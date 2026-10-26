@@ -1,0 +1,82 @@
+{
+ "time_local": "2026-10-27 07:21 NZDT",
+ "mode": "hybrid_rerank",
+ "chosen_on_dev": {
+  "signal": "S1_rerank_top",
+  "t": 0.94
+ },
+ "current": "coverage gate min_coverage=0.5",
+ "results": {
+  "block2_answerable": {
+   "n": 214,
+   "false_refusal_new": "11/214 = 0.051",
+   "false_refusal_current_0.5": "23/214 = 0.107",
+   "false_refusal_archived_0.05(info)": "0/214 = 0.000",
+   "mcnemar_refused(a=current,b=new; b01=current not refused,new refused)": {
+    "b01": 6,
+    "b10": 18,
+    "n_discordant": 24,
+    "p_value": 0.022655844688415527
+   },
+   "citation_precision_new(口径B)": "204/480 = 0.425",
+   "citation_precision_current(口径B)": "188/359 = 0.524",
+   "citation_precision_diff_ci": {
+    "diff": -0.09867688022284121,
+    "ci": [
+     -0.1268498942917547,
+     -0.07110389610389611
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_new": "195/214 = 0.911",
+   "ge1_correct_current": "179/214 = 0.836"
+  },
+  "lowoverlap": {
+   "n": 118,
+   "false_refusal_new": "47/118 = 0.398",
+   "false_refusal_current_0.5": "118/118 = 1.000",
+   "false_refusal_archived_0.05(info)": "6/118 = 0.051",
+   "mcnemar_refused(a=current,b=new; b01=current not refused,new refused)": {
+    "b01": 0,
+    "b10": 71,
+    "n_discordant": 71,
+    "p_value": 8.470329472543003e-22
+   },
+   "citation_precision_new(口径B)": "64/179 = 0.358",
+   "citation_precision_current(口径B)": "0/0 = 待测",
+   "citation_precision_diff_ci": {
+    "diff": null,
+    "ci": null
+   },
+   "ge1_correct_new": "64/118 = 0.542",
+   "ge1_correct_current": "0/118 = 0.000"
+  },
+  "ooc_new": {
+   "n": 51,
+   "correct_refusal_new": "51/51 = 1.000",
+   "correct_refusal_current_0.5": "47/51 = 0.922",
+   "correct_refusal_archived_0.05(info)": "3/51 = 0.059",
+   "mcnemar_refused(a=current,b=new; b01=current not refused,new refused)": {
+    "b01": 4,
+    "b10": 0,
+    "n_discordant": 4,
+    "p_value": 0.125
+   }
+  },
+  "U2_已见过": {
+   "n": 31,
+   "correct_refusal_new": "31/31 = 1.000",
+   "correct_refusal_current_0.5": "31/31 = 1.000",
+   "correct_refusal_archived_0.05(info)": "4/31 = 0.129",
+   "mcnemar_refused(a=current,b=new; b01=current not refused,new refused)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  }
+ },
+ "note": "U2_已见过 was used in Steps 2-5; only ooc_new is an unseen out-of-corpus set."
+}
