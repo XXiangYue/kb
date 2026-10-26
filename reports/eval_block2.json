@@ -711,5 +711,11 @@
    "table",
    "text"
   ]
+ },
+ "notes": {
+  "citation_precision_definition": "口径 B（8f559d8 coverage_strip_doc_refs=True：覆盖率计算前去掉《标题》/标准号/第x条）；口径 A=用原问句。8f559d8 是口径变更，不是系统修复；是否在看到结果前决定无法证实。",
+  "paraphrase": "只有 35 对，样本小。",
+  "low_overlap_stratum": "只有 4 题，不下结论。",
+  "memory": "峰值 RSS 1597MB ≈ 1.6GB"
  }
 }
