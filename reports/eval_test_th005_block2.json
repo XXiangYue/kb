@@ -1,0 +1,326 @@
+{
+ "time_local": "2026-10-27 06:12 NZDT",
+ "question_file": "reports/questions_block2.jsonl",
+ "question_file_built": "2026-10-27 04:31 NZDT",
+ "split": "test",
+ "n_test_answerable": 214,
+ "n_test_U2": 31,
+ "n_test_by_type": {
+  "T2": 88,
+  "T3": 31,
+  "T4": 34,
+  "T5": 25,
+  "P": 36,
+  "U2": 31
+ },
+ "routing_triggered_by_decimal_in_question": "0/214 = 0.000",
+ "hit_definition": "rank of first chunk in the frozen acceptable set (<=3 chunks containing all gold spans)",
+ "retrieval": {
+  "hybrid": {
+   "Recall@5": "190/214 = 0.888",
+   "MRR@10": "150.40/214 = 0.703",
+   "by_type": {
+    "P": {
+     "Recall@5": "30/36 = 0.833",
+     "MRR@10": "23.13/36 = 0.642"
+    },
+    "T2": {
+     "Recall@5": "84/88 = 0.955",
+     "MRR@10": "74.78/88 = 0.850"
+    },
+    "T3": {
+     "Recall@5": "30/31 = 0.968",
+     "MRR@10": "24.53/31 = 0.791"
+    },
+    "T4": {
+     "Recall@5": "23/34 = 0.676",
+     "MRR@10": "10.18/34 = 0.299"
+    },
+    "T5": {
+     "Recall@5": "23/25 = 0.920",
+     "MRR@10": "17.78/25 = 0.711"
+    }
+   },
+   "by_overlap_stratum": {
+    "high(>=0.6)": {
+     "Recall@5": "143/163 = 0.877",
+     "MRR@10": "117.63/163 = 0.722"
+    },
+    "low(<0.3)": {
+     "Recall@5": "3/4 = 0.750",
+     "MRR@10": "0.70/4 = 0.175"
+    },
+    "mid": {
+     "Recall@5": "44/47 = 0.936",
+     "MRR@10": "32.07/47 = 0.682"
+    }
+   }
+  },
+  "hybrid_rerank": {
+   "Recall@5": "208/214 = 0.972",
+   "MRR@10": "188.57/214 = 0.881",
+   "by_type": {
+    "P": {
+     "Recall@5": "35/36 = 0.972",
+     "MRR@10": "29.87/36 = 0.830"
+    },
+    "T2": {
+     "Recall@5": "88/88 = 1.000",
+     "MRR@10": "84.42/88 = 0.959"
+    },
+    "T3": {
+     "Recall@5": "29/31 = 0.935",
+     "MRR@10": "28.64/31 = 0.924"
+    },
+    "T4": {
+     "Recall@5": "32/34 = 0.941",
+     "MRR@10": "27.31/34 = 0.803"
+    },
+    "T5": {
+     "Recall@5": "24/25 = 0.960",
+     "MRR@10": "18.33/25 = 0.733"
+    }
+   },
+   "by_overlap_stratum": {
+    "high(>=0.6)": {
+     "Recall@5": "160/163 = 0.982",
+     "MRR@10": "146.26/163 = 0.897"
+    },
+    "low(<0.3)": {
+     "Recall@5": "4/4 = 1.000",
+     "MRR@10": "3.00/4 = 0.750"
+    },
+    "mid": {
+     "Recall@5": "44/47 = 0.936",
+     "MRR@10": "39.31/47 = 0.836"
+    }
+   }
+  }
+ },
+ "retrieval_paired": {
+  "hybrid->hybrid_rerank": {
+   "n": 214,
+   "Recall@5_mcnemar": {
+    "b01": 19,
+    "b10": 1,
+    "n_discordant": 20,
+    "p_value": 4.00543212890625e-05
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.08411214953271029,
+    "ci": [
+     0.04672897196261682,
+     0.1261682242990654
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "显著",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.1783618899273104,
+    "ci": [
+     0.1320723928200564,
+     0.22310117193294762
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "显著"
+  }
+ },
+ "ask_evidence_only": {
+  "hybrid": {
+   "correct_refusal_U2": "1/31 = 0.032",
+   "false_refusal_answerable": "0/214 = 0.000",
+   "citation_precision(citations)": "168/512 = 0.328",
+   "questions_with_>=1_correct_citation": "168/214 = 0.785"
+  },
+  "hybrid_rerank": {
+   "correct_refusal_U2": "4/31 = 0.129",
+   "false_refusal_answerable": "0/214 = 0.000",
+   "citation_precision(citations)": "213/507 = 0.420",
+   "questions_with_>=1_correct_citation": "204/214 = 0.953"
+  }
+ },
+ "ask_paired": {
+  "hybrid->hybrid_rerank": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 38,
+    "b10": 2,
+    "n_discordant": 40,
+    "p_value": 1.4933903003111482e-09
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": 0.09199334319526625,
+    "ci": [
+     0.06472881550280934,
+     0.11965096015423082
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "label_question_level(mcnemar p<0.05)": "显著",
+   "label_citation_precision(CI excludes 0)": "显著",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 3,
+    "b10": 0,
+    "n_discordant": 3,
+    "p_value": 0.25
+   }
+  }
+ },
+ "paraphrase_robustness": {
+  "n_pairs": 35,
+  "hybrid": {
+   "source_Recall@5": "30/35 = 0.857",
+   "paraphrase_Recall@5": "29/35 = 0.829",
+   "paired(source->paraphrase)": {
+    "n": 35,
+    "Recall@5_mcnemar": {
+     "b01": 2,
+     "b10": 3,
+     "n_discordant": 5,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": -0.02857142857142847,
+     "ci": [
+      -0.17142857142857143,
+      0.11428571428571428
+     ],
+     "iters": 2000,
+     "seed": 0
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": -0.054013605442176815,
+     "ci": [
+      -0.17374149659863944,
+      0.0661904761904762
+     ],
+     "iters": 2000,
+     "seed": 0
+    },
+    "MRR@10_label": "无显著差异"
+   }
+  },
+  "hybrid_rerank": {
+   "source_Recall@5": "34/35 = 0.971",
+   "paraphrase_Recall@5": "34/35 = 0.971",
+   "paired(source->paraphrase)": {
+    "n": 35,
+    "Recall@5_mcnemar": {
+     "b01": 1,
+     "b10": 1,
+     "n_discordant": 2,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": 0.0,
+     "ci": [
+      -0.08571428571428572,
+      0.08571428571428572
+     ],
+     "iters": 2000,
+     "seed": 0
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": 0.0223809523809525,
+     "ci": [
+      -0.047619047619047616,
+      0.09857142857142857
+     ],
+     "iters": 2000,
+     "seed": 0
+    },
+    "MRR@10_label": "无显著差异"
+   }
+  }
+ },
+ "failure_attribution": {
+  "hybrid": {
+   "n_failures(top5 miss)": 24,
+   "den_questions": 214,
+   "primary": {
+    "parse_error": "1/24 = 0.042",
+    "label_error": "0/24 = 0.000",
+    "chunk_boundary": "14/24 = 0.583",
+    "tokenization": "0/24 = 0.000",
+    "vector_miss": "3/24 = 0.125",
+    "fusion_loss": "6/24 = 0.250",
+    "rerank_error": "0/24 = 0.000",
+    "unattributed": "0/24 = 0.000"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 1,
+    "label_error": 0,
+    "chunk_boundary": 14,
+    "tokenization": 0,
+    "vector_miss": 5,
+    "fusion_loss": 19,
+    "rerank_error": 0
+   }
+  },
+  "hybrid_rerank": {
+   "n_failures(top5 miss)": 6,
+   "den_questions": 214,
+   "primary": {
+    "parse_error": "0/6 = 0.000",
+    "label_error": "0/6 = 0.000",
+    "chunk_boundary": "3/6 = 0.500",
+    "tokenization": "0/6 = 0.000",
+    "vector_miss": "1/6 = 0.167",
+    "fusion_loss": "1/6 = 0.167",
+    "rerank_error": "1/6 = 0.167",
+    "unattributed": "0/6 = 0.000"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 0,
+    "label_error": 0,
+    "chunk_boundary": 3,
+    "tokenization": 0,
+    "vector_miss": 2,
+    "fusion_loss": 3,
+    "rerank_error": 1
+   }
+  }
+ },
+ "search_ms_per_query(after warm-up, memoised across ask)": {
+  "hybrid": 3.6,
+  "hybrid_rerank": 2176.6
+ },
+ "max_rss_mb": 1589,
+ "wall_s": 528.2,
+ "config": {
+  "SearchConfig": {
+   "mode": "keyword",
+   "k": 10,
+   "clause_route": true,
+   "std_filter": true,
+   "kinds": [
+    "clause",
+    "commentary",
+    "table",
+    "text"
+   ],
+   "pool": 50,
+   "rrf_k": 60,
+   "rerank_n": 20,
+   "extra": {}
+  },
+  "AskConfig_min_coverage": 0.05,
+  "cite_kinds": [
+   "clause",
+   "table",
+   "text"
+  ]
+ }
+}
