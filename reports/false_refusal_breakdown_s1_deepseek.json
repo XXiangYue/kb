@@ -1,0 +1,197 @@
+{
+ "time_local": "2026-10-27 10:41 NZDT",
+ "source": "reports/e2e_s1_deepseek_per_question.jsonl (7fdc378)",
+ "rule": "False-refusal breakdown of the S1 t=0.94 + DeepSeek e2e run (7fdc378).  Analysis only: it reads\nreports/e2e_s1_deepseek_per_question.jsonl, makes no model calls and runs no retrieval.\n\nRule (deterministic, on each answerable record with refused == True):\n  the refusal_reason string is one of the fixed strings that tushen_kb/ask.py emits, and the\n  record fields must agree with the stage that emits it:\n    1 模型自判证据不足   reason == \"生成模型判定证据不足\"            and llm_called\n    2 引文没过逐字校验   reason == \"生成答案中的引文未通过原文校验\"    and llm_called and n_bad_quotes_stage >= 1\n    3 没给引文           reason == \"生成答案未给出原文引文\"            and llm_called and n_quotes_stage == 0\n    4 其他, sub-counts:\n        S1闸门           reason starts \"证据不足（rerank 最高分\"      and not llm_called\n        无通过校验的引用  reason == \"没有通过原文校验的引用\"          and not llm_called\n        其他原因          any other reason string\n        未能分类          a known reason whose record fields disagree with the rule above\nExamples: the first 3 records of each (set, category / sub-category) sorted by qid.\nDescription only, for category 2: how many of the rejected answers contain an ellipsis\n(\"……\" or \"...\") inside a 「」 quote (i.e. the model spliced a quote).\n",
+ "results": {
+  "block2_answerable": {
+   "n_answerable": 214,
+   "n_false_refusal": 55,
+   "counts": {
+    "1_模型自判证据不足": "25/55",
+    "2_引文没过逐字校验": "18/55",
+    "3_没给引文": "1/55",
+    "4_其他": "11/55",
+    "4_其他/S1闸门": "11/55",
+    "4_其他/无通过校验的引用": "0/55",
+    "4_其他/其他原因": "0/55",
+    "4_其他/未能分类": "0/55"
+   },
+   "examples": {
+    "1_模型自判证据不足": [
+     {
+      "qid": "00a7d241c16f",
+      "question": "检查时发现哪些无法立即整改的情况应被认定为重要事项？",
+      "refusal_reason": "生成模型判定证据不足",
+      "s1": 0.9972,
+      "model_output": "无法回答"
+     },
+     {
+      "qid": "06c3a48271ad",
+      "question": "关于“在城市建成区内”，有哪些禁止性要求？",
+      "refusal_reason": "生成模型判定证据不足",
+      "s1": 0.9808,
+      "model_output": "无法回答"
+     },
+     {
+      "qid": "0c97eca8f45d",
+      "question": "⟦std:DB32T5053-2025||999+18|808cb316ff8bc3bb⟧中，“2.基本功能”对应的“检测方法”是什么？",
+      "refusal_reason": "生成模型判定证据不足",
+      "s1": 0.9993,
+      "model_output": "无法回答"
+     }
+    ],
+    "4_其他/S1闸门": [
+     {
+      "qid": "09647c07c7ea",
+      "question": "关于“装修装饰物”，有哪些禁止性要求？",
+      "refusal_reason": "证据不足（rerank 最高分 0.798 < 阈值 0.94）",
+      "s1": 0.7985,
+      "model_output": null
+     },
+     {
+      "qid": "35c92d294b6f",
+      "question": "哪项条款明确指出要“把问题、原因以及处理情况都详细记录下来”？",
+      "refusal_reason": "证据不足（rerank 最高分 0.903 < 阈值 0.94）",
+      "s1": 0.9031,
+      "model_output": null
+     },
+     {
+      "qid": "37fa65baeaa2",
+      "question": "哪项规定提到“查看显示屏指示灯是否正常”？",
+      "refusal_reason": "证据不足（rerank 最高分 0.556 < 阈值 0.94）",
+      "s1": 0.5561,
+      "model_output": null
+     }
+    ],
+    "2_引文没过逐字校验": [
+     {
+      "qid": "0bda6ae3bb88",
+      "question": "哪一条规定了“⟦std:DB32T5053-2025|7.2|5613+42|c8d3b25942c93ac5⟧”？",
+      "refusal_reason": "生成答案中的引文未通过原文校验",
+      "s1": 0.9991,
+      "model_output": "「DB32T5053-2025 第7.2条」"
+     },
+     {
+      "qid": "1370f5b8b9a9",
+      "question": "哪一条规定了“⟦std:GB55037-2022|10.1.1|77468+26|a400f6477abe8c51⟧”？",
+      "refusal_reason": "生成答案中的引文未通过原文校验",
+      "s1": 0.9994,
+      "model_output": "「⟦std:GB55037-2022|10.1.1|77418+37|f12e44c8aeb2f2f6⟧……⟦std:GB55037-2022|10.1.1|77467+27|a31cbb2b644ad742⟧」"
+     },
+     {
+      "qid": "25cfe98dd412",
+      "question": "哪一条规定了“⟦std:DB32T5053-2025|6.4.2|5134+42|2fc02724fd768b97⟧”？",
+      "refusal_reason": "生成答案中的引文未通过原文校验",
+      "s1": 0.9996,
+      "model_output": "「⟦std:DB32T5053-2025|6.4.2|4831+28|88b6e84d885b1c9a⟧……⟦std:DB32T5053-2025|6.4.2|5129+48|91f0884321f720f7⟧」"
+     }
+    ],
+    "3_没给引文": [
+     {
+      "qid": "825e12a62ed9",
+      "question": "⟦std:DB32T4696-2024||25522+16|d78716ef94234dbc⟧中，“20a”对应的“设备名称”是什么？",
+      "refusal_reason": "生成答案未给出原文引文",
+      "s1": 0.9961,
+      "model_output": "防爆静电电压表"
+     }
+    ]
+   },
+   "cat2_spliced_quote_with_ellipsis(description)": "6/18"
+  },
+  "lowoverlap": {
+   "n_answerable": 118,
+   "n_false_refusal": 64,
+   "counts": {
+    "1_模型自判证据不足": "15/64",
+    "2_引文没过逐字校验": "2/64",
+    "3_没给引文": "0/64",
+    "4_其他": "47/64",
+    "4_其他/S1闸门": "45/64",
+    "4_其他/无通过校验的引用": "2/64",
+    "4_其他/其他原因": "0/64",
+    "4_其他/未能分类": "0/64"
+   },
+   "examples": {
+    "1_模型自判证据不足": [
+     {
+      "qid": "07a916d9b255",
+      "question": "图纸上这套能自己找着火点喷水的灭火装置，验收前是不是得挨个试试：控制它的那台主机装在哪儿、通没通电、按一按会不会响会打印，还有它能不能看出水泵和阀门开没开、能不能指挥喷头转方向，喷头本身好不好使、能不能认出火在哪儿，现场那个小控制箱灵不灵，阀门开关顺不顺，管子挂得牢不牢、有没有牌子，末端放水试水那套东西和排水通不通，放水时出不出水、压力够不够、能不能",
+      "refusal_reason": "生成模型判定证据不足",
+      "s1": 0.9417,
+      "model_output": "无法回答"
+     },
+     {
+      "qid": "0cc953f69701",
+      "question": "我们这间做气体灭火的房间，墙和门窗得能扛住灭火剂喷出来时的压力吧？还有门和窗是不是得能自己关上？这些在图上怎么看？",
+      "refusal_reason": "生成模型判定证据不足",
+      "s1": 0.9589,
+      "model_output": "无法回答。"
+     },
+     {
+      "qid": "1013399c8bdb",
+      "question": "电梯旁边的那些管道井和设备间，跟电梯井之间该挡火的东西都还好好的吧？还有进电梯机房那扇门，平时是不是一直关着的？",
+      "refusal_reason": "生成模型判定证据不足",
+      "s1": 0.9839,
+      "model_output": "无法回答。"
+     }
+    ],
+    "4_其他/S1闸门": [
+     {
+      "qid": "0dc1aa08165d",
+      "question": "我们跟之前的维保公司合同到期不干了，他们走的时候该把哪些资料交给我们留底啊？",
+      "refusal_reason": "证据不足（rerank 最高分 0.938 < 阈值 0.94）",
+      "s1": 0.938,
+      "model_output": null
+     },
+     {
+      "qid": "1106faa251e3",
+      "question": "我们这栋楼有个房间，图纸上只画了一个门，没有另外单独直通外面的出口或楼梯，这样是不是不行？",
+      "refusal_reason": "证据不足（rerank 最高分 0.883 < 阈值 0.94）",
+      "s1": 0.8835,
+      "model_output": null
+     },
+     {
+      "qid": "129e41c7a7ea",
+      "question": "每个月和每年给的那些检查报告，是不是都得由维保公司那边管技术的人亲自看过签字才行？",
+      "refusal_reason": "证据不足（rerank 最高分 0.476 < 阈值 0.94）",
+      "s1": 0.4762,
+      "model_output": null
+     }
+    ],
+    "4_其他/无通过校验的引用": [
+     {
+      "qid": "55d970d97d9e",
+      "question": "这栋楼按规定该装的那种给消防车接水用的接口，要是压根没装，或者装了但用不了，是不是就算大问题？",
+      "refusal_reason": "没有通过原文校验的引用",
+      "s1": 0.9479,
+      "model_output": null
+     },
+     {
+      "qid": "86e10c40b395",
+      "question": "我这儿有个车间，平时生产或存放的东西特别容易着火或者一炸就爆，这种屋子是不是必须得装能把屋里空气往外抽换的设备啊？",
+      "refusal_reason": "没有通过原文校验的引用",
+      "s1": 0.9687,
+      "model_output": null
+     }
+    ],
+    "2_引文没过逐字校验": [
+     {
+      "qid": "60e2ae63f7c3",
+      "question": "师傅，这栋楼喷淋系统最远最高那个试水的地方，我放水试了试，水压够不够、报警和启泵这些正不正常，你们验收时是不是至少得挑一套报警阀来实际测一下啊？",
+      "refusal_reason": "生成答案中的引文未通过原文校验",
+      "s1": 0.9987,
+      "model_output": "依据证据1，应「至少抽查1个报警阀组」，并「⟦std:GB46034-2025|6.2.3.6.1|6355+66|914bde0b6cbec909|S,s14.ff0c,s31.ff0c,s49.ff0c⟧」。"
+     },
+     {
+      "qid": "d8c8b197a892",
+      "question": "我们单位每个月和每年都要交的那份报告里，关于工程基本情况的那张表，具体要填哪些内容、怎么填，有没有现成的例子可以参考？",
+      "refusal_reason": "生成答案中的引文未通过原文校验",
+      "s1": 0.9806,
+      "model_output": "依据证据1，表J.1为「⟦std:DB32T4696-2024|J.1|39292+15|79453e48eaf2a10e⟧」的示例，表中列出的填写内容包括：「单位名称」「维保单位名称 技术负责人」「维保工程名称」「⟦std:DB32T4696-2024|J.1|39333+19|a7a12fa620d3909d⟧」「联系方式」，人员信息部分包括「消防安全管理人」「消防管理人员」「消防控制室值班员」「技术负责人」「项目负责人」「操作人员」及「⟦std:DB32T4696-2024|J.1|39363+19|d110327ced990452|S,w2.20⟧」，设施部分包括「消防控制室位置 数量 电话」「⟦std:DB32T4696-2024|J.1|39457+23|eb407b9b5e2c6623⟧」「⟦std:DB32T4696-2024|J.1|39481+15|fbea3bfd13c3a1e5⟧ "
+     }
+    ]
+   },
+   "cat2_spliced_quote_with_ellipsis(description)": "0/2"
+  }
+ }
+}
