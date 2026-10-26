@@ -38,7 +38,7 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 |---|---|---|---|---|
 | 生成 | DeepSeek | deepseek | deepseek-flash | `DEEPSEEK_API_KEY` |
 | 裁判 1 | 小米 MiMo | xiaomi-mimo | mimo-v2.6-flash | `MIMO_API_KEY` |
-| 裁判 2 | OpenRouter | google | google/gemma-4-31b-it:free（仅当其重试后仍无响应时回退 nvidia/nemotron-3-ultra-550b-a55b:free，family=nvidia） | `OPENROUTER_API_KEY` |
+| 裁判 2 | uuapi（OpenAI 兼容，`https://uuapi.io/v1`） | google | gemini-3.8-flash（timeout 180s，并发 ≤2，指数退避）；备用 gpt-5.6-luna（openai 族，`UUAPI_API_KEY`）**仅人工启用、程序从不自动切换**，且生成/出题模型为 OpenAI 族时禁用 | `NEW_API_KEY_2` |
 
 - 配置校验：任何裁判（含回退模型）的 family ≠ 生成模型 family，两位裁判 family 互不相同 → **DeepSeek 永远不能当裁判**。
 - key 只在调用时从环境读取，不写入日志/仓库/产物；无 key → 状态 `skipped`，绝不伪造结果。
@@ -54,9 +54,23 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 4. **按重叠率分层**：报告 low/mid/high 分层；改写复测（T3）= 待测。
 5. **一次只改一个变量**：A=纯 BM25 vs B=BM25+clause_route，配对精确 McNemar + 配对 bootstrap 95% CI。**B 在 T1 上的 396/396 是「条号路由正确性」，不是检索能力**；检索能力以纯 BM25 为基线，在不含条号的题（T2 内容反查、T3 改写、T4 表格数值、T5 否定）上衡量。
 6. **忠实度由异族模型二元判定**（可选模块，不进主指标），记录模型名。
-7. **双裁判交叉**：两个异族裁判独立二元判定；二选一题交换选项顺序再判；先报告各裁判覆盖率（status=ok 的条数/总条数）。**只有双裁判共同覆盖率 ≥ 0.8 时才报告一致率 x/N、Cohen's κ 与分歧项**，否则这些写「待测」，只报覆盖率与失败项列表。Block 1 中 judge2 覆盖率 3/20，故一致率未报告。
+7. **双裁判交叉**：两个异族裁判独立二元判定；二选一题交换选项顺序再判；先报告各裁判覆盖率（status=ok 的条数/总条数）。**只有双裁判共同覆盖率 ≥ 0.8 时才报告一致率 x/N、Cohen's κ 与分歧项**，否则这些写「待测」，只报覆盖率与失败项列表。Block 1 首跑（OpenRouter Gemma/Nemotron，已弃用，记录移至 `reports/historical/`）judge2 覆盖率 3/20，故当时一致率未报告。
 
-产物：`reports/eval_block1.json`（结果）、`reports/questions_block1.jsonl`（冻结题集）、`reports/judgments_block1_records.jsonl`（裁判记录，不含原始回复）。
+产物：`reports/eval_block1.json`（结果）、`reports/questions_block1.jsonl`（冻结题集）、`reports/historical/`（已弃用的 judge2 首跑记录）。
+
+### 双裁判重判（judge2 = gemini-3.8-flash）
+
+冻结题项 `reports/judge_items_block1.jsonl`（含 prompt；Block 1 run2 的生成答案未持久化，故用同样 6 道 T1 题重新生成 6 个 DeepSeek 答案 + 6 个程序篡改版 + 4 道二选一×2 顺序 = 每裁判 20 条判定）。命令：`python -m tushen_kb.eval.rejudge judge` 后 `... rejudge retry --role judge2`（仅对失败项同模型同 prompt 重试，被替换的失败记录保留在 `reports/judgments_block1_v2_superseded_failures.jsonl` 并计入调用数）。
+
+| | judge1 mimo-v2.6-flash | judge2 gemini-3.8-flash |
+|---|---|---|
+| 覆盖率（status=ok） | 20/20 | 首轮 18/20（2 条 HTTP 400 upstream "Invalid request parameter"），重试后 20/20 |
+| HTTP 调用数 | 20 | 23（含 3 次被替换的失败调用） |
+| token 合计 | 12019 | 16225 |
+| 忠实性判定 vs 程序标签 | 11/12 | 11/12 |
+| 二选一（两种顺序） | 8/8 | 8/8 |
+
+双裁判一致率 **18/20，Cohen's κ = 0.765**（共同覆盖 20/20）。分歧项 2 条，同属 `b3a6e2c4d9a5`（DB32/T 4696 第 4.14 条）：原答案（程序标签=忠实）MiMo 判「是」、Gemini 判「否」——该答案写了标准号「DB32/T 4696-2024」而证据文本中没有标准号，Gemini 的「否」按严格提示词可辩护，属程序标签口径问题；篡改版（标准号 32→39，标签=不忠实）MiMo 判「是」（漏检）、Gemini 判「否」（正确）。N=20 很小，κ 置信区间宽，仅作参考，不作主指标。产物：`reports/judgments_block1_v2_records.jsonl`、`reports/judge_summary_block1_v2.json`。
 
 失败归因类别（block 2 起自动化）：解析错误 / 切块边界 / 分词 / 向量漏召 / 融合损失 / 重排错误 / 标注错误。
 

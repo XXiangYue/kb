@@ -1,0 +1,69 @@
+{
+ "items_file": "reports/judge_items_block1.jsonl",
+ "n_items": 16,
+ "per_judge": {
+  "judge1": {
+   "models_used": [
+    "mimo-v2.6-flash (xiaomi-mimo)"
+   ],
+   "n_records": 20,
+   "coverage(status ok)": "20/20",
+   "status_counts": {
+    "ok": 20
+   },
+   "superseded_failed_calls(retried)": 0,
+   "n_http_attempts(incl. superseded)": 20,
+   "tokens_total": 12019,
+   "latency_ms_mean(final records)": 2731,
+   "latency_ms_max(final records)": 13167,
+   "faith_correct_vs_program_label(over all faith records)": "11/12 = 0.917",
+   "choice_correct(over all order-judgments)": "8/8 = 1.000"
+  },
+  "judge2": {
+   "models_used": [
+    "gemini-3.8-flash (google)"
+   ],
+   "n_records": 20,
+   "coverage(status ok)": "20/20",
+   "status_counts": {
+    "ok": 20
+   },
+   "superseded_failed_calls(retried)": 3,
+   "n_http_attempts(incl. superseded)": 23,
+   "tokens_total": 16225,
+   "latency_ms_mean(final records)": 5128,
+   "latency_ms_max(final records)": 11583,
+   "faith_correct_vs_program_label(over all faith records)": "11/12 = 0.917",
+   "choice_correct(over all order-judgments)": "8/8 = 1.000"
+  }
+ },
+ "inter_judge_agreement": {
+  "coverage_both_ok": "20/20",
+  "n_both_ok": 20,
+  "n_total": 20,
+  "min_coverage_required": 0.8,
+  "failed_items": [],
+  "agree": 18,
+  "str": "18/20",
+  "kappa": 0.7647058823529412,
+  "disagreements": [
+   {
+    "item_id": "b3a6e2c4d9a5:corrupt",
+    "order": "-",
+    "judge1": true,
+    "judge1_model": "mimo-v2.6-flash",
+    "judge2": false,
+    "judge2_model": "gemini-3.8-flash"
+   },
+   {
+    "item_id": "b3a6e2c4d9a5:orig",
+    "order": "-",
+    "judge1": true,
+    "judge1_model": "mimo-v2.6-flash",
+    "judge2": false,
+    "judge2_model": "gemini-3.8-flash"
+   }
+  ]
+ },
+ "retry_note": "首轮失败的调用按原样重试（同模型、同 prompt），被替换的失败记录保存在 judgments_block1_v2_superseded_failures.jsonl，其调用次数与 token 计入上方统计。"
+}

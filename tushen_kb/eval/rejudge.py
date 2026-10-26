@@ -90,6 +90,10 @@ def judge(roles: list[str], workers: int, tag: str):
             res = list(ex.map(lambda it: _judge_item(j, it), items))
         recs[j.spec.role] = [x for r in res for x in r]
         print(j.spec.role, j.spec.model, "done in", round(time.time() - t0), "s", flush=True)
+    _write(recs, items, tag, retry_log=[])
+
+
+def _write(recs: dict, items: list, tag: str, retry_log: list):
     path = REPORTS / f"judgments_{tag}_records.jsonl"
     with open(path, "w", encoding="utf-8") as f:
         for rs in recs.values():
@@ -99,19 +103,26 @@ def judge(roles: list[str], workers: int, tag: str):
                 f.write(json.dumps(d, ensure_ascii=False) + "\n")
     (REPORTS / "runs").mkdir(exist_ok=True)
     J.dump([x for rs in recs.values() for x in rs], REPORTS / "runs" / f"judgments_{tag}_raw.jsonl")
+    if retry_log:
+        with open(REPORTS / f"judgments_{tag}_superseded_failures.jsonl", "w", encoding="utf-8") as f:
+            for d in retry_log:
+                f.write(json.dumps(d, ensure_ascii=False) + "\n")
     labels = {it["item_id"]: it for it in items}
     summ = {"items_file": str(ITEMS.relative_to(ROOT)), "n_items": len(items), "per_judge": {}}
     for role, rs in recs.items():
         cv = J.coverage(rs)
         faith = [x for x in rs if x.task == "faithfulness"]
         chs = [x for x in rs if x.task == "choice"]
+        prev = [d for d in retry_log if d["judge_role"] == role]
         pj = {"models_used": sorted({f"{x.judge_model} ({x.judge_family})" for x in rs}),
               "n_records": len(rs), "coverage(status ok)": cv["str"],
               "status_counts": _count(x.status for x in rs),
-              "n_http_attempts": sum(x.n_attempts for x in rs),
-              "tokens_total": sum((x.usage or {}).get("total_tokens", 0) for x in rs),
-              "latency_ms_mean": round(sum(x.ms or 0 for x in rs) / len(rs)) if rs else None,
-              "latency_ms_max": max((x.ms or 0) for x in rs) if rs else None}
+              "superseded_failed_calls(retried)": len(prev),
+              "n_http_attempts(incl. superseded)": sum(x.n_attempts for x in rs) + sum(d.get("n_attempts") or 0 for d in prev),
+              "tokens_total": sum((x.usage or {}).get("total_tokens", 0) for x in rs)
+              + sum((d.get("usage") or {}).get("total_tokens", 0) for d in prev),
+              "latency_ms_mean(final records)": round(sum(x.ms or 0 for x in rs) / len(rs)) if rs else None,
+              "latency_ms_max(final records)": max((x.ms or 0) for x in rs) if rs else None}
         if cv["value"] and cv["value"] >= J.MIN_JUDGE_COVERAGE:
             pj["faith_correct_vs_program_label(over all faith records)"] = J.rate_str(
                 sum(1 for x in faith if x.verdict is not None and x.verdict == labels[x.item_id]["label"]), len(faith))
@@ -122,8 +133,54 @@ def judge(roles: list[str], workers: int, tag: str):
     if len(recs) == 2:
         a, b = recs.values()
         summ["inter_judge_agreement"] = J.agreement(list(a), list(b))
+    if retry_log:
+        summ["retry_note"] = ("首轮失败的调用按原样重试（同模型、同 prompt），被替换的失败记录保存在 "
+                              f"judgments_{tag}_superseded_failures.jsonl，其调用次数与 token 计入上方统计。")
     (REPORTS / f"judge_summary_{tag}.json").write_text(json.dumps(summ, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(summ, ensure_ascii=False, indent=1))
+
+
+def _load_recs(tag: str) -> dict:
+    fields = set(J.Judgment.__dataclass_fields__)
+    recs: dict[str, list] = {}
+    for l in open(REPORTS / f"judgments_{tag}_records.jsonl", encoding="utf-8"):
+        d = json.loads(l)
+        recs.setdefault(d["judge_role"], []).append(J.Judgment(**{k: v for k, v in d.items() if k in fields}))
+    return recs
+
+
+def retry(role: str, tag: str, rounds: int, wait_s: float):
+    """Re-run ONLY failed judgments of one role with the same model + prompt.
+    Never switches model (backup models are manual-only)."""
+    lines = [json.loads(l) for l in open(ITEMS, encoding="utf-8")]
+    meta, items = lines[0]["_meta"], lines[1:]
+    assert meta["faith_prompt"] == J.FAITH_PROMPT and meta["choice_prompt"] == J.CHOICE_PROMPT, "prompts changed"
+    by_id = {it["item_id"]: it for it in items}
+    recs = _load_recs(tag)
+    sup_path = REPORTS / f"judgments_{tag}_superseded_failures.jsonl"
+    retry_log = [json.loads(l) for l in open(sup_path, encoding="utf-8")] if sup_path.exists() else []
+    j = next(x for x in J.load_judges() if x.spec.role == role)
+    for rnd in range(rounds):
+        bad = sorted({x.item_id for x in recs[role] if x.status != "ok"})
+        if not bad:
+            break
+        print(f"round {rnd + 1}: retrying {bad}", flush=True)
+        for iid in bad:
+            old = [x for x in recs[role] if x.item_id == iid]
+            new = _judge_item(j, by_id[iid])
+            if any(n.judge_model != j.spec.model for n in new):
+                raise SystemExit("model changed during retry - refusing")
+            for o in old:
+                d = asdict(o)
+                d.pop("raw", None)
+                d["retry_round"] = rnd + 1
+                retry_log.append(d)
+            recs[role] = [x for x in recs[role] if x.item_id != iid] + new
+            time.sleep(wait_s)
+    order = {it["item_id"]: k for k, it in enumerate(items)}
+    for r in recs:
+        recs[r].sort(key=lambda x: (order[x.item_id], x.order))
+    _write(recs, items, tag, retry_log)
 
 
 def _count(it):
@@ -135,14 +192,19 @@ def _count(it):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["build", "judge"])
+    ap.add_argument("cmd", choices=["build", "judge", "retry"])
     ap.add_argument("--db", default=str(ROOT / "data" / "tushen.sqlite"))
     ap.add_argument("--roles", default="judge1,judge2")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--tag", default="block1_v2")
+    ap.add_argument("--role", default="judge2")
+    ap.add_argument("--rounds", type=int, default=3)
+    ap.add_argument("--wait", type=float, default=20.0)
     a = ap.parse_args()
     if a.cmd == "build":
         build(Store(a.db))
+    elif a.cmd == "retry":
+        retry(a.role, a.tag, a.rounds, a.wait)
     else:
         judge(a.roles.split(","), a.workers, a.tag)
 
