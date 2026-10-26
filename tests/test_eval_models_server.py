@@ -69,6 +69,8 @@ def test_agreement_needs_two_judges():
     j2.append(Judgment("b", "judge2", "m2", "v", "f2", "model", "faithfulness", "-", "error", None))
     ag = agreement(j1, j2)
     assert ag["n_total"] == 2 and ag["failed_items"][0]["item_id"] == "b"  # failure kept, not dropped
+    # coverage 1/2 < 0.8: agreement and kappa are withheld, only coverage is reported
+    assert ag["coverage_both_ok"] == "1/2" and str(ag["agree"]).startswith("待测") and str(ag["kappa"]).startswith("待测")
 
 
 def test_closed_book_leak_program_check():

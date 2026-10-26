@@ -1,778 +1,782 @@
 {
-  "run": {
-    "time_utc": "2026-10-26T14:01:41Z",
-    "python": "3.12.15",
-    "parser": "pdfparse-1",
-    "chunker": "chunker-1",
-    "tokenizer": "jieba-bigram-1",
-    "docs": [
-      {
-        "doc_id": "GB55037-2022",
-        "sha256": "69d2c2c4d33787e83c02d006e376d1c0977fda5da465bb5bacca84a6820565d3"
-      },
-      {
-        "doc_id": "GB46034-2025",
-        "sha256": "c11804fa2e741da6a5767f496fe483602d4e5dd82ac26789368ff1e7629bc41e"
-      },
-      {
-        "doc_id": "DB32T4696-2024",
-        "sha256": "8ddc8a5dcef04c495d5d133b641337f85d3e7b06b5b45900b7b50e9f12bdc559"
-      },
-      {
-        "doc_id": "DB32T5053-2025",
-        "sha256": "bd675678ac0059da68a2798a04e8210be16d1b40aa137ad3d65d531b214409ff"
-      }
-    ],
-    "questions_file": "reports/questions_block1.jsonl",
-    "seconds": 1306.3
-  },
-  "question_construction": {
-    "T1_filters": {
-      "candidates": 476,
-      "removed_validity_no_clause_chunk": 0,
-      "removed_validity_too_many_golds": 1,
-      "after_validity": 475,
-      "removed_dedup": 0,
-      "after_dedup": 475
-    },
-    "T1_dev": 79,
-    "T1_test": 396,
-    "U_total": 40,
-    "U_test": 30,
-    "model_filter_passes": {
-      "generator": {
-        "model_name": "deepseek-flash",
-        "family": "deepseek",
-        "status": "ready"
-      },
-      "sample_n": 6,
-      "back_translation": {
-        "removed": 0,
-        "of_ok_calls": 6,
-        "qids": [],
-        "rule": "model answers 否 → not answerable from its own source → remove"
-      },
-      "closed_book": {
-        "removed": 0,
-        "of_ok_calls": 6,
-        "qids": [],
-        "rule": "PROGRAM: closed-book answer contains >=15 consecutive chars of gold verbatim → remove"
-      },
-      "calls": [
-        {
-          "qid": "b606c69bf7c6",
-          "task": "back_translation",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 65,
-            "completion_tokens": 1,
-            "total_tokens": 66,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 65
-          }
-        },
-        {
-          "qid": "b606c69bf7c6",
-          "task": "closed_book",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 37,
-            "completion_tokens": 63,
-            "total_tokens": 100,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 37
-          }
-        },
-        {
-          "qid": "57461044685f",
-          "task": "back_translation",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 139,
-            "completion_tokens": 1,
-            "total_tokens": 140,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 139
-          }
-        },
-        {
-          "qid": "57461044685f",
-          "task": "closed_book",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 34,
-            "completion_tokens": 94,
-            "total_tokens": 128,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 34
-          }
-        },
-        {
-          "qid": "2f18b17f9278",
-          "task": "back_translation",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 174,
-            "completion_tokens": 1,
-            "total_tokens": 175,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 174
-          }
-        },
-        {
-          "qid": "2f18b17f9278",
-          "task": "closed_book",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 34,
-            "completion_tokens": 54,
-            "total_tokens": 88,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 34
-          }
-        },
-        {
-          "qid": "3fd70d1d9d08",
-          "task": "back_translation",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 235,
-            "completion_tokens": 1,
-            "total_tokens": 236,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 235
-          }
-        },
-        {
-          "qid": "3fd70d1d9d08",
-          "task": "closed_book",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 36,
-            "completion_tokens": 61,
-            "total_tokens": 97,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 36
-          }
-        },
-        {
-          "qid": "3a3f1b439fe4",
-          "task": "back_translation",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 109,
-            "completion_tokens": 1,
-            "total_tokens": 110,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 109
-          }
-        },
-        {
-          "qid": "3a3f1b439fe4",
-          "task": "closed_book",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 38,
-            "completion_tokens": 97,
-            "total_tokens": 135,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 38
-          }
-        },
-        {
-          "qid": "c686b6efc892",
-          "task": "back_translation",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 92,
-            "completion_tokens": 1,
-            "total_tokens": 93,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 92
-          }
-        },
-        {
-          "qid": "c686b6efc892",
-          "task": "closed_book",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 37,
-            "completion_tokens": 55,
-            "total_tokens": 92,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 37
-          }
-        }
-      ]
-    }
-  },
-  "retrieval_T1_test": {
-    "A_keyword_bm25_only": {
-      "config": {
-        "mode": "keyword",
-        "k": 10,
-        "clause_route": false,
-        "std_filter": true,
-        "kinds": [
-          "clause",
-          "commentary",
-          "table",
-          "text"
-        ],
-        "extra": {}
-      },
-      "Recall@5": {
-        "value": 0.5353535353535354,
-        "num": 212,
-        "den": 396,
-        "str": "212/396 = 0.535"
-      },
-      "MRR@10": {
-        "value": 0.3695476591309925,
-        "sum_rr": 146.3409,
-        "den": 396,
-        "str": "146.34/396 = 0.370"
-      },
-      "by_overlap_stratum": {
-        "high(>=0.6)": {
-          "Recall@5": "5/14 = 0.357",
-          "MRR@10": "2.74/14 = 0.196"
-        },
-        "low(<0.3)": {
-          "Recall@5": "198/328 = 0.604",
-          "MRR@10": "137.07/328 = 0.418"
-        },
-        "mid": {
-          "Recall@5": "9/54 = 0.167",
-          "MRR@10": "6.53/54 = 0.121"
-        }
-      },
-      "by_doc": {
-        "DB32T4696-2024": "60/124 = 0.484",
-        "DB32T5053-2025": "12/27 = 0.444",
-        "GB46034-2025": "20/42 = 0.476",
-        "GB55037-2022": "120/203 = 0.591"
-      },
-      "Recall@5_bootstrap95": [
-        0.48484848484848486,
-        0.5833333333333334
-      ]
-    },
-    "B_keyword_plus_clause_route": {
-      "config": {
-        "mode": "keyword",
-        "k": 10,
-        "clause_route": true,
-        "std_filter": true,
-        "kinds": [
-          "clause",
-          "commentary",
-          "table",
-          "text"
-        ],
-        "extra": {}
-      },
-      "Recall@5": {
-        "value": 1.0,
-        "num": 396,
-        "den": 396,
-        "str": "396/396 = 1.000"
-      },
-      "MRR@10": {
-        "value": 0.9764309764309764,
-        "sum_rr": 386.6667,
-        "den": 396,
-        "str": "386.67/396 = 0.976"
-      },
-      "by_overlap_stratum": {
-        "high(>=0.6)": {
-          "Recall@5": "14/14 = 1.000",
-          "MRR@10": "14.00/14 = 1.000"
-        },
-        "low(<0.3)": {
-          "Recall@5": "328/328 = 1.000",
-          "MRR@10": "323.50/328 = 0.986"
-        },
-        "mid": {
-          "Recall@5": "54/54 = 1.000",
-          "MRR@10": "49.17/54 = 0.910"
-        }
-      },
-      "by_doc": {
-        "DB32T4696-2024": "124/124 = 1.000",
-        "DB32T5053-2025": "27/27 = 1.000",
-        "GB46034-2025": "42/42 = 1.000",
-        "GB55037-2022": "203/203 = 1.000"
-      },
-      "Recall@5_bootstrap95": [
-        1.0,
-        1.0
-      ]
-    },
-    "paired_A_vs_B_hit@5": {
-      "mcnemar_exact": {
-        "b01": 184,
-        "b10": 0,
-        "n_discordant": 184,
-        "p_value": 8.156630584998156e-56
-      },
-      "bootstrap_diff_B_minus_A": {
-        "diff": 0.46464646464646464,
-        "ci": [
-          0.4166666666666667,
-          0.5151515151515151
-        ],
-        "iters": 2000,
-        "seed": 0
-      },
-      "label": "显著",
-      "variable_changed": "clause_route"
-    }
-  },
-  "ask_program_judged": {
-    "false_refusal_rate_T1_test": "0/396 = 0.000",
-    "refusal_rate_U_test(correct_refusals)": "30/30 = 1.000",
-    "citation_precision_T1(cited chunk in acceptable set)": "404/719 = 0.562",
-    "citations_verbatim_verified": "719/719 = 1.000",
-    "refusal_reasons_T1": {}
-  },
-  "not_measured_yet": [
-    "T2/T3/T4/T5 题型",
-    "vector/hybrid/rerank 模式",
-    "改写题集复测",
-    "自动失败归因"
+ "run": {
+  "time_utc": "2026-10-26T14:01:41Z",
+  "python": "3.12.15",
+  "parser": "pdfparse-1",
+  "chunker": "chunker-1",
+  "tokenizer": "jieba-bigram-1",
+  "docs": [
+   {
+    "doc_id": "GB55037-2022",
+    "sha256": "69d2c2c4d33787e83c02d006e376d1c0977fda5da465bb5bacca84a6820565d3"
+   },
+   {
+    "doc_id": "GB46034-2025",
+    "sha256": "c11804fa2e741da6a5767f496fe483602d4e5dd82ac26789368ff1e7629bc41e"
+   },
+   {
+    "doc_id": "DB32T4696-2024",
+    "sha256": "8ddc8a5dcef04c495d5d133b641337f85d3e7b06b5b45900b7b50e9f12bdc559"
+   },
+   {
+    "doc_id": "DB32T5053-2025",
+    "sha256": "bd675678ac0059da68a2798a04e8210be16d1b40aa137ad3d65d531b214409ff"
+   }
   ],
-  "failures_B": [],
-  "n_failures_B": 0,
-  "optional_model_judged_study": {
-    "generator": {
-      "model": "deepseek-flash",
-      "family": "deepseek",
-      "status": "ready"
+  "questions_file": "reports/questions_block1.jsonl",
+  "seconds": 1306.3
+ },
+ "question_construction": {
+  "T1_filters": {
+   "candidates": 476,
+   "removed_validity_no_clause_chunk": 0,
+   "removed_validity_too_many_golds": 1,
+   "after_validity": 475,
+   "removed_dedup": 0,
+   "after_dedup": 475
+  },
+  "T1_dev": 79,
+  "T1_test": 396,
+  "U_total": 40,
+  "U_test": 30,
+  "model_filter_passes": {
+   "generator": {
+    "model_name": "deepseek-flash",
+    "family": "deepseek",
+    "status": "ready"
+   },
+   "sample_n": 6,
+   "back_translation": {
+    "removed": 0,
+    "of_ok_calls": 6,
+    "qids": [],
+    "rule": "model answers 否 → not answerable from its own source → remove"
+   },
+   "closed_book": {
+    "removed": 0,
+    "of_ok_calls": 6,
+    "qids": [],
+    "rule": "PROGRAM: closed-book answer contains >=15 consecutive chars of gold verbatim → remove"
+   },
+   "calls": [
+    {
+     "qid": "b606c69bf7c6",
+     "task": "back_translation",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 65,
+      "completion_tokens": 1,
+      "total_tokens": 66,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 65
+     }
     },
-    "judges": [
-      {
-        "role": "judge1",
-        "model": "mimo-v2.6-flash",
-        "family": "xiaomi-mimo",
-        "fallback": [],
-        "status": "ready"
+    {
+     "qid": "b606c69bf7c6",
+     "task": "closed_book",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 37,
+      "completion_tokens": 63,
+      "total_tokens": 100,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "role": "judge2",
-        "model": "google/gemma-4-31b-it:free",
-        "family": "google",
-        "fallback": [
-          "nvidia/nemotron-3-ultra-550b-a55b:free"
-        ],
-        "status": "ready"
-      }
-    ],
-    "judge_type": "model (not human)",
-    "items": [
-      {
-        "qid": "265ef4f9821b",
-        "refused": false,
-        "reason": null,
-        "llm_call": {
-          "role": "generator",
-          "provider": "deepseek",
-          "family": "deepseek",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 302,
-            "completion_tokens": 34,
-            "total_tokens": 336,
-            "prompt_tokens_details": {
-              "cached_tokens": 128
-            },
-            "prompt_cache_hit_tokens": 128,
-            "prompt_cache_miss_tokens": 174
-          },
-          "ms": 936,
-          "error": null
-        }
-      },
-      {
-        "qid": "ab55d632a582",
-        "refused": false,
-        "reason": null,
-        "llm_call": {
-          "role": "generator",
-          "provider": "deepseek",
-          "family": "deepseek",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 530,
-            "completion_tokens": 262,
-            "total_tokens": 792,
-            "prompt_tokens_details": {
-              "cached_tokens": 384
-            },
-            "prompt_cache_hit_tokens": 384,
-            "prompt_cache_miss_tokens": 146
-          },
-          "ms": 2011,
-          "error": null
-        }
-      },
-      {
-        "qid": "58bb9ef49094",
-        "refused": false,
-        "reason": null,
-        "llm_call": {
-          "role": "generator",
-          "provider": "deepseek",
-          "family": "deepseek",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 1118,
-            "completion_tokens": 34,
-            "total_tokens": 1152,
-            "prompt_tokens_details": {
-              "cached_tokens": 896
-            },
-            "prompt_cache_hit_tokens": 896,
-            "prompt_cache_miss_tokens": 222
-          },
-          "ms": 1104,
-          "error": null
-        }
-      },
-      {
-        "qid": "963932bf3d46",
-        "refused": false,
-        "reason": null,
-        "llm_call": {
-          "role": "generator",
-          "provider": "deepseek",
-          "family": "deepseek",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 768,
-            "completion_tokens": 139,
-            "total_tokens": 907,
-            "prompt_tokens_details": {
-              "cached_tokens": 512
-            },
-            "prompt_cache_hit_tokens": 512,
-            "prompt_cache_miss_tokens": 256
-          },
-          "ms": 1567,
-          "error": null
-        }
-      },
-      {
-        "qid": "261b6d1dfaff",
-        "refused": false,
-        "reason": null,
-        "llm_call": {
-          "role": "generator",
-          "provider": "deepseek",
-          "family": "deepseek",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 450,
-            "completion_tokens": 97,
-            "total_tokens": 547,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 450
-          },
-          "ms": 1192,
-          "error": null
-        }
-      },
-      {
-        "qid": "b3a6e2c4d9a5",
-        "refused": false,
-        "reason": null,
-        "llm_call": {
-          "role": "generator",
-          "provider": "deepseek",
-          "family": "deepseek",
-          "model_name": "deepseek-flash",
-          "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
-          "status": "ok",
-          "usage": {
-            "prompt_tokens": 738,
-            "completion_tokens": 125,
-            "total_tokens": 863,
-            "prompt_tokens_details": {
-              "cached_tokens": 0
-            },
-            "prompt_cache_hit_tokens": 0,
-            "prompt_cache_miss_tokens": 738
-          },
-          "ms": 1353,
-          "error": null
-        }
-      }
-    ],
-    "n_faithfulness_items": 12,
-    "n_corrupted_items": 6,
-    "n_choice_items": 4,
-    "n_choice_judgments_per_judge": 8,
-    "per_judge": {
-      "judge1": {
-        "models_used": [
-          "mimo-v2.6-flash (xiaomi-mimo)"
-        ],
-        "status_counts": {
-          "ok": 20
-        },
-        "fallback_used": 0,
-        "orig_judged_faithful(over all orig items)": "6/6 = 1.000",
-        "corrupt_detected(over all corrupted items)": "5/6 = 0.833",
-        "choice_correct(over all order-judgments)": "8/8 = 1.000",
-        "choice_order_consistent(both orders correct, over items)": "4/4 = 1.000"
-      },
-      "judge2": {
-        "models_used": [
-          "google/gemma-4-31b-it:free (google)",
-          "nvidia/nemotron-3-ultra-550b-a55b:free (nvidia)"
-        ],
-        "status_counts": {
-          "unparsable": 17,
-          "ok": 3
-        },
-        "fallback_used": 17,
-        "orig_judged_faithful(over all orig items)": "1/6 = 0.167",
-        "corrupt_detected(over all corrupted items)": "1/6 = 0.167",
-        "choice_correct(over all order-judgments)": "1/8 = 0.125",
-        "choice_order_consistent(both orders correct, over items)": "0/4 = 0.000"
-      }
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 37
+     }
     },
-    "inter_judge_agreement": {
-      "agree": 3,
-      "n_both_ok": 3,
-      "str": "3/3",
-      "agree_over_all_items(failures=non-agreement)": "3/20",
-      "n_total": 20,
-      "kappa": 1.0,
-      "disagreements": [],
-      "failed_items": [
-        {
-          "item_id": "261b6d1dfaff:corrupt",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "265ef4f9821b:corrupt",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "265ef4f9821b:orig",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "58bb9ef49094:orig",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "5eac84e97e08:choice",
-          "order": "AB",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "5eac84e97e08:choice",
-          "order": "BA",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "7d032a8f34d3:choice",
-          "order": "AB",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "7d032a8f34d3:choice",
-          "order": "BA",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "92d1f103b17e:choice",
-          "order": "AB",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "92d1f103b17e:choice",
-          "order": "BA",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "963932bf3d46:corrupt",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "963932bf3d46:orig",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "ab55d632a582:corrupt",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "ab55d632a582:orig",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "b19a53460ca5:choice",
-          "order": "BA",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "b3a6e2c4d9a5:corrupt",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        },
-        {
-          "item_id": "b3a6e2c4d9a5:orig",
-          "order": "-",
-          "judge1_status": "ok",
-          "judge2_status": "unparsable"
-        }
-      ]
+    {
+     "qid": "57461044685f",
+     "task": "back_translation",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 139,
+      "completion_tokens": 1,
+      "total_tokens": 140,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 139
+     }
     },
-    "corruptions": [
-      {
-        "item_id": "265ef4f9821b:corrupt",
-        "change": "number 4.1->4.8"
+    {
+     "qid": "57461044685f",
+     "task": "closed_book",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 34,
+      "completion_tokens": 94,
+      "total_tokens": 128,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "ab55d632a582:corrupt",
-        "change": "number 4.10->4.8"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 34
+     }
+    },
+    {
+     "qid": "2f18b17f9278",
+     "task": "back_translation",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 174,
+      "completion_tokens": 1,
+      "total_tokens": 175,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "58bb9ef49094:corrupt",
-        "change": "number 32->39"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 174
+     }
+    },
+    {
+     "qid": "2f18b17f9278",
+     "task": "closed_book",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 34,
+      "completion_tokens": 54,
+      "total_tokens": 88,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "963932bf3d46:corrupt",
-        "change": "number 4.12->4.82"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 34
+     }
+    },
+    {
+     "qid": "3fd70d1d9d08",
+     "task": "back_translation",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 235,
+      "completion_tokens": 1,
+      "total_tokens": 236,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "261b6d1dfaff:corrupt",
-        "change": "number 2->9"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 235
+     }
+    },
+    {
+     "qid": "3fd70d1d9d08",
+     "task": "closed_book",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 36,
+      "completion_tokens": 61,
+      "total_tokens": 97,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "b3a6e2c4d9a5:corrupt",
-        "change": "number 1->8"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 36
+     }
+    },
+    {
+     "qid": "3a3f1b439fe4",
+     "task": "back_translation",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 109,
+      "completion_tokens": 1,
+      "total_tokens": 110,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "7d032a8f34d3:choice",
-        "change": "number 4.15->4.85"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 109
+     }
+    },
+    {
+     "qid": "3a3f1b439fe4",
+     "task": "closed_book",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 38,
+      "completion_tokens": 97,
+      "total_tokens": 135,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "92d1f103b17e:choice",
-        "change": "number 4.16->4.86"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 38
+     }
+    },
+    {
+     "qid": "c686b6efc892",
+     "task": "back_translation",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 92,
+      "completion_tokens": 1,
+      "total_tokens": 93,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "5eac84e97e08:choice",
-        "change": "number 4.17->4.87"
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 92
+     }
+    },
+    {
+     "qid": "c686b6efc892",
+     "task": "closed_book",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 37,
+      "completion_tokens": 55,
+      "total_tokens": 92,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
       },
-      {
-        "item_id": "b19a53460ca5:choice",
-        "change": "number 4.18->4.88"
-      }
-    ],
-    "run_notes": [
-      "本结果为 run2（2026-10-27 03:01 NZDT 开始）。judge2 的 17/20 失败：Gemma 免费档上游 429 重试耗尽后回退 Nemotron，Nemotron 为推理模型，max_tokens 过小导致回复无法解析（unparsable），按失败计入分母。",
-      "之后已修复（backoff 基数 5s、回退模型 min_max_tokens=2048、取末行判定），单条冒烟调用 Nemotron 返回可解析结果（1/1 ok）；但 run3 全量重跑在 40 分钟超时内未完成（主要耗在免费档限流退避），未产出结果，故本文件 judge2 数字未更新，修复后的 judge2 一致性：待测。"
-    ]
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 37
+     }
+    }
+   ]
   }
+ },
+ "retrieval_T1_test": {
+  "A_keyword_bm25_only": {
+   "config": {
+    "mode": "keyword",
+    "k": 10,
+    "clause_route": false,
+    "std_filter": true,
+    "kinds": [
+     "clause",
+     "commentary",
+     "table",
+     "text"
+    ],
+    "extra": {}
+   },
+   "Recall@5": {
+    "value": 0.5353535353535354,
+    "num": 212,
+    "den": 396,
+    "str": "212/396 = 0.535"
+   },
+   "MRR@10": {
+    "value": 0.3695476591309925,
+    "sum_rr": 146.3409,
+    "den": 396,
+    "str": "146.34/396 = 0.370"
+   },
+   "by_overlap_stratum": {
+    "high(>=0.6)": {
+     "Recall@5": "5/14 = 0.357",
+     "MRR@10": "2.74/14 = 0.196"
+    },
+    "low(<0.3)": {
+     "Recall@5": "198/328 = 0.604",
+     "MRR@10": "137.07/328 = 0.418"
+    },
+    "mid": {
+     "Recall@5": "9/54 = 0.167",
+     "MRR@10": "6.53/54 = 0.121"
+    }
+   },
+   "by_doc": {
+    "DB32T4696-2024": "60/124 = 0.484",
+    "DB32T5053-2025": "12/27 = 0.444",
+    "GB46034-2025": "20/42 = 0.476",
+    "GB55037-2022": "120/203 = 0.591"
+   },
+   "Recall@5_bootstrap95": [
+    0.48484848484848486,
+    0.5833333333333334
+   ]
+  },
+  "paired_A_vs_B_hit@5": {
+   "mcnemar_exact": {
+    "b01": 184,
+    "b10": 0,
+    "n_discordant": 184,
+    "p_value": 8.156630584998156e-56
+   },
+   "bootstrap_diff_B_minus_A": {
+    "diff": 0.46464646464646464,
+    "ci": [
+     0.4166666666666667,
+     0.5151515151515151
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "label": "显著",
+   "variable_changed": "clause_route",
+   "interpretation": "B 的 396/396 衡量的是条号路由正确性，不是检索能力；检索能力以 A（纯 BM25）为基线，在不含条号的 T2–T5 题上测"
+  },
+  "B_clause_route__routing_correctness_not_retrieval": {
+   "config": {
+    "mode": "keyword",
+    "k": 10,
+    "clause_route": true,
+    "std_filter": true,
+    "kinds": [
+     "clause",
+     "commentary",
+     "table",
+     "text"
+    ],
+    "extra": {}
+   },
+   "Recall@5": {
+    "value": 1.0,
+    "num": 396,
+    "den": 396,
+    "str": "396/396 = 1.000"
+   },
+   "MRR@10": {
+    "value": 0.9764309764309764,
+    "sum_rr": 386.6667,
+    "den": 396,
+    "str": "386.67/396 = 0.976"
+   },
+   "by_overlap_stratum": {
+    "high(>=0.6)": {
+     "Recall@5": "14/14 = 1.000",
+     "MRR@10": "14.00/14 = 1.000"
+    },
+    "low(<0.3)": {
+     "Recall@5": "328/328 = 1.000",
+     "MRR@10": "323.50/328 = 0.986"
+    },
+    "mid": {
+     "Recall@5": "54/54 = 1.000",
+     "MRR@10": "49.17/54 = 0.910"
+    }
+   },
+   "by_doc": {
+    "DB32T4696-2024": "124/124 = 1.000",
+    "DB32T5053-2025": "27/27 = 1.000",
+    "GB46034-2025": "42/42 = 1.000",
+    "GB55037-2022": "203/203 = 1.000"
+   },
+   "Recall@5_bootstrap95": [
+    1.0,
+    1.0
+   ]
+  }
+ },
+ "ask_program_judged": {
+  "false_refusal_rate_T1_test": "0/396 = 0.000",
+  "refusal_rate_U_test(correct_refusals)": "30/30 = 1.000",
+  "citation_precision_T1(cited chunk in acceptable set)": "404/719 = 0.562",
+  "citations_verbatim_verified": "719/719 = 1.000",
+  "refusal_reasons_T1": {}
+ },
+ "not_measured_yet": [
+  "T2/T3/T4/T5 题型",
+  "vector/hybrid/rerank 模式",
+  "改写题集复测",
+  "自动失败归因"
+ ],
+ "failures_B": [],
+ "n_failures_B": 0,
+ "optional_model_judged_study": {
+  "generator": {
+   "model": "deepseek-flash",
+   "family": "deepseek",
+   "status": "ready"
+  },
+  "judges": [
+   {
+    "role": "judge1",
+    "model": "mimo-v2.6-flash",
+    "family": "xiaomi-mimo",
+    "fallback": [],
+    "status": "ready"
+   },
+   {
+    "role": "judge2",
+    "model": "google/gemma-4-31b-it:free",
+    "family": "google",
+    "fallback": [
+     "nvidia/nemotron-3-ultra-550b-a55b:free"
+    ],
+    "status": "ready"
+   }
+  ],
+  "judge_type": "model (not human)",
+  "items": [
+   {
+    "qid": "265ef4f9821b",
+    "refused": false,
+    "reason": null,
+    "llm_call": {
+     "role": "generator",
+     "provider": "deepseek",
+     "family": "deepseek",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 302,
+      "completion_tokens": 34,
+      "total_tokens": 336,
+      "prompt_tokens_details": {
+       "cached_tokens": 128
+      },
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 174
+     },
+     "ms": 936,
+     "error": null
+    }
+   },
+   {
+    "qid": "ab55d632a582",
+    "refused": false,
+    "reason": null,
+    "llm_call": {
+     "role": "generator",
+     "provider": "deepseek",
+     "family": "deepseek",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 530,
+      "completion_tokens": 262,
+      "total_tokens": 792,
+      "prompt_tokens_details": {
+       "cached_tokens": 384
+      },
+      "prompt_cache_hit_tokens": 384,
+      "prompt_cache_miss_tokens": 146
+     },
+     "ms": 2011,
+     "error": null
+    }
+   },
+   {
+    "qid": "58bb9ef49094",
+    "refused": false,
+    "reason": null,
+    "llm_call": {
+     "role": "generator",
+     "provider": "deepseek",
+     "family": "deepseek",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 1118,
+      "completion_tokens": 34,
+      "total_tokens": 1152,
+      "prompt_tokens_details": {
+       "cached_tokens": 896
+      },
+      "prompt_cache_hit_tokens": 896,
+      "prompt_cache_miss_tokens": 222
+     },
+     "ms": 1104,
+     "error": null
+    }
+   },
+   {
+    "qid": "963932bf3d46",
+    "refused": false,
+    "reason": null,
+    "llm_call": {
+     "role": "generator",
+     "provider": "deepseek",
+     "family": "deepseek",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 768,
+      "completion_tokens": 139,
+      "total_tokens": 907,
+      "prompt_tokens_details": {
+       "cached_tokens": 512
+      },
+      "prompt_cache_hit_tokens": 512,
+      "prompt_cache_miss_tokens": 256
+     },
+     "ms": 1567,
+     "error": null
+    }
+   },
+   {
+    "qid": "261b6d1dfaff",
+    "refused": false,
+    "reason": null,
+    "llm_call": {
+     "role": "generator",
+     "provider": "deepseek",
+     "family": "deepseek",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 450,
+      "completion_tokens": 97,
+      "total_tokens": 547,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 450
+     },
+     "ms": 1192,
+     "error": null
+    }
+   },
+   {
+    "qid": "b3a6e2c4d9a5",
+    "refused": false,
+    "reason": null,
+    "llm_call": {
+     "role": "generator",
+     "provider": "deepseek",
+     "family": "deepseek",
+     "model_name": "deepseek-flash",
+     "model_version": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+     "status": "ok",
+     "usage": {
+      "prompt_tokens": 738,
+      "completion_tokens": 125,
+      "total_tokens": 863,
+      "prompt_tokens_details": {
+       "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 738
+     },
+     "ms": 1353,
+     "error": null
+    }
+   }
+  ],
+  "n_faithfulness_items": 12,
+  "n_corrupted_items": 6,
+  "n_choice_items": 4,
+  "n_choice_judgments_per_judge": 8,
+  "per_judge": {
+   "judge1": {
+    "models_used": [
+     "mimo-v2.6-flash (xiaomi-mimo)"
+    ],
+    "status_counts": {
+     "ok": 20
+    },
+    "fallback_used": 0,
+    "orig_judged_faithful(over all orig items)": "6/6 = 1.000",
+    "corrupt_detected(over all corrupted items)": "5/6 = 0.833",
+    "choice_correct(over all order-judgments)": "8/8 = 1.000",
+    "choice_order_consistent(both orders correct, over items)": "4/4 = 1.000",
+    "coverage(status ok)": "20/20"
+   },
+   "judge2": {
+    "models_used": [
+     "google/gemma-4-31b-it:free (google)",
+     "nvidia/nemotron-3-ultra-550b-a55b:free (nvidia)"
+    ],
+    "status_counts": {
+     "unparsable": 17,
+     "ok": 3
+    },
+    "fallback_used": 17,
+    "orig_judged_faithful(over all orig items)": "待测（覆盖率 3/20 < 0.8，不报告）",
+    "corrupt_detected(over all corrupted items)": "待测（覆盖率 3/20 < 0.8，不报告）",
+    "choice_correct(over all order-judgments)": "待测（覆盖率 3/20 < 0.8，不报告）",
+    "choice_order_consistent(both orders correct, over items)": "待测（覆盖率 3/20 < 0.8，不报告）",
+    "coverage(status ok)": "3/20"
+   }
+  },
+  "inter_judge_agreement": {
+   "coverage_both_ok": "3/20",
+   "n_both_ok": 3,
+   "n_total": 20,
+   "min_coverage_required": 0.8,
+   "failed_items": [
+    {
+     "item_id": "261b6d1dfaff:corrupt",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "265ef4f9821b:corrupt",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "265ef4f9821b:orig",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "58bb9ef49094:orig",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "5eac84e97e08:choice",
+     "order": "AB",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "5eac84e97e08:choice",
+     "order": "BA",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "7d032a8f34d3:choice",
+     "order": "AB",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "7d032a8f34d3:choice",
+     "order": "BA",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "92d1f103b17e:choice",
+     "order": "AB",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "92d1f103b17e:choice",
+     "order": "BA",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "963932bf3d46:corrupt",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "963932bf3d46:orig",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "ab55d632a582:corrupt",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "ab55d632a582:orig",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "b19a53460ca5:choice",
+     "order": "BA",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "b3a6e2c4d9a5:corrupt",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    },
+    {
+     "item_id": "b3a6e2c4d9a5:orig",
+     "order": "-",
+     "judge1_status": "ok",
+     "judge2_status": "unparsable"
+    }
+   ],
+   "agree": "待测（双裁判覆盖率不足，不报告一致率）",
+   "kappa": "待测（双裁判覆盖率不足，不报告一致率）",
+   "disagreements": "待测"
+  },
+  "corruptions": [
+   {
+    "item_id": "265ef4f9821b:corrupt",
+    "change": "number 4.1->4.8"
+   },
+   {
+    "item_id": "ab55d632a582:corrupt",
+    "change": "number 4.10->4.8"
+   },
+   {
+    "item_id": "58bb9ef49094:corrupt",
+    "change": "number 32->39"
+   },
+   {
+    "item_id": "963932bf3d46:corrupt",
+    "change": "number 4.12->4.82"
+   },
+   {
+    "item_id": "261b6d1dfaff:corrupt",
+    "change": "number 2->9"
+   },
+   {
+    "item_id": "b3a6e2c4d9a5:corrupt",
+    "change": "number 1->8"
+   },
+   {
+    "item_id": "7d032a8f34d3:choice",
+    "change": "number 4.15->4.85"
+   },
+   {
+    "item_id": "92d1f103b17e:choice",
+    "change": "number 4.16->4.86"
+   },
+   {
+    "item_id": "5eac84e97e08:choice",
+    "change": "number 4.17->4.87"
+   },
+   {
+    "item_id": "b19a53460ca5:choice",
+    "change": "number 4.18->4.88"
+   }
+  ],
+  "run_notes": [
+   "本结果为 run2（2026-10-27 03:01 NZDT 开始）。judge2 的 17/20 失败：Gemma 免费档上游 429 重试耗尽后回退 Nemotron，Nemotron 为推理模型，max_tokens 过小导致回复无法解析（unparsable），按失败计入分母。",
+   "之后已修复（backoff 基数 5s、回退模型 min_max_tokens=2048、取末行判定），单条冒烟调用 Nemotron 返回可解析结果（1/1 ok）；但 run3 全量重跑在 40 分钟超时内未完成（主要耗在免费档限流退避），未产出结果，故本文件 judge2 数字未更新，修复后的 judge2 一致性：待测。",
+   "2026-10-27 04:08 NZDT 按评审意见重写本节：由已提交的 judgments_block1_records.jsonl 重新计算（无新模型调用）；judge2 覆盖率 3/20 不足 0.8，只报告覆盖率，不报告一致率/κ/准确率。"
+  ]
+ }
 }

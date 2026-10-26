@@ -114,27 +114,38 @@ def load_judges() -> list[Judge]:
     return [Judge(s) for s in specs]
 
 
-def agreement(j1: list[Judgment], j2: list[Judgment]) -> dict:
+MIN_JUDGE_COVERAGE = 0.8  # agreement / kappa are only reported once both judges answered >= 80% of items
+
+
+def coverage(records: list[Judgment]) -> dict:
+    ok = sum(1 for r in records if r.status == "ok")
+    n = len(records)
+    return {"ok": ok, "n": n, "str": f"{ok}/{n}", "value": (ok / n) if n else None}
+
+
+def agreement(j1: list[Judgment], j2: list[Judgment], min_coverage: float = MIN_JUDGE_COVERAGE) -> dict:
     """Inter-judge agreement.  Items where either judge's call failed are NOT dropped
-    silently: they are counted in ``n_total``, listed in ``failed_items``, and an
-    all-items agreement (failures counted as non-agreement) is reported too."""
+    silently: they are counted in ``n_total`` and listed in ``failed_items``.
+    Agreement x/N and kappa are withheld ("待测") unless the fraction of items
+    both judges answered is >= ``min_coverage``; only coverage is reported then."""
     a = {(r.item_id, r.order): r for r in j1}
     b = {(r.item_id, r.order): r for r in j2}
     keys = sorted(set(a) | set(b))
     both = [k for k in keys if k in a and k in b and a[k].status == "ok" and b[k].status == "ok"]
     failed = [{"item_id": k[0], "order": k[1], "judge1_status": a[k].status if k in a else "missing",
                "judge2_status": b[k].status if k in b else "missing"} for k in keys if k not in both]
-    if not both:
-        return {"agree": "待测", "n_both_ok": 0, "n_total": len(keys), "kappa": "待测",
-                "disagreements": [], "failed_items": failed}
+    cov = len(both) / len(keys) if keys else 0.0
+    base = {"coverage_both_ok": f"{len(both)}/{len(keys)}", "n_both_ok": len(both), "n_total": len(keys),
+            "min_coverage_required": min_coverage, "failed_items": failed}
+    if not both or cov < min_coverage:
+        why = "待测（双裁判覆盖率不足，不报告一致率）" if both else "待测"
+        return {**base, "agree": why, "kappa": why, "disagreements": "待测"}
     agree = sum(a[k].verdict == b[k].verdict for k in both)
-    return {"agree": agree, "n_both_ok": len(both), "str": f"{agree}/{len(both)}",
-            "agree_over_all_items(failures=non-agreement)": f"{agree}/{len(keys)}", "n_total": len(keys),
+    return {**base, "agree": agree, "str": f"{agree}/{len(both)}",
             "kappa": cohen_kappa([a[k].verdict for k in both], [b[k].verdict for k in both]),
             "disagreements": [{"item_id": k[0], "order": k[1], "judge1": a[k].verdict, "judge1_model": a[k].judge_model,
                                "judge2": b[k].verdict, "judge2_model": b[k].judge_model}
-                              for k in both if a[k].verdict != b[k].verdict],
-            "failed_items": failed}
+                              for k in both if a[k].verdict != b[k].verdict]}
 
 
 def corrupt(text: str) -> tuple[str, str] | None:

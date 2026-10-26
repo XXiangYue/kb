@@ -164,6 +164,7 @@ def judge_study(store, qs, n: int, n_choice: int = 4) -> dict:
         for x in chs:
             by_item.setdefault(x.item_id, []).append(x)
         per[role] = {
+            "coverage(status ok)": J.coverage(rs)["str"],
             "models_used": sorted({f"{x.judge_model} ({x.judge_family})" for x in rs if x.judge_model}),
             "status_counts": _count(x.status for x in rs),
             "fallback_used": sum(x.fallback_used for x in rs),
@@ -174,6 +175,12 @@ def judge_study(store, qs, n: int, n_choice: int = 4) -> dict:
                 rate(sum(1 for v in by_item.values() if len(v) == 2 and all(x.verdict is True for x in v)),
                      len(by_item))["str"],
         }
+    for role, rs in recs.items():  # low-coverage judge: report coverage only, withhold accuracy numbers
+        cv = J.coverage(rs)
+        if cv["value"] is None or cv["value"] < J.MIN_JUDGE_COVERAGE:
+            for k in list(per[role]):
+                if k.startswith(("orig_", "corrupt_", "choice_")):
+                    per[role][k] = f"待测（覆盖率 {cv['str']} < {J.MIN_JUDGE_COVERAGE}，不报告）"
     out["per_judge"] = per
     roles = list(recs)
     out["inter_judge_agreement"] = J.agreement(recs[roles[0]], recs[roles[1]]) if len(roles) > 1 else "待测"
@@ -246,9 +253,10 @@ def main():
             "model_filter_passes": "skipped (run with --llm)"},
         "retrieval_T1_test": {
             "A_keyword_bm25_only": {"config": asdict(cfg_a), **summarize(ra, test)},
-            "B_keyword_plus_clause_route": {"config": asdict(cfg_b), **summarize(rb, test)},
+            "B_clause_route__routing_correctness_not_retrieval": {"config": asdict(cfg_b), **summarize(rb, test)},
             "paired_A_vs_B_hit@5": {"mcnemar_exact": mc, "bootstrap_diff_B_minus_A": bs,
                                      "label": significance_label(mc["p_value"], bs["ci"]),
+                                     "interpretation": "B 的 396/396 衡量的是条号路由正确性，不是检索能力；检索能力以 A（纯 BM25）为基线，在不含条号的 T2–T5 题上测",
                                      "variable_changed": "clause_route"}},
         "ask_program_judged": {
             "false_refusal_rate_T1_test": rate(false_ref, len(test))["str"],
@@ -269,7 +277,7 @@ def main():
     out = REPORTS / "eval_block1.json"
     out.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("question_construction", "ask_program_judged")}, ensure_ascii=False, indent=1))
-    for name in ("A_keyword_bm25_only", "B_keyword_plus_clause_route"):
+    for name in ("A_keyword_bm25_only", "B_clause_route__routing_correctness_not_retrieval"):
         r = report["retrieval_T1_test"][name]
         print(name, "Recall@5", r["Recall@5"]["str"], "MRR@10", r["MRR@10"]["str"], r["by_overlap_stratum"])
     print("paired", report["retrieval_T1_test"]["paired_A_vs_B_hit@5"])
