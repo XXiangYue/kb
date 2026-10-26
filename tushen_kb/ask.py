@@ -28,7 +28,9 @@ EXPLICIT_CLAUSE = re.compile(r"第\s*((?:[A-Z]|\d{1,2})(?:\.\d{1,3}){1,4})\s*条
 class AskConfig:
     search: SearchConfig = field(default_factory=SearchConfig)
     n_evidence: int = 3
-    min_coverage: float = 0.5  # fraction of query content tokens found in top evidence (calibrate on dev split)
+    # frozen by the dev-only calibration rule (reports/threshold_calibration_dev.json, rule in 807a93d);
+    # was 0.5 before.  NOTE: the rule weights 88 answerable vs 9 U2 dev questions equally per error.
+    min_coverage: float = 0.05
     # chunk kinds allowed as CITED evidence.  条文说明 (commentary) is explanatory, not the
     # normative text, so by default it may appear in evidence but is never cited.
     cite_kinds: tuple = ("clause", "table", "text")

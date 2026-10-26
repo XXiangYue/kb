@@ -1,0 +1,140 @@
+{
+ "time_local": "2026-10-27 05:54 NZDT",
+ "mode": "hybrid_rerank",
+ "rule": "Step 4: calibrate AskConfig.min_coverage on the DEV split only (hybrid_rerank, evidence-only /ask).\n\nRule fixed before running (written here, committed with the result):\n  grid       0.00, 0.05, ..., 0.80\n  objective  minimise errors = false refusals (answerable dev) + false answers (U2 dev, not refused)\n  ties       higher citation precision (口径 B), then the HIGHER threshold (prefer refusing)\nDev = block-2 dev split + low-overlap dev split.  Before calibrating, dev/test overlap is checked\n(qid, whitespace-normalised question text, and source chunk) and written to the report.\nTest is not read here except for the overlap check.\n",
+ "dev_test_overlap": {
+  "n_dev": 97,
+  "n_test": 363,
+  "qid_overlap": 0,
+  "question_text_overlap": 0,
+  "src_chunk_overlap(informational)": 8
+ },
+ "n_dev_answerable": 88,
+ "n_dev_U2": 9,
+ "n_dev_by_file": {
+  "questions_block2.jsonl": 70,
+  "questions_lowoverlap.jsonl": 27
+ },
+ "grid": [
+  {
+   "min_coverage": 0.0,
+   "false_refusal": "3/88 = 0.034",
+   "false_answer_U2": "9/9 = 1.000",
+   "errors": 12,
+   "citation_precision": "73/192 = 0.380"
+  },
+  {
+   "min_coverage": 0.05,
+   "false_refusal": "4/88 = 0.045",
+   "false_answer_U2": "7/9 = 0.778",
+   "errors": 11,
+   "citation_precision": "73/186 = 0.392"
+  },
+  {
+   "min_coverage": 0.1,
+   "false_refusal": "7/88 = 0.080",
+   "false_answer_U2": "6/9 = 0.667",
+   "errors": 13,
+   "citation_precision": "70/170 = 0.412"
+  },
+  {
+   "min_coverage": 0.15,
+   "false_refusal": "13/88 = 0.148",
+   "false_answer_U2": "5/9 = 0.556",
+   "errors": 18,
+   "citation_precision": "66/156 = 0.423"
+  },
+  {
+   "min_coverage": 0.2,
+   "false_refusal": "18/88 = 0.205",
+   "false_answer_U2": "3/9 = 0.333",
+   "errors": 21,
+   "citation_precision": "61/143 = 0.427"
+  },
+  {
+   "min_coverage": 0.25,
+   "false_refusal": "23/88 = 0.261",
+   "false_answer_U2": "1/9 = 0.111",
+   "errors": 24,
+   "citation_precision": "55/126 = 0.437"
+  },
+  {
+   "min_coverage": 0.3,
+   "false_refusal": "26/88 = 0.295",
+   "false_answer_U2": "1/9 = 0.111",
+   "errors": 27,
+   "citation_precision": "52/111 = 0.468"
+  },
+  {
+   "min_coverage": 0.35,
+   "false_refusal": "30/88 = 0.341",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 30,
+   "citation_precision": "51/100 = 0.510"
+  },
+  {
+   "min_coverage": 0.4,
+   "false_refusal": "33/88 = 0.375",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 33,
+   "citation_precision": "50/95 = 0.526"
+  },
+  {
+   "min_coverage": 0.45,
+   "false_refusal": "37/88 = 0.420",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 37,
+   "citation_precision": "46/85 = 0.541"
+  },
+  {
+   "min_coverage": 0.5,
+   "false_refusal": "37/88 = 0.420",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 37,
+   "citation_precision": "46/83 = 0.554"
+  },
+  {
+   "min_coverage": 0.55,
+   "false_refusal": "42/88 = 0.477",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 42,
+   "citation_precision": "42/68 = 0.618"
+  },
+  {
+   "min_coverage": 0.6,
+   "false_refusal": "43/88 = 0.489",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 43,
+   "citation_precision": "42/62 = 0.677"
+  },
+  {
+   "min_coverage": 0.65,
+   "false_refusal": "50/88 = 0.568",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 50,
+   "citation_precision": "35/50 = 0.700"
+  },
+  {
+   "min_coverage": 0.7,
+   "false_refusal": "53/88 = 0.602",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 53,
+   "citation_precision": "32/42 = 0.762"
+  },
+  {
+   "min_coverage": 0.75,
+   "false_refusal": "56/88 = 0.636",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 56,
+   "citation_precision": "30/34 = 0.882"
+  },
+  {
+   "min_coverage": 0.8,
+   "false_refusal": "61/88 = 0.693",
+   "false_answer_U2": "0/9 = 0.000",
+   "errors": 61,
+   "citation_precision": "26/27 = 0.963"
+  }
+ ],
+ "chosen_min_coverage": 0.05
+}
