@@ -75,3 +75,12 @@ def test_llm_skipped_falls_back(store):
             return d
     r = ask(store, "消防电梯底坑排水井有效容量", llm=Skip(""))
     assert not r["refused"] and r["mode"] == "evidence_only" and r["trace"]["llm_call"]["status"].startswith("skipped")
+
+
+def test_commentary_never_cited_by_default(store):
+    q = "防火分区面积的计算方法"
+    old = ask(store, q, AskConfig(cite_kinds=("clause", "table", "text", "commentary")))
+    new = ask(store, q)
+    assert any(e["kind"] == "commentary" for e in new["evidence"])  # still visible as evidence
+    assert not any(c["chunk_id"].split(":")[1] == "commentary" for c in new["citations"])
+    assert any(c["chunk_id"].split(":")[1] == "commentary" for c in old["citations"]) or old["refused"]

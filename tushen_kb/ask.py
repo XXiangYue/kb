@@ -29,6 +29,9 @@ class AskConfig:
     search: SearchConfig = field(default_factory=SearchConfig)
     n_evidence: int = 3
     min_coverage: float = 0.5  # fraction of query content tokens found in top evidence (calibrate on dev split)
+    # chunk kinds allowed as CITED evidence.  条文说明 (commentary) is explanatory, not the
+    # normative text, so by default it may appear in evidence but is never cited.
+    cite_kinds: tuple = ("clause", "table", "text")
 
 
 @dataclass
@@ -54,7 +57,7 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
     cfg = cfg or AskConfig()
     t0 = time.perf_counter()
     trace: dict = {"config": {"search": asdict(cfg.search), "n_evidence": cfg.n_evidence,
-                              "min_coverage": cfg.min_coverage},
+                              "min_coverage": cfg.min_coverage, "cite_kinds": list(cfg.cite_kinds)},
                    "stages": [], "context_log": [], "token_counter": "cjk_char+ascii_word estimate"}
 
     def stage(name, **kw):
@@ -101,7 +104,7 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
     citations = []
     texts = {}
     for e, h in zip(evidence, hits):
-        if e["coverage"] < cfg.min_coverage:
+        if e["coverage"] < cfg.min_coverage or h["kind"] not in cfg.cite_kinds:
             continue
         if h["doc_id"] not in texts:
             texts[h["doc_id"]] = store.doc_text(h["doc_id"])

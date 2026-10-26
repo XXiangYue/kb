@@ -84,3 +84,24 @@ def significance_label(p: float, ci: list | None) -> str:
     if ci is not None and ci[0] <= 0 <= ci[1]:
         return "无显著差异"
     return "显著" if p < 0.05 else "无显著差异"
+
+
+def bootstrap_ratio_diff_ci(num_a, den_a, num_b, den_b, iters: int = 2000, seed: int = 0, alpha: float = 0.05) -> dict:
+    """Paired (cluster) bootstrap over items for sum(num_b)/sum(den_b) - sum(num_a)/sum(den_a).
+    Used for citation precision, whose unit (citation) is clustered within questions."""
+    n = len(num_a)
+    assert n == len(den_a) == len(num_b) == len(den_b)
+    if n == 0 or not sum(den_a) or not sum(den_b):
+        return {"diff": None, "ci": None}
+    rng = random.Random(seed)
+    diffs = []
+    for _ in range(iters):
+        idx = [rng.randrange(n) for _ in range(n)]
+        da, db = sum(den_a[i] for i in idx), sum(den_b[i] for i in idx)
+        if da and db:
+            diffs.append(sum(num_b[i] for i in idx) / db - sum(num_a[i] for i in idx) / da)
+    diffs.sort()
+    m = len(diffs)
+    return {"diff": sum(num_b) / sum(den_b) - sum(num_a) / sum(den_a),
+            "ci": [diffs[int(alpha / 2 * m)], diffs[int((1 - alpha / 2) * m) - 1]], "iters": iters, "seed": seed,
+            "unit": "question (cluster bootstrap)"}
