@@ -46,6 +46,8 @@ class Judgment:
     fallback_used: bool = False
     n_attempts: int = 0
     error: str | None = None
+    usage: dict | None = None
+    ms: int | None = None
 
 
 def _final_line(text: str) -> str:
@@ -90,7 +92,8 @@ class Judge:
         # name the model ACTUALLY used (fallback may differ from the configured primary)
         return Judgment(item_id, self.spec.role, call.get("model_name"), call.get("model_version"), call.get("family"),
                         "model", task, order, status, verdict if status == "ok" else None, call.get("text"),
-                        bool(call.get("fallback_used")), len(call.get("attempts") or []), call.get("error"))
+                        bool(call.get("fallback_used")), len(call.get("attempts") or []), call.get("error"),
+                        call.get("usage"), call.get("ms"))
 
     def faithfulness(self, item_id: str, evidence: str, answer: str) -> Judgment:
         call = self.model.complete([{"role": "user", "content": FAITH_PROMPT.format(evidence=evidence, answer=answer)}],
@@ -166,3 +169,8 @@ def dump(records: list[Judgment], path) -> None:
     with open(path, "w", encoding="utf-8") as f:
         for r in records:
             f.write(json.dumps(asdict(r), ensure_ascii=False) + "\n")
+
+
+def rate_str(num: int, den: int) -> str:
+    from .metrics import rate
+    return rate(num, den)["str"]

@@ -41,9 +41,13 @@ class ModelSpec:
     max_retries: int = 2
     backoff_base_s: float = 1.0
     min_max_tokens: int = 0
+    timeout_s: float = 60.0
+    # backup_models are NEVER used automatically: switching requires explicit approval and a config
+    # change; they are listed only so validation can check them (family rules) in advance.
+    backup_models: list | None = None
 
     def families(self) -> list[str]:
-        fs = [self.family] + [f.get("family") for f in (self.fallback_models or [])]
+        fs = [self.family] + [f.get("family") for f in (self.fallback_models or []) + (self.backup_models or [])]
         return [f.lower() for f in fs if f]
 
     @property
@@ -84,9 +88,9 @@ def validate(gen: ModelSpec, judges: list[ModelSpec]) -> None:
             continue
         if not j.family:
             raise ConfigError(f"{j.role}: family is required")
-        for f in (j.fallback_models or []):
+        for f in (j.fallback_models or []) + (j.backup_models or []):
             if not f.get("family") or not f.get("model"):
-                raise ConfigError(f"{j.role}: fallback model needs model+family")
+                raise ConfigError(f"{j.role}: fallback/backup model needs model+family")
         for fam in j.families():
             if gfam and fam == gfam:
                 raise ConfigError(f"{j.role}: judge family '{fam}' equals generator family — not allowed")
@@ -108,9 +112,9 @@ class ChatModel:
     """Minimal OpenAI-compatible client.  ``complete`` returns a call record:
     {status, text, model_name, model_version, provider, family, usage, ms}."""
 
-    def __init__(self, spec: ModelSpec, timeout: float = 60.0):
+    def __init__(self, spec: ModelSpec, timeout: float | None = None):
         self.spec = spec
-        self.timeout = timeout
+        self.timeout = timeout or spec.timeout_s
 
     @property
     def name(self) -> str:

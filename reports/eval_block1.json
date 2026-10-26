@@ -777,6 +777,7 @@
    "本结果为 run2（2026-10-27 03:01 NZDT 开始）。judge2 的 17/20 失败：Gemma 免费档上游 429 重试耗尽后回退 Nemotron，Nemotron 为推理模型，max_tokens 过小导致回复无法解析（unparsable），按失败计入分母。",
    "之后已修复（backoff 基数 5s、回退模型 min_max_tokens=2048、取末行判定），单条冒烟调用 Nemotron 返回可解析结果（1/1 ok）；但 run3 全量重跑在 40 分钟超时内未完成（主要耗在免费档限流退避），未产出结果，故本文件 judge2 数字未更新，修复后的 judge2 一致性：待测。",
    "2026-10-27 04:08 NZDT 按评审意见重写本节：由已提交的 judgments_block1_records.jsonl 重新计算（无新模型调用）；judge2 覆盖率 3/20 不足 0.8，只报告覆盖率，不报告一致率/κ/准确率。"
-  ]
+  ],
+  "historical": "历史记录：本节 judge2 = OpenRouter Gemma/Nemotron（已弃用）。现 judge2 = uuapi gemini-3.8-flash，见 reports/judge_summary_block1_v2.json；裁判记录已移至 reports/historical/。"
  }
 }

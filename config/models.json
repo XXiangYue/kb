@@ -25,23 +25,25 @@
     },
     {
       "role": "judge2",
-      "provider": "openrouter",
+      "provider": "uuapi",
       "family": "google",
-      "base_url": "https://openrouter.ai/api/v1",
-      "model": "google/gemma-4-31b-it:free",
-      "api_key_env": "OPENROUTER_API_KEY",
+      "base_url": "https://uuapi.io/v1",
+      "model": "gemini-3.8-flash",
+      "api_key_env": "NEW_API_KEY_2",
       "auth_header": "Authorization",
-      "fallback_models": [
+      "max_retries": 3,
+      "backoff_base_s": 10.0,
+      "timeout_s": 180.0,
+      "min_max_tokens": 0,
+      "backup_models": [
         {
-          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "family": "nvidia",
-          "_comment": "used ONLY if the primary model fails to respond after retries; reasoning model → needs a larger token budget; records name the model actually used",
-          "min_max_tokens": 2048
+          "model": "gpt-5.6-luna",
+          "family": "openai",
+          "api_key_env": "UUAPI_API_KEY",
+          "_comment": "BACKUP ONLY, never automatic: switching requires reporting to the project owner first; forbidden if the generator / question-generating model is OpenAI family (enforced by family validation); never mix two judge-2 models within one agreement rate"
         }
       ],
-      "max_retries": 5,
-      "backoff_base_s": 5.0,
-      "min_max_tokens": 64
+      "_history": "block-1 run2 used OpenRouter google/gemma-4-31b-it:free with fallback nvidia/nemotron-3-ultra-550b-a55b:free; those records are kept as historical in reports/historical/"
     }
   ]
 }

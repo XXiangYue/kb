@@ -14,7 +14,8 @@ import re
 import subprocess
 import sys
 
-KEY_ENVS = ["DEEPSEEK_API_KEY", "MIMO_API_KEY", "OPENROUTER_API_KEY", "OPENAI_API_KEY", "HF_TOKEN"]
+KEY_ENVS = ["DEEPSEEK_API_KEY", "MIMO_API_KEY", "OPENROUTER_API_KEY", "NEW_API_KEY_2", "UUAPI_API_KEY",
+            "OPENAI_API_KEY", "HF_TOKEN"]
 PATTERNS = {
     "sk-token": re.compile(r"\bsk-[A-Za-z0-9]{16,}"),
     "tp-token": re.compile(r"\bt?tp-[A-Za-z0-9]{16,}"),

@@ -123,7 +123,7 @@ def test_repo_judge2_is_third_family():
     gen, judges = load_models()
     fams = [f for j in judges if j.configured for f in j.families()]
     assert "deepseek" not in fams and len(fams) == len(set(fams))
-    assert judges[1].model == "google/gemma-4-31b-it:free"
+    assert judges[1].model == "gemini-3.8-flash"
 
 
 def test_fallback_family_equal_to_generator_rejected():
@@ -191,3 +191,18 @@ def test_verdict_parsing():
     assert _parse_binary("我认为可以") is None
     assert _parse_choice("A") == "A" and _parse_choice("reasoning...\n答案：B") == "B"
     assert _parse_choice("Analysis of options") is None
+
+
+def test_backup_judge_forbidden_when_generator_is_openai():
+    j2 = spec("judge2", "uuapi", "google")
+    j2.backup_models = [{"model": "gpt-x", "family": "openai"}]
+    with pytest.raises(ConfigError):
+        validate(spec("generator", "openai", "openai"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
+    validate(spec("generator", "deepseek", "deepseek"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
+
+
+def test_config_judge2_is_uuapi_gemini():
+    _, js = load_models()
+    j2 = [j for j in js if j.role == "judge2"][0]
+    assert j2.model == "gemini-3.8-flash" and j2.family == "google" and not j2.fallback_models
+    assert j2.timeout_s >= 180 and j2.api_key_env == "NEW_API_KEY_2"
