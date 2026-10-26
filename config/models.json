@@ -1,0 +1,47 @@
+{
+  "_comment": "Provider/model/env-var names are configuration. API keys are read from the environment at call time and are NEVER stored here, in logs, or in artifacts.",
+  "generator": {
+    "role": "generator",
+    "provider": "deepseek",
+    "family": "deepseek",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "auth_header": "Authorization",
+    "max_retries": 2,
+    "backoff_base_s": 1.0
+  },
+  "judges": [
+    {
+      "role": "judge1",
+      "provider": "xiaomi-mimo",
+      "family": "xiaomi-mimo",
+      "base_url": "https://token-plan-cn.xiaomimimo.com/v1",
+      "model": "mimo-v2.6-flash",
+      "api_key_env": "MIMO_API_KEY",
+      "auth_header": "Authorization",
+      "max_retries": 2,
+      "backoff_base_s": 1.0
+    },
+    {
+      "role": "judge2",
+      "provider": "openrouter",
+      "family": "google",
+      "base_url": "https://openrouter.ai/api/v1",
+      "model": "google/gemma-4-31b-it:free",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "auth_header": "Authorization",
+      "fallback_models": [
+        {
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "family": "nvidia",
+          "_comment": "used ONLY if the primary model fails to respond after retries; reasoning model → needs a larger token budget; records name the model actually used",
+          "min_max_tokens": 2048
+        }
+      ],
+      "max_retries": 5,
+      "backoff_base_s": 5.0,
+      "min_max_tokens": 64
+    }
+  ]
+}

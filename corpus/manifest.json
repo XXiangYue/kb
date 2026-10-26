@@ -1,0 +1,49 @@
+{
+  "note": "PDFs are NOT in git (redistribution rights unclear). Fetch with scripts/download_corpus.sh; sha256 pins the exact file used.",
+  "docs": [
+    {
+      "doc_id": "GB55037-2022",
+      "std_code": "GB 55037-2022",
+      "title": "建筑防火通用规范",
+      "file": "data/pdfs/GB55037-2022.pdf",
+      "url": "https://js.119.gov.cn/group1/M00/01/D6/rBPe7Wi5YSWATAAkABU9IFBisPA109.pdf",
+      "sha256": "69d2c2c4d33787e83c02d006e376d1c0977fda5da465bb5bacca84a6820565d3",
+      "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目（含条文说明的文字版；页眉带第三方汇编水印「消防规范网 gf.1190119.com」）",
+      "license": "强制性工程建设规范，住建部发布公告称本规范在住房和城乡建设部门户网站公开，供公众免费阅读；再分发权利未明示，且此文字版为第三方汇编 → 不入库，仅脚本下载。官方 gov.cn 镜像为扫描件无文字层（见 README）。",
+      "mandatory_rule": "doc:statement 全部条文必须严格执行"
+    },
+    {
+      "doc_id": "GB46034-2025",
+      "std_code": "GB 46034-2025",
+      "title": "公众聚集场所投入使用营业消防安全检查规则",
+      "file": "data/pdfs/GB46034-2025.pdf",
+      "url": "https://js.119.gov.cn/group1/M00/01/D6/rBPe7Wi-Q0WANQUkAAdZByxiIpc522.pdf",
+      "sha256": "c11804fa2e741da6a5767f496fe483602d4e5dd82ac26789368ff1e7629bc41e",
+      "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目",
+      "license": "强制性国家标准，国家标准全文公开系统（openstd.samr.gov.cn）对强制性国标提供免费在线阅读；版权归标准出版方，再分发权利未明示 → 不入库。",
+      "mandatory_rule": "doc:code 强制性国家标准（代号无 /T），全文强制"
+    },
+    {
+      "doc_id": "DB32T4696-2024",
+      "std_code": "DB32/T 4696-2024",
+      "title": "建筑消防设施维护保养规程",
+      "file": "data/pdfs/DB32T4696-2024.pdf",
+      "url": "https://js.119.gov.cn/group1/M00/01/D6/rBPe7Wi6PkeAbCxEACVpr2rulVY674.pdf",
+      "sha256": "8ddc8a5dcef04c495d5d133b641337f85d3e7b06b5b45900b7b50e9f12bdc559",
+      "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目",
+      "license": "江苏省推荐性地方标准，政府网站公开发布供阅读；再分发权利未明示 → 不入库。",
+      "mandatory_rule": "clause:font 推荐性标准，逐条按黑体/加粗字体启发式判定"
+    },
+    {
+      "doc_id": "DB32T5053-2025",
+      "std_code": "DB32/T 5053-2025",
+      "title": "消防电梯的使用管理与维护保养规则",
+      "file": "data/pdfs/DB32T5053-2025.pdf",
+      "url": "https://js.119.gov.cn/group1/M00/01/D6/rBPe7Wi6Pc-AfZ1pAAoqKnsJzgI640.pdf",
+      "sha256": "bd675678ac0059da68a2798a04e8210be16d1b40aa137ad3d65d531b214409ff",
+      "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目",
+      "license": "江苏省推荐性地方标准，政府网站公开发布供阅读；再分发权利未明示 → 不入库。",
+      "mandatory_rule": "clause:font 推荐性标准，逐条按黑体/加粗字体启发式判定"
+    }
+  ]
+}
