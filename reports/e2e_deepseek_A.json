@@ -1,0 +1,64 @@
+{
+ "time_local": "2026-10-27 09:51 NZDT",
+ "search_mode": "hybrid_rerank",
+ "min_coverage": 0.05,
+ "coverage_strip_doc_refs": false,
+ "gate": "coverage",
+ "gate_threshold": 0.0,
+ "generator": "deepseek-flash (generator role only; no model judging)",
+ "results": {
+  "block2_test": {
+   "n_answerable": 214,
+   "n_U2": 31,
+   "correct_refusal_U2(已见过)": "31/31 = 1.000",
+   "correct_refusal_OOC_new": "0/0 = 待测",
+   "false_refusal_answerable": "51/214 = 0.238",
+   "false_refusal_reasons": {
+    "生成答案中的引文未通过原文校验": 19,
+    "生成模型判定证据不足": 30,
+    "生成答案未给出原文引文": 2
+   },
+   "llm_calls": 241,
+   "llm_ok": 241,
+   "llm_failures": {
+    "ok": 241
+   },
+   "tokens_total": 153741,
+   "latency_ms_mean": 945,
+   "latency_ms_p50": 930,
+   "latency_ms_p95": 1302,
+   "answers_with_no_quote": 59,
+   "citation_verbatim_pass(quotes)": "333/353 = 0.943",
+   "quote_precision(verified quotes from gold chunk)": "322/333 = 0.967",
+   "citation_precision(program citations, non-refused answerable, 口径A)": "169/385 = 0.439",
+   "answerable_with_ge1_correct_citation": "163/214 = 0.762"
+  },
+  "lowoverlap_test": {
+   "n_answerable": 118,
+   "n_U2": 0,
+   "correct_refusal_U2": "0/0 = 待测",
+   "correct_refusal_OOC_new": "0/0 = 待测",
+   "false_refusal_answerable": "48/118 = 0.407",
+   "false_refusal_reasons": {
+    "证据不足": 3,
+    "生成答案中的引文未通过原文校验": 6,
+    "生成模型判定证据不足": 36,
+    "没有通过原文校验的引用": 3
+   },
+   "llm_calls": 112,
+   "llm_ok": 112,
+   "llm_failures": {
+    "ok": 112
+   },
+   "tokens_total": 66942,
+   "latency_ms_mean": 2406,
+   "latency_ms_p50": 946,
+   "latency_ms_p95": 1699,
+   "answers_with_no_quote": 36,
+   "citation_verbatim_pass(quotes)": "183/194 = 0.943",
+   "quote_precision(verified quotes from gold chunk)": "162/183 = 0.885",
+   "citation_precision(program citations, non-refused answerable, 口径A)": "70/164 = 0.427",
+   "answerable_with_ge1_correct_citation": "70/118 = 0.593"
+  }
+ }
+}

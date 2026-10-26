@@ -1,0 +1,79 @@
+{
+ "time_local": "2026-10-27 10:11 NZDT",
+ "mode": "hybrid_rerank",
+ "S1_t": 0.94,
+ "results": {
+  "block2_answerable": {
+   "n": 214,
+   "S1_A_vs_7818948_一致(refusal,n_cit,n_cit_ok,S1)": "214/214 = 1.000",
+   "S1_strip_A_vs_B_same_chunk_ids_and_refusal(this rerun)": "214/214 = 1.000",
+   "S1_refused": "11/214 = 0.051",
+   "current0.5_口径A_refused": "23/214 = 0.107",
+   "mcnemar_refused(a=current0.5_A,b=S1)": {
+    "b01": 6,
+    "b10": 18,
+    "n_discordant": 24,
+    "p_value": 0.022655844688415527
+   },
+   "citation_precision_S1(口径A)": "204/480 = 0.425",
+   "citation_precision_current0.5(口径A)": "188/359 = 0.524",
+   "citation_precision_diff_ci(b=S1 - a=current0.5, 口径A)": {
+    "diff": -0.09867688022284121,
+    "ci": [
+     -0.1268498942917547,
+     -0.07110389610389611
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_current0.5(口径A)": "179/214 = 0.836"
+  },
+  "lowoverlap": {
+   "n": 118,
+   "S1_A_vs_7818948_一致(refusal,n_cit,n_cit_ok,S1)": "118/118 = 1.000",
+   "S1_strip_A_vs_B_same_chunk_ids_and_refusal(this rerun)": "118/118 = 1.000",
+   "S1_refused": "47/118 = 0.398",
+   "current0.5_口径A_refused": "118/118 = 1.000",
+   "mcnemar_refused(a=current0.5_A,b=S1)": {
+    "b01": 0,
+    "b10": 71,
+    "n_discordant": 71,
+    "p_value": 8.470329472543003e-22
+   },
+   "citation_precision_S1(口径A)": "64/179 = 0.358",
+   "citation_precision_current0.5(口径A)": "0/0 = 待测",
+   "citation_precision_diff_ci(b=S1 - a=current0.5, 口径A)": {
+    "diff": null,
+    "ci": null
+   },
+   "ge1_correct_current0.5(口径A)": "0/118 = 0.000"
+  },
+  "ooc_new": {
+   "n": 51,
+   "S1_A_vs_7818948_一致(refusal,n_cit,n_cit_ok,S1)": "51/51 = 1.000",
+   "S1_strip_A_vs_B_same_chunk_ids_and_refusal(this rerun)": "51/51 = 1.000",
+   "S1_refused": "51/51 = 1.000",
+   "current0.5_口径A_refused": "47/51 = 0.922",
+   "mcnemar_refused(a=current0.5_A,b=S1)": {
+    "b01": 4,
+    "b10": 0,
+    "n_discordant": 4,
+    "p_value": 0.125
+   }
+  },
+  "U2_已见过": {
+   "n": 31,
+   "S1_A_vs_7818948_一致(refusal,n_cit,n_cit_ok,S1)": "31/31 = 1.000",
+   "S1_strip_A_vs_B_same_chunk_ids_and_refusal(this rerun)": "31/31 = 1.000",
+   "S1_refused": "31/31 = 1.000",
+   "current0.5_口径A_refused": "31/31 = 1.000",
+   "mcnemar_refused(a=current0.5_A,b=S1)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  }
+ }
+}
