@@ -1,0 +1,60 @@
+# Block 2 报告（检索：关键词 / 向量 / 混合 / 混合+重排）
+
+题集 `reports/questions_block2.jsonl` 已在跑评测**之前**冻结提交（cb65e05）。评测只用 test 划分，dev 划分没有用来调参。全部问题都不含条文号或标准号（构建时已过滤），因此本报告测的是检索能力，而不是条号路由。所有主要指标都由程序判定。
+运行：`python -m tushen_kb.eval.run_block2`，2026-10-27 05:03 NZDT，结果见 `reports/eval_block2.json`。
+
+## 题集（生成模型 deepseek-flash；435 次调用，435 次成功，共 75541 tokens）
+| 类型 | test | dev | 过滤情况 |
+|---|---|---|---|
+| T2 原句定位 | 88 | 32 | 候选 121，因 gold 校验去掉 1 |
+| T3 模型出题 | 31 | 7 | 生成 80；去掉照抄/含编号 27、回译 4（共检 53）、闭卷泄漏 11（共检 49） |
+| T4 表格单元格 | 34 | 4 | 候选 44，去掉 0（去掉纯数字行键、□、占位值） |
+| T5 禁止性条款 | 25 | 8 | 候选 35（去掉代词/泛指主语） |
+| P 改写 | 36 | 10 | 生成 199；去掉照抄/含编号 150、回译 1 |
+| U2 库外问题 | 31 | 9 | 提出 50；去掉无法解析 7、术语在语料库中出现 2 |
+另有去重去掉 10 题。
+
+## 四种模式（test 中可回答题 n=214，U2 n=31）
+| 模式 | Recall@5 | MRR@10 | U2 正确拒答 | 误拒 | 引用精确率 | 至少 1 条正确引用 |
+|---|---|---|---|---|---|---|
+| keyword (BM25) | 192/214=0.897 | 162.93/214=0.761 | 27/31 | 16/214 | 173/424=0.408 | 169/214 |
+| vector | 162/214=0.757 | 119.52/214=0.559 | 31/31 | 43/214 | 123/289=0.426 | 123/214 |
+| hybrid (RRF) | 190/214=0.888 | 150.40/214=0.703 | 31/31 | 26/214 | 149/374=0.398 | 149/214 |
+| hybrid_rerank | 208/214=0.972 | 188.57/214=0.881 | 31/31 | 23/214 | 188/359=0.524 | 179/214 |
+
+配对比较，每次只改一个变量。Recall@5 用精确 McNemar 检验（b01=A 错 B 对），差值给出配对 bootstrap 95% CI：
+- keyword→hybrid：15:17，p=0.86，CI [-0.061, 0.042]，无显著差异。MRR 差 -0.059，CI [-0.098, -0.020]，显著变差。
+- vector→hybrid：30:2，p=2.5e-7，CI [0.084, 0.178]，显著。
+- hybrid→hybrid_rerank：19:1，p=4.0e-5，CI [0.047, 0.126]，显著。MRR 差 +0.178，CI [0.132, 0.223]。
+- 引用精确率（聚类 bootstrap）：hybrid→rerank 差 +0.125，CI [0.090, 0.160]，显著。keyword→hybrid 差 -0.010，CI [-0.043, 0.022]，无显著差异。
+- 误拒（McNemar）：keyword→hybrid 12:2，p=0.013，hybrid 误拒更多。hybrid→rerank 1:4，p=0.38。
+
+按重叠度分层的 Recall@5：
+| 分层 | keyword | hybrid_rerank |
+|---|---|---|
+| 高 | 155/163 | 160/163 |
+| 中 | 37/47 | 44/47 |
+| 低 | 0/4 | 4/4 |
+
+低重叠层只有 4 题，样本太小，不下结论。
+
+改写稳健性（P 与其源题配对，n=35）：
+| 模式 | 源题 Recall@5 | 改写题 Recall@5 | McNemar |
+|---|---|---|---|
+| keyword | 33/35 | 27/35 | p=0.031，显著下降 |
+| vector | 25/35 | 26/35 | — |
+| hybrid | 30/35 | 29/35 | — |
+| hybrid_rerank | 34/35 | 34/35 | — |
+
+## 失败归因（top-5 未命中，每题只记一个主因）
+- keyword 共 22 题：chunk_boundary 6，unattributed（词汇鸿沟）16。
+- vector 共 52 题：parse_error 1，chunk_boundary 23，vector_miss 28。
+- hybrid 共 24 题：parse_error 1，chunk_boundary 14，vector_miss 3，fusion_loss 6。
+- hybrid_rerank 共 6 题：chunk_boundary 3，vector_miss 1，fusion_loss 1，rerank_error 1。
+- tokenization 和 label_error 在所有模式下都是 0。
+
+## 资源
+CPU 4 线程。峰值 RSS 1597MB（两个模型同时加载）。每题检索耗时：keyword 2.6ms，vector 0.9ms，hybrid 3.6ms，hybrid_rerank 2188ms。整次评测耗时 545s。
+
+## 待测
+需要模型判定的研究（Judge2 gemini-3.8-flash）在 Block 2 中还没有跑。route_only_citations 变量、dev 阈值校准、更大的低重叠样本也都待测。
