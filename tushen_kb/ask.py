@@ -28,9 +28,11 @@ EXPLICIT_CLAUSE = re.compile(r"第\s*((?:[A-Z]|\d{1,2})(?:\.\d{1,3}){1,4})\s*条
 class AskConfig:
     search: SearchConfig = field(default_factory=SearchConfig)
     n_evidence: int = 3
-    # frozen by the dev-only calibration rule (reports/threshold_calibration_dev.json, rule in 807a93d);
-    # was 0.5 before.  NOTE: the rule weights 88 answerable vs 9 U2 dev questions equally per error.
-    min_coverage: float = 0.05
+    # default restored to 0.5.  The dev-only calibration (rule 807a93d, result
+    # reports/threshold_calibration_dev.json, frozen in 72a8b5a) picked 0.05, but on test that
+    # gives U2 correct refusal 4/31, so 0.05 is NOT a safe default.  At 0.5 the low-overlap
+    # test set is falsely refused 118/118.  Refusal is an unsolved limitation, not tuned here.
+    min_coverage: float = 0.5
     # chunk kinds allowed as CITED evidence.  条文说明 (commentary) is explanatory, not the
     # normative text, so by default it may appear in evidence but is never cited.
     cite_kinds: tuple = ("clause", "table", "text")
