@@ -92,6 +92,17 @@ python -m tushen_kb.cli search "消防电梯前室面积" --mode hybrid_rerank
 | hybrid_rerank | hybrid 前 20 名用 bge-reranker-base 交叉编码重排 |
 | bm25_rerank | keyword（BM25）前 20 名用同一个 reranker 重排；用于把「加 reranker」和「加向量召回」两个因素拆开 |
 
+**rerank 默认关闭。** 默认检索模式是 `keyword`：`tushen_kb/search.py` 中 `SearchConfig.mode = "keyword"`。/ask 通过 `tushen_kb/ask.py` 的 `AskConfig.search` 使用同一个默认值，CLI 的 `--mode` 默认也是 `keyword`。需要显式设置 `mode="hybrid_rerank"` 或 `"bm25_rerank"` 才会启用 rerank；候选数由 `SearchConfig.rerank_n = 20` 控制。
+
+**rerank 延迟实测**（`reports/rerank_latency.json`，脚本 `tushen_kb/eval/bench_rerank.py`）：
+- 环境：Intel(R) Xeon(R) Processor，8 个逻辑 CPU；torch 4 线程；内存 15.6GB；无 GPU。
+- 模型：bge-reranker-base，k = 20 个候选，batch 8。
+- 样本：n = 327 条查询（Block 2 + 低重叠 test 可回答题），前 5 条热身不计。
+- 结果：
+  - 仅 rerank：中位数 2310 ms，p95 3822 ms。
+  - 完整 search：hybrid 中位数 14 ms / p95 23 ms；hybrid_rerank 中位数 2317 ms / p95 3838 ms。
+- 本项目里所有关于 rerank 的结论，都要连同这个延迟代价一起看。
+
 标准号过滤与条文号路由在四种模式中完全一致。模型权重与向量（SQLite 中 `vectors` 表）不入库；未构建向量时 `/search` 的向量类模式返回 HTTP 503。
 
 ## 引用精度修复（单变量、同一冻结题集 `reports/questions_block1.jsonl`）

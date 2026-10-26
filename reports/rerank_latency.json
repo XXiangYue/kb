@@ -1,0 +1,29 @@
+{
+ "time_local": "2026-10-27 07:51 NZDT",
+ "hardware": {
+  "cpu_model": "Intel(R) Xeon(R) Processor",
+  "logical_cpus": 8,
+  "torch_threads": 4,
+  "ram_total_GB": 15.6,
+  "gpu": "none (CPU only)"
+ },
+ "reranker": "BAAI/bge-reranker-base",
+ "candidates_k": 20,
+ "batch": 8,
+ "n_queries": 327,
+ "warmup_excluded": 5,
+ "rerank_only_ms": {
+  "median": 2309.6,
+  "p95": 3822.0,
+  "mean": 2367.7
+ },
+ "search_hybrid_ms": {
+  "median": 14.2,
+  "p95": 22.7
+ },
+ "search_hybrid_rerank_ms": {
+  "median": 2317.4,
+  "p95": 3837.5
+ },
+ "peak_rss_MB": 1607
+}

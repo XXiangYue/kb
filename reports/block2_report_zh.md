@@ -218,3 +218,19 @@ test 结果（n=118，全部是 L 型，全部可回答，没有 U2；`reports/e
   - **当前默认（覆盖率 0.5）在同一 dev 上**：误拒 37/88，误答 1/47，cost 0.527。
   - **成本比敏感性（仅供参考，不用于选择）**：按 3:1 计，最优会变成 S1 t = 0.82（误拒 10/88，误答 1/47）。所以 t 的选择对成本比敏感。
   - 现象：t = 0.94 时 S1 在 dev 上把 OOC 题全部拒掉了，阈值位于高分区。dev 语料外只有 47 题，这个 0/47 的上界并不紧。
+
+## rerank 延迟与默认开关（主管要求：rerank 结论须附延迟）
+- **默认开关：关闭。**
+  - `tushen_kb/search.py` 中 `SearchConfig.mode` 默认为 `"keyword"`。
+  - `AskConfig.search`（`tushen_kb/ask.py`）和 CLI 的 `--mode` 也默认为 `keyword`。
+  - 启用需要设 `mode="hybrid_rerank"` 或 `"bm25_rerank"`，候选数为 `rerank_n = 20`。
+  - 本报告中带 rerank 的评测都是显式指定的模式。
+- **单独测量**（`reports/rerank_latency.json`）：
+  - 硬件：Intel(R) Xeon(R) Processor，8 个逻辑 CPU，torch 4 线程，内存 15.6GB，无 GPU。
+  - 模型与查询：bge-reranker-base，k = 20，batch 8；n = 327 条查询，前 5 条热身已排除；没有做记忆化，测量时也没有其他重任务并行。
+  - 结果：
+    - 仅 rerank：中位数 2310 ms，p95 3822 ms，均值 2368 ms。
+    - hybrid 完整检索：中位数 14 ms，p95 23 ms。
+    - hybrid_rerank 完整检索：中位数 2317 ms，p95 3838 ms。
+    - 峰值 RSS 1607MB。
+- 解读：rerank 带来的检索增益，代价是在这台 CPU 上每条查询多约 2.3 秒（中位数）。
