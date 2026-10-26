@@ -65,5 +65,6 @@
    }
   ]
  },
- "retry_note": "首轮失败的调用按原样重试（同模型、同 prompt），被替换的失败记录保存在 judgments_block1_v2_superseded_failures.jsonl，其调用次数与 token 计入上方统计。"
+ "retry_note": "首轮失败的调用按原样重试（同模型、同 prompt），被替换的失败记录保存在 judgments_block1_v2_superseded_failures.jsonl，其调用次数与 token 计入上方统计。",
+ "notes_agreement": "Judge agreement / kappa is INTERNAL DIAGNOSTICS ONLY, not an external metric. judge2 = gemini-3.8-flash only; backup gpt-5.6-luna removed and banned (relay returned gpt-5.6-terra, suspected hidden prompt injection)."
 }

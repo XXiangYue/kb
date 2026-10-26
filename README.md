@@ -38,7 +38,7 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 |---|---|---|---|---|
 | 生成 | DeepSeek | deepseek | deepseek-flash | `DEEPSEEK_API_KEY` |
 | 裁判 1 | 小米 MiMo | xiaomi-mimo | mimo-v2.6-flash | `MIMO_API_KEY` |
-| 裁判 2 | uuapi（OpenAI 兼容，`https://uuapi.io/v1`） | google | gemini-3.8-flash（timeout 180s，并发 ≤2，指数退避）；备用 gpt-5.6-luna（openai 族，`UUAPI_API_KEY`）**仅人工启用、程序从不自动切换**，且生成/出题模型为 OpenAI 族时禁用 | `NEW_API_KEY_2` |
+| 裁判 2 | uuapi（OpenAI 兼容，`https://uuapi.io/v1`） | google | gemini-3.8-flash（timeout 180s，并发 ≤2，指数退避）。**只用这一个模型，从不切换**；持续失败时报告覆盖率 x/N。原备用裁判 gpt-5.6-luna 已删除并禁用：该中转返回的模型名是 gpt-5.6-terra，疑似隐藏提示注入（配置校验会拒绝该模型及任何 backup_models） | `NEW_API_KEY_2` |
 
 - 配置校验：任何裁判（含回退模型）的 family ≠ 生成模型 family，两位裁判 family 互不相同 → **DeepSeek 永远不能当裁判**。
 - key 只在调用时从环境读取，不写入日志/仓库/产物；无 key → 状态 `skipped`，绝不伪造结果。
@@ -70,7 +70,7 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 | 忠实性判定 vs 程序标签 | 11/12 | 11/12 |
 | 二选一（两种顺序） | 8/8 | 8/8 |
 
-双裁判一致率 **18/20，Cohen's κ = 0.765**（共同覆盖 20/20）。分歧项 2 条，同属 `b3a6e2c4d9a5`（DB32/T 4696 第 4.14 条）：原答案：MiMo 与 Gemini 分歧（MiMo「是」、Gemini「否」），程序标签记为「忠实」。该答案写了标准号「DB32/T 4696-2024」，而证据文本里没有这个标准号。篡改版（标准号 32→39）：MiMo 与 Gemini 分歧（MiMo「是」、Gemini「否」），程序标签记为「不忠实」。N=20 很小，κ 的置信区间很宽，只作参考，不作主指标。产物：`reports/judgments_block1_v2_records.jsonl`、`reports/judge_summary_block1_v2.json`。
+双裁判一致率 **18/20，Cohen's κ = 0.765**（**仅作内部诊断，不是对外指标**）（共同覆盖 20/20）。分歧项 2 条，同属 `b3a6e2c4d9a5`（DB32/T 4696 第 4.14 条）：原答案：MiMo 与 Gemini 分歧（MiMo「是」、Gemini「否」），程序标签记为「忠实」。该答案写了标准号「DB32/T 4696-2024」，而证据文本里没有这个标准号。篡改版（标准号 32→39）：MiMo 与 Gemini 分歧（MiMo「是」、Gemini「否」），程序标签记为「不忠实」。N=20 很小，κ 的置信区间很宽，只作参考，不作主指标。产物：`reports/judgments_block1_v2_records.jsonl`、`reports/judge_summary_block1_v2.json`。
 
 失败归因类别（block 2 起自动化）：解析错误 / 切块边界 / 分词 / 向量漏召 / 融合损失 / 重排错误 / 标注错误。
 

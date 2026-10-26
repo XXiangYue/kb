@@ -67,7 +67,7 @@ CPU 4 线程。峰值 RSS 1597MB（两个模型同时加载）。每题检索耗
 系统修复只报 ea328ba（cite_kinds：条文说明不作为引用）：404/719 → 404/710（McNemar 9:0，p=0.0039）。
 8f559d8 是口径变更（口径 B），口径 A 与口径 B 的对照见 README。它是否在看到结果之前决定，无法证实。
 ## 双裁判
-一致率 18/20，κ=0.765。两处分歧都写成「MiMo 与 Gemini 分歧，程序标签记为 忠实 / 不忠实」，不评价两个裁判的对错。
+一致率 18/20，κ=0.765，**仅作内部诊断，不是对外指标**。裁判 2 只用 gemini-3.8-flash；原备用 gpt-5.6-luna 已删除并禁用（中转返回 gpt-5.6-terra，疑似隐藏提示注入）。两处分歧都写成「MiMo 与 Gemini 分歧，程序标签记为 忠实 / 不忠实」，不评价两个裁判的对错。
 
 ## Step 2：bm25_rerank（BM25 + bge-reranker-base）
 同一冻结 test 集（可回答 214 题，U2 31 题），同一 AskConfig，只改检索模式。结果文件 `reports/eval_block2_bm25_rerank.json`（keyword / hybrid / hybrid_rerank 在同一进程中重跑，数字与 cc9b11c 一致）。

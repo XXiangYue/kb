@@ -35,15 +35,8 @@
       "backoff_base_s": 10.0,
       "timeout_s": 180.0,
       "min_max_tokens": 0,
-      "backup_models": [
-        {
-          "model": "gpt-5.6-luna",
-          "family": "openai",
-          "api_key_env": "UUAPI_API_KEY",
-          "_comment": "BACKUP ONLY, never automatic: switching requires reporting to the project owner first; forbidden if the generator / question-generating model is OpenAI family (enforced by family validation); never mix two judge-2 models within one agreement rate"
-        }
-      ],
-      "_history": "block-1 run2 used OpenRouter google/gemma-4-31b-it:free with fallback nvidia/nemotron-3-ultra-550b-a55b:free; those records are kept as historical in reports/historical/"
+      "_history": "block-1 run2 used OpenRouter google/gemma-4-31b-it:free with fallback nvidia/nemotron-3-ultra-550b-a55b:free; those records are kept as historical in reports/historical/",
+      "_removed": "backup judge gpt-5.6-luna removed 2026-10-27: its relay answered as a different model (gpt-5.6-terra), suspected hidden prompt injection; banned for any use. judge2 = gemini-3.8-flash only, never switched; failures are reported as coverage x/N."
     }
   ]
 }

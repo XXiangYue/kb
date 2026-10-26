@@ -42,12 +42,9 @@ class ModelSpec:
     backoff_base_s: float = 1.0
     min_max_tokens: int = 0
     timeout_s: float = 60.0
-    # backup_models are NEVER used automatically: switching requires explicit approval and a config
-    # change; they are listed only so validation can check them (family rules) in advance.
-    backup_models: list | None = None
 
     def families(self) -> list[str]:
-        fs = [self.family] + [f.get("family") for f in (self.fallback_models or []) + (self.backup_models or [])]
+        fs = [self.family] + [f.get("family") for f in (self.fallback_models or [])]
         return [f.lower() for f in fs if f]
 
     @property
@@ -65,7 +62,14 @@ class ModelSpec:
         return "ready"
 
 
+# Banned outright (any role, any use): the gpt-5.6-luna relay answered as "gpt-5.6-terra"
+# (suspected hidden prompt injection).  There is no backup judge any more.
+BANNED_MODELS = {"gpt-5.6-luna", "gpt-5.6-terra"}
+
+
 def _spec(d: dict) -> ModelSpec:
+    if "backup_models" in d:
+        raise ConfigError(f"{d.get('role')}: backup_models removed - judge 2 is a single model, never switched")
     fields = ModelSpec.__dataclass_fields__
     return ModelSpec(**{k: v for k, v in d.items() if k in fields and v is not None or k in
                         ("role", "provider", "family", "base_url", "model", "api_key_env")})
@@ -81,6 +85,10 @@ def load_models(path: Path = MODELS_CONFIG) -> tuple[ModelSpec, list[ModelSpec]]
 
 def validate(gen: ModelSpec, judges: list[ModelSpec]) -> None:
     """judge families (incl. fallbacks) must differ from the generator family and from each other."""
+    for m in [gen] + list(judges):
+        names = {m.model} | {f.get("model") for f in (m.fallback_models or [])}
+        if names & BANNED_MODELS:
+            raise ConfigError(f"{m.role}: banned model {sorted(names & BANNED_MODELS)}")
     gfam = (gen.family or "").lower()
     seen: dict[str, str] = {}
     for j in judges:
@@ -88,9 +96,11 @@ def validate(gen: ModelSpec, judges: list[ModelSpec]) -> None:
             continue
         if not j.family:
             raise ConfigError(f"{j.role}: family is required")
-        for f in (j.fallback_models or []) + (j.backup_models or []):
+        if j.role == "judge2" and j.fallback_models:
+            raise ConfigError("judge2: no fallback/backup models - one model per agreement rate")
+        for f in (j.fallback_models or []):
             if not f.get("family") or not f.get("model"):
-                raise ConfigError(f"{j.role}: fallback/backup model needs model+family")
+                raise ConfigError(f"{j.role}: fallback model needs model+family")
         for fam in j.families():
             if gfam and fam == gfam:
                 raise ConfigError(f"{j.role}: judge family '{fam}' equals generator family — not allowed")

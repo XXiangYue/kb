@@ -151,7 +151,7 @@ def _load_recs(tag: str) -> dict:
 
 def retry(role: str, tag: str, rounds: int, wait_s: float):
     """Re-run ONLY failed judgments of one role with the same model + prompt.
-    Never switches model (backup models are manual-only)."""
+    Never switches model (there is no backup judge; failures are reported as coverage x/N)."""
     lines = [json.loads(l) for l in open(ITEMS, encoding="utf-8")]
     meta, items = lines[0]["_meta"], lines[1:]
     assert meta["faith_prompt"] == J.FAITH_PROMPT and meta["choice_prompt"] == J.CHOICE_PROMPT, "prompts changed"

@@ -193,12 +193,18 @@ def test_verdict_parsing():
     assert _parse_choice("Analysis of options") is None
 
 
-def test_backup_judge_forbidden_when_generator_is_openai():
+def test_banned_and_backup_judges_rejected():
+    from tushen_kb.llm import _spec
     j2 = spec("judge2", "uuapi", "google")
-    j2.backup_models = [{"model": "gpt-x", "family": "openai"}]
+    j2.model = "gpt-5.6-luna"
     with pytest.raises(ConfigError):
-        validate(spec("generator", "openai", "openai"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
-    validate(spec("generator", "deepseek", "deepseek"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
+        validate(spec("generator", "deepseek", "deepseek"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
+    j2 = spec("judge2", "uuapi", "google")
+    j2.fallback_models = [{"model": "gpt-x", "family": "openai"}]
+    with pytest.raises(ConfigError):
+        validate(spec("generator", "deepseek", "deepseek"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
+    with pytest.raises(ConfigError):
+        _spec({"role": "judge2", "model": "gemini-3.8-flash", "backup_models": [{"model": "m", "family": "f"}]})
 
 
 def test_config_judge2_is_uuapi_gemini():
