@@ -28,6 +28,7 @@ QFILE = REPORTS / "questions_block1.jsonl"
 # variable name -> (old value, new value).  Everything else stays at AskConfig defaults.
 VARIABLES = {
     "cite_kinds": (("clause", "table", "text", "commentary"), ("clause", "table", "text")),
+    "coverage_strip_doc_refs": (False, True),
 }
 
 
@@ -77,7 +78,7 @@ def main():
                                  [p["n_ok"] for p in pb], [p["n_cit"] for p in pb])
     rep = {"time_local": time.strftime("%Y-%m-%d %H:%M %Z"), "question_file": str(QFILE.relative_to(ROOT)),
            "n_T1_test": len(test), "n_U_test": len(u_test), "variable": a.variable,
-           "A_old": {"value": list(old), **sa}, "B_new": {"value": list(new), **sb},
+           "A_old": {"value": old, **sa}, "B_new": {"value": new, **sb},
            "paired": {"mcnemar_exact(per-question all-citations-precise)": mc,
                       "bootstrap_precision_diff_B_minus_A": bs,
                       "label": significance_label(mc["p_value"], bs["ci"])},

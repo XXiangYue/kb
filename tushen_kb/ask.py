@@ -17,7 +17,7 @@ from typing import Callable
 
 from .cite import format_ref, locate, pick_quote, verify_citation, verify_quote
 from .llm import count_tokens
-from .search import SearchConfig, resolve_docs, search
+from .search import STD_IN_QUERY, SearchConfig, resolve_docs, search
 from .store import Store
 from .tokenize import content_tokens
 
@@ -32,6 +32,9 @@ class AskConfig:
     # chunk kinds allowed as CITED evidence.  条文说明 (commentary) is explanatory, not the
     # normative text, so by default it may appear in evidence but is never cited.
     cite_kinds: tuple = ("clause", "table", "text")
+    # compute evidence coverage on the query with document references removed (《title》, corpus titles,
+    # standard codes, 第x条): otherwise neighbours match only the title words and get cited.
+    coverage_strip_doc_refs: bool = True
 
 
 @dataclass
@@ -42,6 +45,14 @@ class ContextBlock:
 
 
 ContextHook = Callable[[str, dict], list[ContextBlock]]
+
+
+def strip_doc_refs(query: str, titles: list[str]) -> str:
+    q = re.sub(r"《[^》]*》", " ", query)
+    for t in sorted((t for t in titles if t), key=len, reverse=True):
+        q = q.replace(t, " ")
+    q = STD_IN_QUERY.sub(" ", q)
+    return EXPLICIT_CLAUSE.sub(" ", q)
 
 
 def _coverage(query: str, text: str) -> float:
@@ -57,7 +68,8 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
     cfg = cfg or AskConfig()
     t0 = time.perf_counter()
     trace: dict = {"config": {"search": asdict(cfg.search), "n_evidence": cfg.n_evidence,
-                              "min_coverage": cfg.min_coverage, "cite_kinds": list(cfg.cite_kinds)},
+                              "min_coverage": cfg.min_coverage, "cite_kinds": list(cfg.cite_kinds),
+                              "coverage_strip_doc_refs": cfg.coverage_strip_doc_refs},
                    "stages": [], "context_log": [], "token_counter": "cjk_char+ascii_word estimate"}
 
     def stage(name, **kw):
@@ -88,8 +100,10 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
     # 3. evidence gate
     docs = {d["doc_id"]: d for d in store.docs()}
     evidence = []
+    cov_query = strip_doc_refs(query, [d["title"] for d in docs.values()]) if cfg.coverage_strip_doc_refs else query
+    trace["coverage_query"] = cov_query
     for h in hits[:cfg.n_evidence]:
-        cov = _coverage(query, h["text"]) if h.get("route") != "clause_route" else 1.0
+        cov = _coverage(cov_query, h["text"]) if h.get("route") != "clause_route" else 1.0
         evidence.append({"chunk_id": h["chunk_id"], "doc_id": h["doc_id"], "kind": h["kind"],
                          "clause_no": h["clause_no"], "page_start": h["page_start"], "page_end": h["page_end"],
                          "char_start": h["char_start"], "char_end": h["char_end"], "score": h["score"],

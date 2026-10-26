@@ -1,0 +1,49 @@
+{
+ "time_local": "2026-10-27 04:09 NZDT",
+ "question_file": "reports/questions_block1.jsonl",
+ "n_T1_test": 396,
+ "n_U_test": 30,
+ "variable": "coverage_strip_doc_refs",
+ "A_old": {
+  "value": false,
+  "citation_precision_T1": "404/710 = 0.569",
+  "false_refusal_T1_test": "0/396 = 0.000",
+  "correct_refusal_U_test": "30/30 = 1.000",
+  "questions_all_citations_precise": "237/396 = 0.598",
+  "imprecise_citations_by_kind": {
+   "clause": 134,
+   "text": 172
+  }
+ },
+ "B_new": {
+  "value": true,
+  "citation_precision_T1": "404/532 = 0.759",
+  "false_refusal_T1_test": "0/396 = 0.000",
+  "correct_refusal_U_test": "30/30 = 1.000",
+  "questions_all_citations_precise": "300/396 = 0.758",
+  "imprecise_citations_by_kind": {
+   "clause": 101,
+   "text": 27
+  }
+ },
+ "paired": {
+  "mcnemar_exact(per-question all-citations-precise)": {
+   "b01": 100,
+   "b10": 37,
+   "n_discordant": 137,
+   "p_value": 6.990213957185692e-08
+  },
+  "bootstrap_precision_diff_B_minus_A": {
+   "diff": 0.19038441173355924,
+   "ci": [
+    0.15166845247206484,
+    0.22842042795239004
+   ],
+   "iters": 2000,
+   "seed": 0,
+   "unit": "question (cluster bootstrap)"
+  },
+  "label": "显著"
+ },
+ "shared_base_overrides": {}
+}

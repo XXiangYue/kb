@@ -84,3 +84,9 @@ def test_commentary_never_cited_by_default(store):
     assert any(e["kind"] == "commentary" for e in new["evidence"])  # still visible as evidence
     assert not any(c["chunk_id"].split(":")[1] == "commentary" for c in new["citations"])
     assert any(c["chunk_id"].split(":")[1] == "commentary" for c in old["citations"]) or old["refused"]
+
+
+def test_strip_doc_refs():
+    from tushen_kb.ask import strip_doc_refs
+    q = strip_doc_refs("《建筑防火通用规范》GB 55037-2022 第4.1.2条 防火分区面积", ["建筑防火通用规范"])
+    assert "建筑防火" not in q and "55037" not in q and "4.1.2" not in q and "防火分区面积" in q
