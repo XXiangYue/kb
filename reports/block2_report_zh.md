@@ -68,3 +68,28 @@ CPU 4 线程。峰值 RSS 1597MB（两个模型同时加载）。每题检索耗
 8f559d8 是口径变更（口径 B），口径 A 与口径 B 的对照见 README。它是否在看到结果之前决定，无法证实。
 ## 双裁判
 一致率 18/20，κ=0.765。两处分歧都写成「MiMo 与 Gemini 分歧，程序标签记为 忠实 / 不忠实」，不评价两个裁判的对错。
+
+## Step 2：bm25_rerank（BM25 + bge-reranker-base）
+同一冻结 test 集（可回答 214 题，U2 31 题），同一 AskConfig，只改检索模式。结果文件 `reports/eval_block2_bm25_rerank.json`（keyword / hybrid / hybrid_rerank 在同一进程中重跑，数字与 cc9b11c 一致）。
+
+| 模式 | Recall@5 | MRR@10 | 引用精度（口径 B） | ≥1 条正确引用 | 误拒 | U2 正确拒答 |
+|---|---|---|---|---|---|---|
+| keyword | 192/214 | 162.93/214 = 0.761 | 173/424 = 0.408 | 169/214 | 16/214 | 27/31 |
+| bm25_rerank | 208/214 | 187.45/214 = 0.876 | 186/372 = 0.500 | 177/214 | 23/214 | 31/31 |
+| hybrid_rerank | 208/214 | 188.57/214 = 0.881 | 188/359 = 0.524 | 179/214 | 23/214 | 31/31 |
+
+配对检验（n=214；McNemar b01=A 错 B 对，b10=A 对 B 错；bootstrap 2000 次）：
+
+| 对比 | Recall@5 McNemar | Recall@5 差 CI | MRR 差 [CI] | 引用精度差 [CI，按题聚类] | 误拒 McNemar |
+|---|---|---|---|---|---|
+| keyword→bm25_rerank | 19:3，p=0.00086，显著 | +0.075 [0.037, 0.117] | +0.115 [0.069, 0.158] 显著 | +0.092 [0.063, 0.121] 显著 | 9:2，p=0.065，无显著差异 |
+| bm25_rerank→hybrid_rerank | 2:2，p=1.0，无显著差异 | 0.000 [-0.019, 0.019] | +0.005 [-0.014, 0.025] 无显著差异 | +0.024 [0.005, 0.043] CI 不含 0 | 0:0 |
+
+（误拒 McNemar 的 b01 = A 不拒、B 误拒。）
+
+结论：
+- 在这套题上，Recall@5 / MRR 的提升主要来自 reranker。加不加向量召回（bm25_rerank→hybrid_rerank）在 Recall@5 和 MRR 上都没有显著差异。
+- 引用精度上 hybrid_rerank 比 bm25_rerank 高 0.024，CI 不含 0。但「≥1 条正确引用」的题级 McNemar 是 3:1，p=0.625，所以只能说引用条数更少、更准，不能说多答对了题。
+- 低重叠层这里只有 4 题（bm25_rerank 2/4，hybrid_rerank 4/4），**不下结论**，见 Step 3。
+- bm25_rerank 失败 6 题：rerank_error 2，chunk_boundary 1，unattributed 3。
+- 耗时：bm25_rerank 每题 2840ms，hybrid_rerank 2259ms。本次两个 rerank 模式同时跑，墙钟 1237s，峰值 RSS 1612MB。

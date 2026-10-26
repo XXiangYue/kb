@@ -47,7 +47,7 @@ def test_dense_modes_end_to_end(store):
     except dense.VectorsMissing:
         pytest.skip("models not downloaded")
     dense.build_vectors(store, batch=4)
-    for m in ("vector", "hybrid", "hybrid_rerank"):
+    for m in ("vector", "hybrid", "hybrid_rerank", "bm25_rerank"):
         hits = search(store, "消防电梯底坑的排水井容量是多少", SearchConfig(mode=m, k=3))
         assert hits and hits[0]["rank"] == 1
     # clause routing is applied identically in every mode

@@ -90,6 +90,7 @@ python -m tushen_kb.cli search "消防电梯前室面积" --mode hybrid_rerank
 | vector | bge-small-zh-v1.5 CLS 向量余弦（查询加 BGE 官方检索指令前缀），块文本与 BM25 索引同（表格前置表名），截断 512 token |
 | hybrid | keyword 池(50) + vector 池(50) 做 RRF(k=60) |
 | hybrid_rerank | hybrid 前 20 名用 bge-reranker-base 交叉编码重排 |
+| bm25_rerank | keyword（BM25）前 20 名用同一个 reranker 重排；用于把「加 reranker」和「加向量召回」两个因素拆开 |
 
 标准号过滤与条文号路由在四种模式中完全一致。模型权重与向量（SQLite 中 `vectors` 表）不入库；未构建向量时 `/search` 的向量类模式返回 HTTP 503。
 

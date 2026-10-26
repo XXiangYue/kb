@@ -32,3 +32,8 @@ def test_label_error():
 def test_fusion_loss_before_vector_miss():
     p, f = attribute("hybrid", [], Q, _d(rank_bm25_top50=1), None, 9)
     assert p == "fusion_loss" and "vector_miss" not in f
+
+
+def test_bm25_rerank_error():
+    p, _ = attribute("bm25_rerank", [], Q, _d(rank_bm25_top50=3), None, None)
+    assert p == "rerank_error"

@@ -4,6 +4,8 @@
   vector        bge-small-zh-v1.5 cosine over the same chunks           (block 2)
   hybrid        RRF(k=60) of the keyword pool and the vector pool       (block 2)
   hybrid_rerank hybrid top-N candidates re-ordered by bge-reranker-base (block 2)
+  bm25_rerank   keyword top-N candidates re-ordered by the same reranker  (block 2, vs keyword:
+                adds only the reranker; vs hybrid_rerank: only the candidate source differs)
 
 Standard-code filter and clause-number routing are applied identically in all
 modes (routing promotes exact clause-number hits to the top)."""
@@ -15,7 +17,7 @@ from dataclasses import dataclass, field
 from .store import Store
 from .tokenize import fts_query
 
-MODES = ("keyword", "vector", "hybrid", "hybrid_rerank")
+MODES = ("keyword", "vector", "hybrid", "hybrid_rerank", "bm25_rerank")
 CLAUSE_IN_QUERY = re.compile(r"(?<![\d.])((?:[A-Z]|\d{1,2})(?:\.\d{1,3}){1,4})(?![\d.])")
 STD_IN_QUERY = re.compile(r"(GB|DB\s*\d{2}|JGJ|CJJ|XF)\s*(/\s*T)?\s*(\d{3,6})(?:\s*[-—]\s*(\d{4}))?", re.I)
 
@@ -62,6 +64,8 @@ def search(store: Store, q: str, cfg: SearchConfig | None = None) -> list[dict]:
     doc_ids: list[str] = resolve_docs(store, q)[0] if cfg.std_filter else []
     if cfg.mode == "keyword":
         rows = _bm25_pool(store, q, cfg, doc_ids)
+    elif cfg.mode == "bm25_rerank":
+        rows = _rerank(q, _bm25_pool(store, q, cfg, doc_ids), cfg.rerank_n)
     elif cfg.mode == "vector":
         rows = _vector_pool(store, q, cfg, doc_ids)
     else:
@@ -139,7 +143,7 @@ def _rerank(q: str, rows: list[dict], n: int) -> list[dict]:
         return rows
     sc = dense.rerank_scores(q, [dense.passage_text(r) for r in head])
     for r, s, i in zip(head, sc, range(len(head))):
-        r["rank_hybrid"] = i + 1
+        r["rank_pre_rerank"] = i + 1
         r["score"] = s
         r["route"] = "rerank"
     head.sort(key=lambda r: -r["score"])

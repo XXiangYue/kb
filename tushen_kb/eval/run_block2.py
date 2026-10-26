@@ -21,7 +21,8 @@ the primary category is the first applicable in this order:
                     jieba tokens (gap >= 0.25); keyword mode, or hybrid modes when BOTH retrievers miss
   5 vector_miss     vector mode; or hybrid modes when BOTH BM25 and vector miss top-5
   6 fusion_loss     [hybrid modes] gold in BM25 or vector top-5 but not in hybrid top-5
-  7 rerank_error    [hybrid_rerank] gold in hybrid top-5, pushed out by the reranker
+  7 rerank_error    [hybrid_rerank] gold in hybrid top-5, pushed out by the reranker;
+                    [bm25_rerank] gold in BM25 top-5, pushed out by the reranker
   (for keyword mode a miss without a tokenization gap is "unattributed" = vocabulary gap)
   unattributed      none of the above (reported, not hidden)
 Usage: python -m tushen_kb.eval.run_block2
@@ -34,6 +35,7 @@ import resource
 import time
 from collections import Counter, defaultdict
 from dataclasses import replace
+from pathlib import Path
 
 from ..ask import AskConfig, _coverage, ask
 from ..ingest import ROOT
@@ -47,7 +49,9 @@ from .questions import stratum
 
 REPORTS = ROOT / "reports"
 QFILE = REPORTS / "questions_block2.jsonl"
-PAIRS = [("keyword", "hybrid"), ("vector", "hybrid"), ("hybrid", "hybrid_rerank"), ("keyword", "vector")]
+PAIRS = [("keyword", "hybrid"), ("vector", "hybrid"), ("hybrid", "hybrid_rerank"), ("keyword", "vector"),
+         ("keyword", "bm25_rerank"), ("bm25_rerank", "hybrid_rerank")]
+DEFAULT_MODES = ("keyword", "vector", "hybrid", "hybrid_rerank")
 CATS = ["parse_error", "label_error", "chunk_boundary", "tokenization", "vector_miss", "fusion_loss",
         "rerank_error", "unattributed"]
 
@@ -105,7 +109,12 @@ def attribute(mode, top, q, d, sq, rank_hybrid):
     ve5 = d["rank_vector_top50"] is not None and d["rank_vector_top50"] <= 5
     gap = d["substring_cov"] - d["token_cov"] >= 0.25
     hy5 = rank_hybrid is not None and rank_hybrid <= 5
-    if mode == "keyword":
+    if mode == "bm25_rerank":
+        if bm5:
+            flags.append("rerank_error")        # BM25 had it in top-5, the reranker pushed it out
+        elif gap:
+            flags.append("tokenization")
+    elif mode == "keyword":
         if gap:
             flags.append("tokenization")
     elif mode == "vector":
@@ -151,12 +160,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=str(ROOT / "data" / "tushen.sqlite"))
     ap.add_argument("--split", default="test")
+    ap.add_argument("--modes", default=",".join(DEFAULT_MODES))
+    ap.add_argument("--out", default="eval_block2")
+    ap.add_argument("--qfile", default=str(QFILE), help="frozen question file (default: block-2 set)")
     a = ap.parse_args()
     t_start = time.time()
+    modes = tuple(a.modes.split(","))
+    assert all(m in MODES for m in modes)
+    pairs = [(x, y) for x, y in PAIRS if x in modes and y in modes]
     store = Store(a.db)
     from .. import dense
     _memo(dense)
-    lines = [json.loads(l) for l in open(QFILE, encoding="utf-8")]
+    qfile = Path(a.qfile)
+    lines = [json.loads(l) for l in open(qfile, encoding="utf-8")]
     meta, qs = lines[0], lines[1:]
     test = [q for q in qs if q["split"] == a.split]
     ans = [q for q in test if q["answerable"]]
@@ -174,7 +190,7 @@ def main():
     diags = {q["qid"]: diag(store, q, allc, g.sq, tok_len) for q in ans}
     ranks, tops, per_q = {}, {}, defaultdict(dict)
     timing = {}
-    for mode in MODES:
+    for mode in modes:
         t0 = time.time()
         cfg = SearchConfig(mode=mode, k=10)
         rs, tp = [], []
@@ -186,13 +202,13 @@ def main():
         timing[mode] = round((time.time() - t0) / max(1, len(ans)) * 1000, 1)
     # failure attribution
     attr = {}
-    for mode in MODES:
+    for mode in modes:
         prim, flg = Counter(), Counter()
         for i, q in enumerate(ans):
             r = ranks[mode][i]
             if r is not None and r <= 5:
                 continue
-            p, f = attribute(mode, tops[mode][i], q, diags[q["qid"]], g.sq, ranks["hybrid"][i])
+            p, f = attribute(mode, tops[mode][i], q, diags[q["qid"]], g.sq, (ranks["hybrid"][i] if "hybrid" in ranks else None))
             prim[p] += 1
             flg.update(f)
             per_q[q["qid"]][mode] = {"rank": r, "primary": p, "flags": f}
@@ -202,7 +218,7 @@ def main():
                       "flags(any, multi-label)": {c: flg[c] for c in CATS if c != "unattributed"}}
     # /ask evidence-only: refusal + citation precision, same AskConfig except search mode
     askres = {}
-    for mode in MODES:
+    for mode in modes:
         cfg = AskConfig(search=SearchConfig(mode=mode))
         per = []
         for q in ans:
@@ -221,7 +237,7 @@ def main():
             "citation_precision(citations)": rate(sum(p["n_ok"] for p in per), sum(p["n_cit"] for p in per))["str"],
             "questions_with_>=1_correct_citation": rate(sum(p["n_ok"] > 0 for p in per), len(per))["str"]}
     ask_paired = {}
-    for A, B in PAIRS:
+    for A, B in pairs:
         pa, pb = askres[A]["per"], askres[B]["per"]
         ya = [p["n_ok"] > 0 for p in pa]
         yb = [p["n_ok"] > 0 for p in pb]
@@ -241,20 +257,20 @@ def main():
     idx = {q["qid"]: i for i, q in enumerate(ans)}
     pp = [(idx[q["src_qid"]], idx[q["qid"]]) for q in ans if q["type"] == "P" and q["src_qid"] in idx]
     para = {}
-    for mode in MODES:
+    for mode in modes:
         src = [ranks[mode][i] for i, _ in pp]
         par = [ranks[mode][j] for _, j in pp]
         para[mode] = {"source_Recall@5": recall_at_k(src, 5)["str"], "paraphrase_Recall@5": recall_at_k(par, 5)["str"],
                       "paired(source->paraphrase)": paired(src, par)}
     rep = {
-        "time_local": time.strftime("%Y-%m-%d %H:%M %Z"), "question_file": str(QFILE.relative_to(ROOT)),
-        "question_file_built": meta.get("built_local"), "split": a.split,
+        "time_local": time.strftime("%Y-%m-%d %H:%M %Z"), "question_file": str(qfile.resolve().relative_to(ROOT)),
+        "question_file_built": meta["_meta"].get("built_local") if "_meta" in meta else meta.get("built_local"), "split": a.split,
         "n_test_answerable": len(ans), "n_test_U2": len(u2),
         "n_test_by_type": dict(Counter(q["type"] for q in test)),
         "routing_triggered_by_decimal_in_question": rate(sum(d["routing_triggered"] for d in diags.values()), len(ans))["str"],
         "hit_definition": "rank of first chunk in the frozen acceptable set (<=3 chunks containing all gold spans)",
-        "retrieval": {m: summarize(ranks[m], ans) for m in MODES},
-        "retrieval_paired": {f"{A}->{B}": paired(ranks[A], ranks[B]) for A, B in PAIRS},
+        "retrieval": {m: summarize(ranks[m], ans) for m in modes},
+        "retrieval_paired": {f"{A}->{B}": paired(ranks[A], ranks[B]) for A, B in pairs},
         "ask_evidence_only": ask_summary, "ask_paired": ask_paired,
         "paraphrase_robustness": {"n_pairs": len(pp), **para},
         "failure_attribution": attr,
@@ -264,10 +280,10 @@ def main():
         "config": {"SearchConfig": SearchConfig().__dict__, "AskConfig_min_coverage": AskConfig().min_coverage,
                    "cite_kinds": list(AskConfig().cite_kinds)},
     }
-    (REPORTS / "eval_block2.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
-    with open(REPORTS / "eval_block2_per_question.jsonl", "w", encoding="utf-8") as f:
+    (REPORTS / f"{a.out}.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
+    with open(REPORTS / f"{a.out}_per_question.jsonl", "w", encoding="utf-8") as f:
         for i, q in enumerate(ans):
-            f.write(json.dumps({"qid": q["qid"], "type": q["type"], **{f"rank_{m}": ranks[m][i] for m in MODES},
+            f.write(json.dumps({"qid": q["qid"], "type": q["type"], **{f"rank_{m}": ranks[m][i] for m in modes},
                                 "diag": diags[q["qid"]], "failures": per_q.get(q["qid"], {})},
                                ensure_ascii=False) + "\n")
     print(json.dumps({k: rep[k] for k in ("n_test_answerable", "n_test_U2", "retrieval_paired", "ask_evidence_only",
