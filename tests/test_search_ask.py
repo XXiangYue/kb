@@ -24,9 +24,35 @@ def test_clause_route(store):
     assert hits[0]["clause_no"] == "3.2.1"
 
 
-def test_other_modes_not_implemented(store):
-    with pytest.raises(NotImplementedError):
-        search(store, "x", SearchConfig(mode="vector"))
+def test_vector_modes_need_vectors(store):
+    from tushen_kb.dense import VectorsMissing
+    for m in ("vector", "hybrid", "hybrid_rerank"):
+        with pytest.raises(VectorsMissing):
+            search(store, "消防电梯", SearchConfig(mode=m))
+
+
+def test_rrf_fusion_order():
+    from tushen_kb.search import _rrf
+    a = [{"rowid": 1}, {"rowid": 2}, {"rowid": 3}]
+    b = [{"rowid": 3}, {"rowid": 1}]
+    out = _rrf(a, b, 60)
+    assert [r["rowid"] for r in out] == [1, 3, 2]
+    assert out[0]["rank_bm25"] == 1 and out[0]["rank_vector"] == 2 and "rank_vector" not in out[2]
+
+
+def test_dense_modes_end_to_end(store):
+    from tushen_kb import dense
+    try:
+        dense._model_dir(dense.EMB_MODEL), dense._model_dir(dense.RERANK_MODEL)
+    except dense.VectorsMissing:
+        pytest.skip("models not downloaded")
+    dense.build_vectors(store, batch=4)
+    for m in ("vector", "hybrid", "hybrid_rerank"):
+        hits = search(store, "消防电梯底坑的排水井容量是多少", SearchConfig(mode=m, k=3))
+        assert hits and hits[0]["rank"] == 1
+    # clause routing is applied identically in every mode
+    hits = search(store, "第3.2.1条", SearchConfig(mode="hybrid_rerank", k=3))
+    assert hits[0]["route"] == "clause_route"
 
 
 def test_ask_answers_with_verified_citation(store):

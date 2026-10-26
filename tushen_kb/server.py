@@ -15,6 +15,7 @@ from pathlib import Path
 
 from .ask import AskConfig, ask
 from .ingest import ROOT, ingest_file, ingest_manifest
+from .dense import VectorsMissing
 from .search import SearchConfig, search
 from .store import Store
 
@@ -70,6 +71,8 @@ def make_server(db_path: str, host: str = "127.0.0.1", port: int = 8765) -> Thre
                 return self._send(404, {"error": "not found"})
             except NotImplementedError as e:
                 return self._send(501, {"error": str(e)})
+            except VectorsMissing as e:
+                return self._send(503, {"error": str(e)})
             except KeyError as e:
                 return self._send(400, {"error": f"missing field {e}"})
             except Exception as e:  # pragma: no cover

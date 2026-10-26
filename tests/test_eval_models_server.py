@@ -114,7 +114,7 @@ def test_server_roundtrip(store, tmp_path):
         req = urllib.request.Request(base + "/search", data=json.dumps({"q": "x", "mode": "vector"}).encode())
         with pytest.raises(urllib.error.HTTPError) as e:
             urllib.request.urlopen(req, timeout=10)
-        assert e.value.code == 501
+        assert e.value.code == 503  # vectors not built for the test store
     finally:
         srv.shutdown()
 

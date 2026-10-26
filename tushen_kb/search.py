@@ -1,6 +1,12 @@
-"""Retrieval.  Block 1 implements mode=keyword (FTS5 BM25 over jieba+bigram
-tokens).  vector / hybrid (RRF k=60) / hybrid_rerank are declared so the API
-and eval harness are stable, but raise NotImplementedError until block 2."""
+"""Retrieval modes (one variable changes between adjacent modes):
+
+  keyword       FTS5 BM25 over jieba+bigram tokens                     (block 1)
+  vector        bge-small-zh-v1.5 cosine over the same chunks           (block 2)
+  hybrid        RRF(k=60) of the keyword pool and the vector pool       (block 2)
+  hybrid_rerank hybrid top-N candidates re-ordered by bge-reranker-base (block 2)
+
+Standard-code filter and clause-number routing are applied identically in all
+modes (routing promotes exact clause-number hits to the top)."""
 from __future__ import annotations
 
 import re
@@ -21,6 +27,9 @@ class SearchConfig:
     clause_route: bool = True   # exact clause-number match is promoted to the top
     std_filter: bool = True     # a standard code in the query restricts to that doc
     kinds: tuple = ("clause", "commentary", "table", "text")
+    pool: int = 50              # candidates per retriever before fusion
+    rrf_k: int = 60
+    rerank_n: int = 20          # hybrid candidates passed to the cross-encoder
     extra: dict = field(default_factory=dict)
 
 
@@ -50,52 +59,111 @@ def search(store: Store, q: str, cfg: SearchConfig | None = None) -> list[dict]:
     cfg = cfg or SearchConfig()
     if cfg.mode not in MODES:
         raise ValueError(f"unknown mode {cfg.mode}")
-    if cfg.mode != "keyword":
-        raise NotImplementedError(f"mode={cfg.mode} 待实现（block 2）")
-    return _keyword(store, q, cfg)
+    doc_ids: list[str] = resolve_docs(store, q)[0] if cfg.std_filter else []
+    if cfg.mode == "keyword":
+        rows = _bm25_pool(store, q, cfg, doc_ids)
+    elif cfg.mode == "vector":
+        rows = _vector_pool(store, q, cfg, doc_ids)
+    else:
+        rows = _rrf(_bm25_pool(store, q, cfg, doc_ids), _vector_pool(store, q, cfg, doc_ids), cfg.rrf_k)
+        if cfg.mode == "hybrid_rerank":
+            rows = _rerank(q, rows, cfg.rerank_n)
+    if cfg.clause_route:
+        rows = _route(store, q, rows, doc_ids)
+    for i, r in enumerate(rows[:cfg.k]):
+        r["rank"] = i + 1
+    return rows[:cfg.k]
 
 
-def _keyword(store: Store, q: str, cfg: SearchConfig) -> list[dict]:
+def _bm25_pool(store: Store, q: str, cfg: SearchConfig, doc_ids: list[str]) -> list[dict]:
     fq = fts_query(q)
     if not fq:
         return []
-    doc_ids: list[str] = []
-    if cfg.std_filter:
-        doc_ids, _ = resolve_docs(store, q)
     where, args = ["chunks_fts MATCH ?"], [fq]
     if doc_ids:
         where.append("c.doc_id IN (%s)" % ",".join("?" * len(doc_ids)))
         args += doc_ids
     where.append("c.kind IN (%s)" % ",".join("?" * len(cfg.kinds)))
     args += list(cfg.kinds)
-    pool = max(cfg.k * 5, 50)
+    pool = max(cfg.k * 5, cfg.pool)
     sql = ("SELECT c.*, bm25(chunks_fts) AS bm FROM chunks_fts JOIN chunks c ON c.rowid = chunks_fts.rowid "
            f"WHERE {' AND '.join(where)} ORDER BY bm LIMIT {pool}")
     rows = [dict(r) for r in store.conn.execute(sql, args)]
     for r in rows:
         r["score"] = -r.pop("bm")  # higher is better
         r["route"] = "bm25"
-    if cfg.clause_route:
-        nos = set(CLAUSE_IN_QUERY.findall(q))
-        if nos:
-            routed = [r for r in rows if r["clause_no"] in nos and r["kind"] in ("clause", "table")]
-            # also fetch exact clause chunks that BM25 did not surface
-            have = {r["rowid"] for r in routed}
-            for no in nos:
-                sql2 = "SELECT c.* FROM chunks c WHERE c.clause_no=? AND c.kind IN ('clause','table')"
-                a2 = [no]
-                if doc_ids:
-                    sql2 += " AND c.doc_id IN (%s)" % ",".join("?" * len(doc_ids))
-                    a2 += doc_ids
-                for r in store.conn.execute(sql2 + " ORDER BY rowid", a2):
-                    if r["rowid"] not in have:
-                        d = dict(r)
-                        d["score"] = 0.0
-                        routed.append(d)
-                        have.add(d["rowid"])
-            for r in routed:
-                r["route"] = "clause_route"
-            rows = routed + [r for r in rows if r["rowid"] not in have]
-    for i, r in enumerate(rows[:cfg.k]):
-        r["rank"] = i + 1
-    return rows[:cfg.k]
+    return rows
+
+
+def _vector_pool(store: Store, q: str, cfg: SearchConfig, doc_ids: list[str]) -> list[dict]:
+    from . import dense
+    import numpy as np
+    ids, mat = dense.matrix(store)
+    sims = mat @ dense.embed_query(q)
+    allowed = {r[0] for r in store.conn.execute(
+        "SELECT rowid FROM chunks WHERE kind IN (%s)" % ",".join("?" * len(cfg.kinds))
+        + (" AND doc_id IN (%s)" % ",".join("?" * len(doc_ids)) if doc_ids else ""),
+        list(cfg.kinds) + list(doc_ids))}
+    out = []
+    for j in np.argsort(-sims):
+        rid = int(ids[j])
+        if rid in allowed:
+            r = store.chunk_by_rowid(rid)
+            r["score"] = float(sims[j])
+            r["route"] = "vector"
+            out.append(r)
+            if len(out) >= max(cfg.k * 5, cfg.pool):
+                break
+    return out
+
+
+def _rrf(a: list[dict], b: list[dict], k: int) -> list[dict]:
+    score: dict[int, float] = {}
+    rows: dict[int, dict] = {}
+    for lst, name in ((a, "bm25"), (b, "vector")):
+        for i, r in enumerate(lst):
+            score[r["rowid"]] = score.get(r["rowid"], 0.0) + 1.0 / (k + i + 1)
+            d = rows.setdefault(r["rowid"], dict(r))
+            d[f"rank_{name}"] = i + 1
+    out = sorted(rows.values(), key=lambda r: -score[r["rowid"]])
+    for r in out:
+        r["score"] = score[r["rowid"]]
+        r["route"] = "rrf"
+    return out
+
+
+def _rerank(q: str, rows: list[dict], n: int) -> list[dict]:
+    from . import dense
+    head, tail = rows[:n], rows[n:]
+    if not head:
+        return rows
+    sc = dense.rerank_scores(q, [dense.passage_text(r) for r in head])
+    for r, s, i in zip(head, sc, range(len(head))):
+        r["rank_hybrid"] = i + 1
+        r["score"] = s
+        r["route"] = "rerank"
+    head.sort(key=lambda r: -r["score"])
+    return head + tail
+
+
+def _route(store: Store, q: str, rows: list[dict], doc_ids: list[str]) -> list[dict]:
+    nos = set(CLAUSE_IN_QUERY.findall(q))
+    if not nos:
+        return rows
+    routed = [r for r in rows if r["clause_no"] in nos and r["kind"] in ("clause", "table")]
+    have = {r["rowid"] for r in routed}
+    for no in nos:  # also fetch exact clause chunks the retriever did not surface
+        sql2 = "SELECT c.* FROM chunks c WHERE c.clause_no=? AND c.kind IN ('clause','table')"
+        a2 = [no]
+        if doc_ids:
+            sql2 += " AND c.doc_id IN (%s)" % ",".join("?" * len(doc_ids))
+            a2 += doc_ids
+        for r in store.conn.execute(sql2 + " ORDER BY rowid", a2):
+            if r["rowid"] not in have:
+                d = dict(r)
+                d["score"] = 0.0
+                routed.append(d)
+                have.add(d["rowid"])
+    for r in routed:
+        r["route"] = "clause_route"
+    return routed + [r for r in rows if r["rowid"] not in have]

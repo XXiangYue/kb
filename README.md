@@ -74,6 +74,25 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 
 失败归因类别（block 2 起自动化）：解析错误 / 切块边界 / 分词 / 向量漏召 / 融合损失 / 重排错误 / 标注错误。
 
+## Block 2：向量 / 混合 / 重排（CPU）
+
+```bash
+uv pip install --python .venv/bin/python torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+uv pip install --python .venv/bin/python -r requirements-dense.txt
+bash scripts/download_models.sh        # BAAI/bge-small-zh-v1.5 + BAAI/bge-reranker-base（MIT），经 hf-mirror.com（当时 308 跳转到 huggingface.co），sha256 记于 reports/models_sha256.txt
+python -m tushen_kb.cli embed          # 754 个块全部嵌入，batch=16，实测 26.4 s，峰值 RSS 760 MB
+python -m tushen_kb.cli search "消防电梯前室面积" --mode hybrid_rerank
+```
+
+| mode | 与上一档相比只变一个变量 |
+|---|---|
+| keyword | FTS5 BM25（jieba + 二元组） |
+| vector | bge-small-zh-v1.5 CLS 向量余弦（查询加 BGE 官方检索指令前缀），块文本与 BM25 索引同（表格前置表名），截断 512 token |
+| hybrid | keyword 池(50) + vector 池(50) 做 RRF(k=60) |
+| hybrid_rerank | hybrid 前 20 名用 bge-reranker-base 交叉编码重排 |
+
+标准号过滤与条文号路由在四种模式中完全一致。模型权重与向量（SQLite 中 `vectors` 表）不入库；未构建向量时 `/search` 的向量类模式返回 HTTP 503。
+
 ## 引用精度修复（单变量、同一冻结题集 `reports/questions_block1.jsonl`）
 
 `python -m tushen_kb.eval.cite_ab --variable <名>`，结果在 `reports/cite_ab_<名>.json`。配对检验单位 = 题：McNemar 用「该题全部引用都精确」，引用精度差用按题聚类的 bootstrap 95% CI。

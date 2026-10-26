@@ -1,0 +1,12 @@
+289adf7ada1eb6b4afa7589a48a032d45a076cf2e46dcdb3b4cabc33be14f708  ./BAAI/bge-reranker-base/config.json
+ced967c45fd1902eb92716c9ceeca7c95a936770ea9db611f5a841b926e33fbd  ./BAAI/bge-reranker-base/model.safetensors
+cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865  ./BAAI/bge-reranker-base/sentencepiece.bpe.model
+d5469a60db23249c7f8945013d78df30b44b6bf686c6bb4740f4223f77b1b535  ./BAAI/bge-reranker-base/special_tokens_map.json
+9eb652ac4e40cc093272bbbe0f55d521cf67570060227109b5cdc20945a4489e  ./BAAI/bge-reranker-base/tokenizer.json
+a1d6bc8734a6f635dc158508bef000f8e2e5a759c7d92f984b2c86e5ff53425b  ./BAAI/bge-reranker-base/tokenizer_config.json
+3853a7979202c348751b753e36f579c41d8da7d36af617d3d907e1fc9b441f2a  ./BAAI/bge-small-zh-v1.5/config.json
+354763b9b1357bc9c44f62c6be2276321081ed2567773608c0d0785b61d5a026  ./BAAI/bge-small-zh-v1.5/model.safetensors
+b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3  ./BAAI/bge-small-zh-v1.5/special_tokens_map.json
+48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26  ./BAAI/bge-small-zh-v1.5/tokenizer.json
+e6f3b96db926a37d4039995fbf5ad17de158dfb8f6343d607e4dbaad18d75f5a  ./BAAI/bge-small-zh-v1.5/tokenizer_config.json
+45bbac6b341c319adc98a532532882e91a9cefc0329aa57bac9ae761c27b291c  ./BAAI/bge-small-zh-v1.5/vocab.txt
