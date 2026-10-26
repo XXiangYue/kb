@@ -93,3 +93,36 @@ CPU 4 线程。峰值 RSS 1597MB（两个模型同时加载）。每题检索耗
 - 低重叠层这里只有 4 题（bm25_rerank 2/4，hybrid_rerank 4/4），**不下结论**，见 Step 3。
 - bm25_rerank 失败 6 题：rerank_error 2，chunk_boundary 1，unattributed 3。
 - 耗时：bm25_rerank 每题 2840ms，hybrid_rerank 2259ms。本次两个 rerank 模式同时跑，墙钟 1237s，峰值 RSS 1612MB。
+
+## Step 3：扩大低重叠层（overlap < 0.3）
+题目在任何运行之前已冻结并提交（2f508c0，`reports/questions_lowoverlap.jsonl`，生成于 05:13 NZDT）。题型 L：DeepSeek（只当生成器）把条文改写成不熟悉术语的人的口语提问。来源条文排除 Block 2 已用过的全部 src_chunk。
+
+过滤计数：
+- 可用来源条文 308 条，抽 260 条，生成调用 260 次，失败 0。
+- 引用/照抄过滤去掉 7，程序金标有效性去掉 0，overlap ≥ 0.3 去掉 52。
+- 回译检查 201 题中去掉 41，闭卷泄漏检查 160 题中去掉 15，去重 0。
+- 剩 145 题：test 118，dev 27。生成器共调用 621 次，成功 621 次，共 151,244 tokens。
+
+test 结果（n=118，全部是 L 型，全部可回答，没有 U2；`reports/eval_lowoverlap.json`）：
+
+| 模式 | Recall@5 | MRR@10 |
+|---|---|---|
+| keyword | 79/118 = 0.669 | 0.524 |
+| vector | 80/118 = 0.678 | 0.535 |
+| hybrid | 86/118 = 0.729 | 0.599 |
+| bm25_rerank | 89/118 = 0.754 | 0.644 |
+| hybrid_rerank | 95/118 = 0.805 | 0.683 |
+
+配对（Recall@5 McNemar b01:b10，p，差值 CI；MRR 差值 [CI]）：
+- keyword→hybrid：11:4，p=0.12，[0.000, 0.127]，无显著差异；MRR +0.075 [0.017, 0.131]。
+- vector→hybrid：14:8，p=0.29，无显著差异；MRR +0.063 [0.002, 0.126]。
+- hybrid→hybrid_rerank：13:4，p=0.049，[0.008, 0.144]，显著；MRR +0.084 [0.016, 0.151]。
+- keyword→vector：18:17，p=1.0，无显著差异。
+- keyword→bm25_rerank：11:1，p=0.0063，[0.034, 0.144]，显著；MRR +0.121 [0.049, 0.195]。
+- bm25_rerank→hybrid_rerank：11:5，p=0.21，[-0.017, 0.119]，无显著差异；MRR +0.038 [-0.016, 0.093]。
+
+结论：
+- 在低重叠题上，所有模式都比高重叠题低很多。hybrid_rerank 最高（95/118），但它对 bm25_rerank 的优势在 n=118 下仍不显著。
+- **重要发现：/ask 在这 118 题上全部误拒（每个模式都是 118/118）。** 原因是覆盖率闸门 min_coverage=0.5 衡量的是问题词在证据中出现的比例，而低重叠题的定义就是问题词很少出现在条文里。所以检索即使命中，闸门也会拒答。阈值校准见 Step 4。
+- 失败归因（hybrid_rerank 23 题）：vector_miss 15，rerank_error 4，fusion_loss 3，chunk_boundary 1。keyword 39 题里 38 题是 unattributed（词汇鸿沟）。
+- 这批题由 DeepSeek 生成，改写风格单一，可能不代表真实用户的口语分布。

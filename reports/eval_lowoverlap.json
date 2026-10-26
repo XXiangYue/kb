@@ -1,0 +1,729 @@
+{
+ "time_local": "2026-10-27 05:47 NZDT",
+ "question_file": "reports/questions_lowoverlap.jsonl",
+ "question_file_built": "2026-10-27 05:13 NZDT",
+ "split": "test",
+ "n_test_answerable": 118,
+ "n_test_U2": 0,
+ "n_test_by_type": {
+  "L": 118
+ },
+ "routing_triggered_by_decimal_in_question": "0/118 = 0.000",
+ "hit_definition": "rank of first chunk in the frozen acceptable set (<=3 chunks containing all gold spans)",
+ "retrieval": {
+  "keyword": {
+   "Recall@5": "79/118 = 0.669",
+   "MRR@10": "61.78/118 = 0.524",
+   "by_type": {
+    "L": {
+     "Recall@5": "79/118 = 0.669",
+     "MRR@10": "61.78/118 = 0.524"
+    }
+   },
+   "by_overlap_stratum": {
+    "low(<0.3)": {
+     "Recall@5": "79/118 = 0.669",
+     "MRR@10": "61.78/118 = 0.524"
+    }
+   }
+  },
+  "vector": {
+   "Recall@5": "80/118 = 0.678",
+   "MRR@10": "63.18/118 = 0.535",
+   "by_type": {
+    "L": {
+     "Recall@5": "80/118 = 0.678",
+     "MRR@10": "63.18/118 = 0.535"
+    }
+   },
+   "by_overlap_stratum": {
+    "low(<0.3)": {
+     "Recall@5": "80/118 = 0.678",
+     "MRR@10": "63.18/118 = 0.535"
+    }
+   }
+  },
+  "hybrid": {
+   "Recall@5": "86/118 = 0.729",
+   "MRR@10": "70.67/118 = 0.599",
+   "by_type": {
+    "L": {
+     "Recall@5": "86/118 = 0.729",
+     "MRR@10": "70.67/118 = 0.599"
+    }
+   },
+   "by_overlap_stratum": {
+    "low(<0.3)": {
+     "Recall@5": "86/118 = 0.729",
+     "MRR@10": "70.67/118 = 0.599"
+    }
+   }
+  },
+  "bm25_rerank": {
+   "Recall@5": "89/118 = 0.754",
+   "MRR@10": "76.04/118 = 0.644",
+   "by_type": {
+    "L": {
+     "Recall@5": "89/118 = 0.754",
+     "MRR@10": "76.04/118 = 0.644"
+    }
+   },
+   "by_overlap_stratum": {
+    "low(<0.3)": {
+     "Recall@5": "89/118 = 0.754",
+     "MRR@10": "76.04/118 = 0.644"
+    }
+   }
+  },
+  "hybrid_rerank": {
+   "Recall@5": "95/118 = 0.805",
+   "MRR@10": "80.57/118 = 0.683",
+   "by_type": {
+    "L": {
+     "Recall@5": "95/118 = 0.805",
+     "MRR@10": "80.57/118 = 0.683"
+    }
+   },
+   "by_overlap_stratum": {
+    "low(<0.3)": {
+     "Recall@5": "95/118 = 0.805",
+     "MRR@10": "80.57/118 = 0.683"
+    }
+   }
+  }
+ },
+ "retrieval_paired": {
+  "keyword->hybrid": {
+   "n": 118,
+   "Recall@5_mcnemar": {
+    "b01": 11,
+    "b10": 4,
+    "n_discordant": 15,
+    "p_value": 0.11846923828125
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.05932203389830504,
+    "ci": [
+     0.0,
+     0.1271186440677966
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.07535983319881623,
+    "ci": [
+     0.017467043314500944,
+     0.13128194780737154
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "显著"
+  },
+  "vector->hybrid": {
+   "n": 118,
+   "Recall@5_mcnemar": {
+    "b01": 14,
+    "b10": 8,
+    "n_discordant": 22,
+    "p_value": 0.28627872467041016
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.05084745762711862,
+    "ci": [
+     -0.025423728813559324,
+     0.1271186440677966
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.06345170836696257,
+    "ci": [
+     0.0021388216303470592,
+     0.12591807909604522
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "显著"
+  },
+  "hybrid->hybrid_rerank": {
+   "n": 118,
+   "Recall@5_mcnemar": {
+    "b01": 13,
+    "b10": 4,
+    "n_discordant": 17,
+    "p_value": 0.049041748046875
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.07627118644067798,
+    "ci": [
+     0.00847457627118644,
+     0.1440677966101695
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "显著",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.08387812752219526,
+    "ci": [
+     0.01592682270648372,
+     0.15130145278450363
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "显著"
+  },
+  "keyword->vector": {
+   "n": 118,
+   "Recall@5_mcnemar": {
+    "b01": 18,
+    "b10": 17,
+    "n_discordant": 35,
+    "p_value": 1.0
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.008474576271186418,
+    "ci": [
+     -0.09322033898305085,
+     0.11016949152542373
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.011908124831853661,
+    "ci": [
+     -0.07522867904223836,
+     0.09657990314769975
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "无显著差异"
+  },
+  "keyword->bm25_rerank": {
+   "n": 118,
+   "Recall@5_mcnemar": {
+    "b01": 11,
+    "b10": 1,
+    "n_discordant": 12,
+    "p_value": 0.00634765625
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.0847457627118644,
+    "ci": [
+     0.03389830508474576,
+     0.1440677966101695
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "显著",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.12089050309389293,
+    "ci": [
+     0.049421576540220606,
+     0.19505649717514123
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "显著"
+  },
+  "bm25_rerank->hybrid_rerank": {
+   "n": 118,
+   "Recall@5_mcnemar": {
+    "b01": 11,
+    "b10": 5,
+    "n_discordant": 16,
+    "p_value": 0.210113525390625
+   },
+   "Recall@5_diff_B_minus_A": {
+    "diff": 0.05084745762711862,
+    "ci": [
+     -0.01694915254237288,
+     0.11864406779661017
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+   "MRR@10_diff_B_minus_A(paired bootstrap)": {
+    "diff": 0.03834745762711855,
+    "ci": [
+     -0.01590328221684154,
+     0.09306900726392252
+    ],
+    "iters": 2000,
+    "seed": 0
+   },
+   "MRR@10_label": "无显著差异"
+  }
+ },
+ "ask_evidence_only": {
+  "keyword": {
+   "correct_refusal_U2": "0/0 = 待测",
+   "false_refusal_answerable": "118/118 = 1.000",
+   "citation_precision(citations)": "0/0 = 待测",
+   "questions_with_>=1_correct_citation": "0/118 = 0.000"
+  },
+  "vector": {
+   "correct_refusal_U2": "0/0 = 待测",
+   "false_refusal_answerable": "118/118 = 1.000",
+   "citation_precision(citations)": "0/0 = 待测",
+   "questions_with_>=1_correct_citation": "0/118 = 0.000"
+  },
+  "hybrid": {
+   "correct_refusal_U2": "0/0 = 待测",
+   "false_refusal_answerable": "118/118 = 1.000",
+   "citation_precision(citations)": "0/0 = 待测",
+   "questions_with_>=1_correct_citation": "0/118 = 0.000"
+  },
+  "bm25_rerank": {
+   "correct_refusal_U2": "0/0 = 待测",
+   "false_refusal_answerable": "118/118 = 1.000",
+   "citation_precision(citations)": "0/0 = 待测",
+   "questions_with_>=1_correct_citation": "0/118 = 0.000"
+  },
+  "hybrid_rerank": {
+   "correct_refusal_U2": "0/0 = 待测",
+   "false_refusal_answerable": "118/118 = 1.000",
+   "citation_precision(citations)": "0/0 = 待测",
+   "questions_with_>=1_correct_citation": "0/118 = 0.000"
+  }
+ },
+ "ask_paired": {
+  "keyword->hybrid": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": null,
+    "ci": null
+   },
+   "label_question_level(mcnemar p<0.05)": "无显著差异",
+   "label_citation_precision(CI excludes 0)": "待测",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  },
+  "vector->hybrid": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": null,
+    "ci": null
+   },
+   "label_question_level(mcnemar p<0.05)": "无显著差异",
+   "label_citation_precision(CI excludes 0)": "待测",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  },
+  "hybrid->hybrid_rerank": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": null,
+    "ci": null
+   },
+   "label_question_level(mcnemar p<0.05)": "无显著差异",
+   "label_citation_precision(CI excludes 0)": "待测",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  },
+  "keyword->vector": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": null,
+    "ci": null
+   },
+   "label_question_level(mcnemar p<0.05)": "无显著差异",
+   "label_citation_precision(CI excludes 0)": "待测",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  },
+  "keyword->bm25_rerank": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": null,
+    "ci": null
+   },
+   "label_question_level(mcnemar p<0.05)": "无显著差异",
+   "label_citation_precision(CI excludes 0)": "待测",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  },
+  "bm25_rerank->hybrid_rerank": {
+   "mcnemar(question has >=1 correct citation)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "citation_precision_diff_B_minus_A(cluster bootstrap)": {
+    "diff": null,
+    "ci": null
+   },
+   "label_question_level(mcnemar p<0.05)": "无显著差异",
+   "label_citation_precision(CI excludes 0)": "待测",
+   "mcnemar(false refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   },
+   "mcnemar(U2 correct refusal)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  }
+ },
+ "paraphrase_robustness": {
+  "n_pairs": 0,
+  "keyword": {
+   "source_Recall@5": "0/0 = 待测",
+   "paraphrase_Recall@5": "0/0 = 待测",
+   "paired(source->paraphrase)": {
+    "n": 0,
+    "Recall@5_mcnemar": {
+     "b01": 0,
+     "b10": 0,
+     "n_discordant": 0,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": null,
+     "ci": null
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": null,
+     "ci": null
+    },
+    "MRR@10_label": "显著"
+   }
+  },
+  "vector": {
+   "source_Recall@5": "0/0 = 待测",
+   "paraphrase_Recall@5": "0/0 = 待测",
+   "paired(source->paraphrase)": {
+    "n": 0,
+    "Recall@5_mcnemar": {
+     "b01": 0,
+     "b10": 0,
+     "n_discordant": 0,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": null,
+     "ci": null
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": null,
+     "ci": null
+    },
+    "MRR@10_label": "显著"
+   }
+  },
+  "hybrid": {
+   "source_Recall@5": "0/0 = 待测",
+   "paraphrase_Recall@5": "0/0 = 待测",
+   "paired(source->paraphrase)": {
+    "n": 0,
+    "Recall@5_mcnemar": {
+     "b01": 0,
+     "b10": 0,
+     "n_discordant": 0,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": null,
+     "ci": null
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": null,
+     "ci": null
+    },
+    "MRR@10_label": "显著"
+   }
+  },
+  "bm25_rerank": {
+   "source_Recall@5": "0/0 = 待测",
+   "paraphrase_Recall@5": "0/0 = 待测",
+   "paired(source->paraphrase)": {
+    "n": 0,
+    "Recall@5_mcnemar": {
+     "b01": 0,
+     "b10": 0,
+     "n_discordant": 0,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": null,
+     "ci": null
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": null,
+     "ci": null
+    },
+    "MRR@10_label": "显著"
+   }
+  },
+  "hybrid_rerank": {
+   "source_Recall@5": "0/0 = 待测",
+   "paraphrase_Recall@5": "0/0 = 待测",
+   "paired(source->paraphrase)": {
+    "n": 0,
+    "Recall@5_mcnemar": {
+     "b01": 0,
+     "b10": 0,
+     "n_discordant": 0,
+     "p_value": 1.0
+    },
+    "Recall@5_diff_B_minus_A": {
+     "diff": null,
+     "ci": null
+    },
+    "Recall@5_label(mcnemar p<0.05 and CI excludes 0)": "无显著差异",
+    "MRR@10_diff_B_minus_A(paired bootstrap)": {
+     "diff": null,
+     "ci": null
+    },
+    "MRR@10_label": "显著"
+   }
+  }
+ },
+ "failure_attribution": {
+  "keyword": {
+   "n_failures(top5 miss)": 39,
+   "den_questions": 118,
+   "primary": {
+    "parse_error": "0/39 = 0.000",
+    "label_error": "0/39 = 0.000",
+    "chunk_boundary": "1/39 = 0.026",
+    "tokenization": "0/39 = 0.000",
+    "vector_miss": "0/39 = 0.000",
+    "fusion_loss": "0/39 = 0.000",
+    "rerank_error": "0/39 = 0.000",
+    "unattributed": "38/39 = 0.974"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 0,
+    "label_error": 0,
+    "chunk_boundary": 1,
+    "tokenization": 0,
+    "vector_miss": 0,
+    "fusion_loss": 0,
+    "rerank_error": 0
+   }
+  },
+  "vector": {
+   "n_failures(top5 miss)": 38,
+   "den_questions": 118,
+   "primary": {
+    "parse_error": "0/38 = 0.000",
+    "label_error": "0/38 = 0.000",
+    "chunk_boundary": "1/38 = 0.026",
+    "tokenization": "0/38 = 0.000",
+    "vector_miss": "37/38 = 0.974",
+    "fusion_loss": "0/38 = 0.000",
+    "rerank_error": "0/38 = 0.000",
+    "unattributed": "0/38 = 0.000"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 0,
+    "label_error": 0,
+    "chunk_boundary": 1,
+    "tokenization": 0,
+    "vector_miss": 38,
+    "fusion_loss": 0,
+    "rerank_error": 0
+   }
+  },
+  "hybrid": {
+   "n_failures(top5 miss)": 32,
+   "den_questions": 118,
+   "primary": {
+    "parse_error": "0/32 = 0.000",
+    "label_error": "0/32 = 0.000",
+    "chunk_boundary": "1/32 = 0.031",
+    "tokenization": "0/32 = 0.000",
+    "vector_miss": "19/32 = 0.594",
+    "fusion_loss": "12/32 = 0.375",
+    "rerank_error": "0/32 = 0.000",
+    "unattributed": "0/32 = 0.000"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 0,
+    "label_error": 0,
+    "chunk_boundary": 1,
+    "tokenization": 0,
+    "vector_miss": 20,
+    "fusion_loss": 12,
+    "rerank_error": 0
+   }
+  },
+  "bm25_rerank": {
+   "n_failures(top5 miss)": 29,
+   "den_questions": 118,
+   "primary": {
+    "parse_error": "0/29 = 0.000",
+    "label_error": "0/29 = 0.000",
+    "chunk_boundary": "0/29 = 0.000",
+    "tokenization": "0/29 = 0.000",
+    "vector_miss": "0/29 = 0.000",
+    "fusion_loss": "0/29 = 0.000",
+    "rerank_error": "1/29 = 0.034",
+    "unattributed": "28/29 = 0.966"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 0,
+    "label_error": 0,
+    "chunk_boundary": 0,
+    "tokenization": 0,
+    "vector_miss": 0,
+    "fusion_loss": 0,
+    "rerank_error": 1
+   }
+  },
+  "hybrid_rerank": {
+   "n_failures(top5 miss)": 23,
+   "den_questions": 118,
+   "primary": {
+    "parse_error": "0/23 = 0.000",
+    "label_error": "0/23 = 0.000",
+    "chunk_boundary": "1/23 = 0.043",
+    "tokenization": "0/23 = 0.000",
+    "vector_miss": "15/23 = 0.652",
+    "fusion_loss": "3/23 = 0.130",
+    "rerank_error": "4/23 = 0.174",
+    "unattributed": "0/23 = 0.000"
+   },
+   "flags(any, multi-label)": {
+    "parse_error": 0,
+    "label_error": 0,
+    "chunk_boundary": 1,
+    "tokenization": 0,
+    "vector_miss": 16,
+    "fusion_loss": 3,
+    "rerank_error": 4
+   }
+  }
+ },
+ "search_ms_per_query(after warm-up, memoised across ask)": {
+  "keyword": 3.5,
+  "vector": 1.1,
+  "hybrid": 4.7,
+  "bm25_rerank": 3394.2,
+  "hybrid_rerank": 2816.0
+ },
+ "max_rss_mb": 1599,
+ "wall_s": 742.5,
+ "config": {
+  "SearchConfig": {
+   "mode": "keyword",
+   "k": 10,
+   "clause_route": true,
+   "std_filter": true,
+   "kinds": [
+    "clause",
+    "commentary",
+    "table",
+    "text"
+   ],
+   "pool": 50,
+   "rrf_k": 60,
+   "rerank_n": 20,
+   "extra": {}
+  },
+  "AskConfig_min_coverage": 0.5,
+  "cite_kinds": [
+   "clause",
+   "table",
+   "text"
+  ]
+ }
+}
