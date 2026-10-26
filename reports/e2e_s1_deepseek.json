@@ -1,0 +1,85 @@
+{
+ "time_local": "2026-10-27 10:35 NZDT",
+ "search_mode": "hybrid_rerank",
+ "min_coverage": 0.5,
+ "coverage_strip_doc_refs": true,
+ "gate": "rerank_top",
+ "gate_threshold": 0.94,
+ "generator": "deepseek-flash (generator role only; no model judging)",
+ "results": {
+  "block2_test": {
+   "n_answerable": 214,
+   "n_U2": 31,
+   "correct_refusal_U2(已见过)": "31/31 = 1.000",
+   "correct_refusal_OOC_new": "0/0 = 待测",
+   "false_refusal_answerable": "55/214 = 0.257",
+   "false_refusal_reasons": {
+    "生成答案中的引文未通过原文校验": 18,
+    "证据不足": 11,
+    "生成模型判定证据不足": 25,
+    "生成答案未给出原文引文": 1
+   },
+   "llm_calls": 203,
+   "llm_ok": 203,
+   "llm_failures": {
+    "ok": 203
+   },
+   "tokens_total": 138318,
+   "latency_ms_mean": 947,
+   "latency_ms_p50": 917,
+   "latency_ms_p95": 1317,
+   "answers_with_no_quote": 26,
+   "citation_verbatim_pass(quotes)": "372/390 = 0.954",
+   "quote_precision(verified quotes from gold chunk)": "361/372 = 0.970",
+   "citation_precision(program citations, non-refused answerable, 口径B)": "164/378 = 0.434",
+   "answerable_with_ge1_correct_citation": "159/214 = 0.743"
+  },
+  "lowoverlap_test": {
+   "n_answerable": 118,
+   "n_U2": 0,
+   "correct_refusal_U2": "0/0 = 待测",
+   "correct_refusal_OOC_new": "0/0 = 待测",
+   "false_refusal_answerable": "64/118 = 0.542",
+   "false_refusal_reasons": {
+    "证据不足": 45,
+    "生成模型判定证据不足": 15,
+    "没有通过原文校验的引用": 2,
+    "生成答案中的引文未通过原文校验": 2
+   },
+   "llm_calls": 71,
+   "llm_ok": 71,
+   "llm_failures": {
+    "ok": 71
+   },
+   "tokens_total": 41322,
+   "latency_ms_mean": 1074,
+   "latency_ms_p50": 997,
+   "latency_ms_p95": 1648,
+   "answers_with_no_quote": 15,
+   "citation_verbatim_pass(quotes)": "132/137 = 0.964",
+   "quote_precision(verified quotes from gold chunk)": "120/132 = 0.909",
+   "citation_precision(program citations, non-refused answerable, 口径B)": "54/134 = 0.403",
+   "answerable_with_ge1_correct_citation": "54/118 = 0.458"
+  },
+  "ooc_b3_test": {
+   "n_answerable": 0,
+   "n_U2": 0,
+   "correct_refusal_U2": "0/0 = 待测",
+   "correct_refusal_OOC_new": "51/51 = 1.000",
+   "false_refusal_answerable": "0/0 = 待测",
+   "false_refusal_reasons": {},
+   "llm_calls": 0,
+   "llm_ok": 0,
+   "llm_failures": {},
+   "tokens_total": 0,
+   "latency_ms_mean": null,
+   "latency_ms_p50": null,
+   "latency_ms_p95": null,
+   "answers_with_no_quote": 0,
+   "citation_verbatim_pass(quotes)": "0/0 = 待测",
+   "quote_precision(verified quotes from gold chunk)": "0/0 = 待测",
+   "citation_precision(program citations, non-refused answerable, 口径B)": "0/0 = 待测",
+   "answerable_with_ge1_correct_citation": "0/0 = 待测"
+  }
+ }
+}

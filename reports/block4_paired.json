@@ -1,0 +1,203 @@
+{
+ "time_local": "2026-10-27 10:36 NZDT",
+ "a1: a=14d729f(口径B) b=e2e_deepseek_A(口径A), archive only": {
+  "block2_answerable": {
+   "n": 214,
+   "refused_a": "49/214 = 0.229",
+   "refused_b": "51/214 = 0.238",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 8,
+    "b10": 6,
+    "n_discordant": 14,
+    "p_value": 0.79052734375
+   },
+   "citation_precision_a": "171/390 = 0.438",
+   "citation_precision_b": "169/385 = 0.439",
+   "citation_precision_diff_ci(b-a, cluster bootstrap)": {
+    "diff": 0.0004995004995004826,
+    "ci": [
+     -0.006117879829220019,
+     0.007629412890699794
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_a": "165/214 = 0.771",
+   "ge1_correct_b": "163/214 = 0.762"
+  },
+  "lowoverlap": {
+   "n": 118,
+   "refused_a": "49/118 = 0.415",
+   "refused_b": "48/118 = 0.407",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 2,
+    "b10": 3,
+    "n_discordant": 5,
+    "p_value": 1.0
+   },
+   "citation_precision_a": "69/161 = 0.429",
+   "citation_precision_b": "70/164 = 0.427",
+   "citation_precision_diff_ci(b-a, cluster bootstrap)": {
+    "diff": -0.0017421602787456303,
+    "ci": [
+     -0.009081196581196604,
+     0.004471253216349613
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_a": "69/118 = 0.585",
+   "ge1_correct_b": "70/118 = 0.593"
+  },
+  "U2_已见过": {
+   "n": 31,
+   "refused_a": "31/31 = 1.000",
+   "refused_b": "31/31 = 1.000",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  }
+ },
+ "b vs 14d729f: a=Step5 0.05+DeepSeek b=S1 0.94+DeepSeek (reference only: gate and threshold both differ)": {
+  "block2_answerable": {
+   "n": 214,
+   "refused_a": "49/214 = 0.229",
+   "refused_b": "55/214 = 0.257",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 14,
+    "b10": 8,
+    "n_discordant": 22,
+    "p_value": 0.28627872467041016
+   },
+   "citation_precision_a": "171/390 = 0.438",
+   "citation_precision_b": "164/378 = 0.434",
+   "citation_precision_diff_ci(b-a, cluster bootstrap)": {
+    "diff": -0.00459910459910462,
+    "ci": [
+     -0.01446804790628553,
+     0.004853346120592572
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_a": "165/214 = 0.771",
+   "ge1_correct_b": "159/214 = 0.743"
+  },
+  "lowoverlap": {
+   "n": 118,
+   "refused_a": "49/118 = 0.415",
+   "refused_b": "64/118 = 0.542",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 20,
+    "b10": 5,
+    "n_discordant": 25,
+    "p_value": 0.004077315330505371
+   },
+   "citation_precision_a": "69/161 = 0.429",
+   "citation_precision_b": "54/134 = 0.403",
+   "citation_precision_diff_ci(b-a, cluster bootstrap)": {
+    "diff": -0.02558635394456288,
+    "ci": [
+     -0.04858870967741935,
+     -0.005173652694610786
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_a": "69/118 = 0.585",
+   "ge1_correct_b": "54/118 = 0.458"
+  },
+  "U2_已见过": {
+   "n": 31,
+   "refused_a": "31/31 = 1.000",
+   "refused_b": "31/31 = 1.000",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  }
+ },
+ "b vs 7818948: a=S1 evidence-only b=S1+DeepSeek (effect of adding the LLM stage)": {
+  "block2_answerable": {
+   "n": 214,
+   "refused_a": "11/214 = 0.051",
+   "refused_b": "55/214 = 0.257",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 44,
+    "b10": 0,
+    "n_discordant": 44,
+    "p_value": 1.1368683772161603e-13
+   },
+   "citation_precision_a": "204/480 = 0.425",
+   "citation_precision_b": "164/378 = 0.434",
+   "citation_precision_diff_ci(b-a, cluster bootstrap)": {
+    "diff": 0.00886243386243385,
+    "ci": [
+     -0.007413046331539608,
+     0.026999370277078105
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_a": "195/214 = 0.911",
+   "ge1_correct_b": "159/214 = 0.743"
+  },
+  "lowoverlap": {
+   "n": 118,
+   "refused_a": "47/118 = 0.398",
+   "refused_b": "64/118 = 0.542",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 17,
+    "b10": 0,
+    "n_discordant": 17,
+    "p_value": 1.52587890625e-05
+   },
+   "citation_precision_a": "64/179 = 0.358",
+   "citation_precision_b": "54/134 = 0.403",
+   "citation_precision_diff_ci(b-a, cluster bootstrap)": {
+    "diff": 0.045443175185524876,
+    "ci": [
+     0.017271523178807924,
+     0.08053354728713269
+    ],
+    "iters": 2000,
+    "seed": 0,
+    "unit": "question (cluster bootstrap)"
+   },
+   "ge1_correct_a": "64/118 = 0.542",
+   "ge1_correct_b": "54/118 = 0.458"
+  },
+  "ooc_new": {
+   "n": 51,
+   "refused_a": "51/51 = 1.000",
+   "refused_b": "51/51 = 1.000",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  },
+  "U2_已见过": {
+   "n": 31,
+   "refused_a": "31/31 = 1.000",
+   "refused_b": "31/31 = 1.000",
+   "mcnemar_refused(b01=a not refused, b refused)": {
+    "b01": 0,
+    "b10": 0,
+    "n_discordant": 0,
+    "p_value": 1.0
+   }
+  }
+ }
+}
