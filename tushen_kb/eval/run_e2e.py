@@ -8,6 +8,8 @@ checks against the frozen gold labels:
                             (counted on every answer the generator produced, incl. those then refused)
   citation precision        program citations (口径 B) in the acceptable set / all, non-refused only
   quote precision           verified quotes whose evidence chunk is in the acceptable set / verified quotes
+Block 4 (plan 9073cdd): --gate rerank_top --gate-threshold 0.94 --with-ooc runs the frozen S1 gate
+end-to-end; --no-strip gives 口径 A.  Defaults reproduce 14d729f.
 Small CPU batches (--batch, default 20) with a resumable checkpoint file; per-call log has
 status, tokens, latency, error class - never prompt secrets or keys.
 """
@@ -65,6 +67,9 @@ def one(store, q, cfg, llm):
         rec["n_bad_quotes_stage"] = st.get("llm", {}).get("n_bad_quotes")
     cits = [] if r["refused"] else r["citations"]
     rec["n_cit"], rec["n_cit_ok"] = len(cits), sum(c["chunk_id"] in acc for c in cits)
+    rec["cit_ids"] = [c["chunk_id"] for c in cits]
+    if "rerank_gate" in st:
+        rec["s1"] = st["rerank_gate"]["s1"]
     return rec
 
 
@@ -73,11 +78,20 @@ def main():
     ap.add_argument("--batch", type=int, default=20)
     ap.add_argument("--out", default="e2e_deepseek")
     ap.add_argument("--summarize-only", action="store_true")
+    # defaults reproduce 14d729f (Step 5: coverage gate 0.05, 口径 B, block2 + low-overlap test)
+    ap.add_argument("--min-coverage", type=float, default=0.05)
+    ap.add_argument("--no-strip", action="store_true", help="coverage_strip_doc_refs=False (口径 A)")
+    ap.add_argument("--gate", default="coverage")
+    ap.add_argument("--gate-threshold", type=float, default=0.0)
+    ap.add_argument("--with-ooc", action="store_true", help="also questions_ooc_b3.jsonl test")
     a = ap.parse_args()
     if a.summarize_only:
         prev = json.loads((REPORTS / f"{a.out}.json").read_text(encoding="utf-8"))
         # keep the threshold the run actually used, not the current default
-        summarize(REPORTS / f"{a.out}_per_question.jsonl", a.out, AskConfig(min_coverage=prev["min_coverage"]))
+        summarize(REPORTS / f"{a.out}_per_question.jsonl", a.out,
+                  AskConfig(min_coverage=prev["min_coverage"],
+                            coverage_strip_doc_refs=prev.get("coverage_strip_doc_refs", True),
+                            gate=prev.get("gate", "coverage"), gate_threshold=prev.get("gate_threshold", 0.0)))
         return
     gen, judges = load_models()
     validate(gen, judges)
@@ -86,9 +100,12 @@ def main():
     store = Store(str(ROOT / "data" / "tushen.sqlite"))
     from .. import dense
     _memo(dense)
-    cfg = AskConfig(search=SearchConfig(mode="hybrid_rerank"))
+    cfg = AskConfig(search=SearchConfig(mode="hybrid_rerank"), min_coverage=a.min_coverage,
+                    coverage_strip_doc_refs=not a.no_strip, gate=a.gate, gate_threshold=a.gate_threshold)
+    print("config", {"min_coverage": cfg.min_coverage, "coverage_strip_doc_refs": cfg.coverage_strip_doc_refs,
+                     "gate": cfg.gate, "gate_threshold": cfg.gate_threshold}, time.strftime("%H:%M %Z"), flush=True)
     qs = []
-    for f in ("questions_block2.jsonl", "questions_lowoverlap.jsonl"):
+    for f in ("questions_block2.jsonl", "questions_lowoverlap.jsonl") + (("questions_ooc_b3.jsonl",) if a.with_ooc else ()):
         qs += [dict(json.loads(l), _file=f) for l in open(REPORTS / f, encoding="utf-8")][1:]
     qs = [q for q in qs if q.get("split") == "test"]
     ck = REPORTS / f"{a.out}_per_question.jsonl"
@@ -109,9 +126,14 @@ def main():
 def summarize(ck: Path, out: str, cfg):
     R = [json.loads(l) for l in open(ck, encoding="utf-8")]
     res = {}
+    kou = "口径B" if cfg.coverage_strip_doc_refs else "口径A"
     for name, sel in (("block2_test", lambda r: r["file"] == "questions_block2.jsonl"),
-                      ("lowoverlap_test", lambda r: r["file"] == "questions_lowoverlap.jsonl")):
+                      ("lowoverlap_test", lambda r: r["file"] == "questions_lowoverlap.jsonl"),
+                      ("ooc_b3_test", lambda r: r["file"] == "questions_ooc_b3.jsonl")):
         S = [r for r in R if sel(r)]
+        if not S:
+            continue
+        ooc = [r for r in S if r["type"] == "OOC"]
         ans = [r for r in S if r["answerable"]]
         u2 = [r for r in S if r["type"] == "U2"]
         calls = [r["llm"] for r in S if r["llm"]]
@@ -126,7 +148,8 @@ def summarize(ck: Path, out: str, cfg):
         lat = sorted(c["ms"] for c in ok if c.get("ms") is not None)
         res[name] = {
             "n_answerable": len(ans), "n_U2": len(u2),
-            "correct_refusal_U2": rate(sum(r["refused"] for r in u2), len(u2))["str"],
+            "correct_refusal_U2" + ("(已见过)" if u2 else ""): rate(sum(r["refused"] for r in u2), len(u2))["str"],
+            "correct_refusal_OOC_new": rate(sum(r["refused"] for r in ooc), len(ooc))["str"],
             "false_refusal_answerable": rate(sum(r["refused"] for r in ans), len(ans))["str"],
             "false_refusal_reasons": reasons,
             "llm_calls": len(calls), "llm_ok": len(ok),
@@ -138,14 +161,15 @@ def summarize(ck: Path, out: str, cfg):
             "answers_with_no_quote": sum(1 for r in S if r["llm"] and r["llm"]["status"] == "ok" and not r.get("quotes")),
             "citation_verbatim_pass(quotes)": rate(len(vq), len(quotes))["str"],
             "quote_precision(verified quotes from gold chunk)": rate(sum(x["in_gold"] for x in vq), len(vq))["str"],
-            "citation_precision(program citations, non-refused answerable, 口径B)":
+            f"citation_precision(program citations, non-refused answerable, {kou})":
                 rate(sum(r["n_cit_ok"] for r in ans), sum(r["n_cit"] for r in ans))["str"],
-            "citation_precision_口径A": "待测 (needs rerun with coverage_strip_doc_refs=False; not run)",
             "answerable_with_ge1_correct_citation":
                 rate(sum(1 for r in ans if not r["refused"] and r["n_cit_ok"] > 0), len(ans))["str"],
         }
     rep = {"time_local": time.strftime("%Y-%m-%d %H:%M %Z"), "search_mode": "hybrid_rerank",
-           "min_coverage": cfg.min_coverage, "generator": "deepseek-flash (generator role only; no model judging)",
+           "min_coverage": cfg.min_coverage,
+           "coverage_strip_doc_refs": cfg.coverage_strip_doc_refs, "gate": cfg.gate, "gate_threshold": cfg.gate_threshold,
+           "generator": "deepseek-flash (generator role only; no model judging)",
            "results": res}
     (REPORTS / f"{out}.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(rep, ensure_ascii=False, indent=1))

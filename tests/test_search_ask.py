@@ -116,3 +116,38 @@ def test_strip_doc_refs():
     from tushen_kb.ask import strip_doc_refs
     q = strip_doc_refs("《建筑防火通用规范》GB 55037-2022 第4.1.2条 防火分区面积", ["建筑防火通用规范"])
     assert "建筑防火" not in q and "55037" not in q and "4.1.2" not in q and "防火分区面积" in q
+
+
+def test_gate_default_is_coverage_and_unknown_rejected(store):
+    cfg = AskConfig()
+    assert cfg.gate == "coverage" and cfg.min_coverage == 0.5 and cfg.search.mode == "keyword"
+    with pytest.raises(ValueError):
+        ask(store, "消防电梯底坑排水井", AskConfig(gate="nope"))
+    with pytest.raises(ValueError):
+        ask(store, "消防电梯底坑排水井", AskConfig(gate="rerank_top", gate_threshold=0.9))  # keyword mode
+
+
+def test_gate_default_output_unchanged(store):
+    for q in ("消防电梯底坑排水井的有效容量", "疏散楼梯间能否设置卷帘", "第9.9.9条是什么"):
+        a, b = ask(store, q), ask(store, q, AskConfig(gate="coverage", gate_threshold=0.99))
+        assert (a["refused"], a["refusal_reason"], [c["chunk_id"] for c in a["citations"]]) == \
+               (b["refused"], b["refusal_reason"], [c["chunk_id"] for c in b["citations"]])
+
+
+def test_gate_rerank_top(store, monkeypatch):
+    import tushen_kb.ask as A
+    real = A.search
+
+    def fake(st, q, cfg):
+        hits = real(st, q, SearchConfig(mode="keyword"))
+        for h in hits:
+            h["route"], h["score"] = "rerank", logit
+        return hits
+    monkeypatch.setattr(A, "search", fake)
+    cfg = AskConfig(search=SearchConfig(mode="hybrid_rerank"), gate="rerank_top", gate_threshold=0.94)
+    logit = 0.0   # sigmoid 0.5 < 0.94 -> refuse
+    r = ask(store, "消防电梯底坑排水井的有效容量", cfg)
+    assert r["refused"] and "rerank" in r["refusal_reason"]
+    logit = 5.0   # sigmoid 0.993 >= 0.94 -> passes gate; coverage filter off
+    r = ask(store, "消防电梯底坑排水井的有效容量", cfg)
+    assert not r["refused"] and r["citations"]

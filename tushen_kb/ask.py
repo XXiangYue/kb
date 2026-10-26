@@ -10,6 +10,7 @@ Every call returns a ``trace`` with stage timings, config and context-token log.
 """
 from __future__ import annotations
 
+import math
 import re
 import time
 from dataclasses import asdict, dataclass, field
@@ -21,6 +22,7 @@ from .search import STD_IN_QUERY, SearchConfig, resolve_docs, search
 from .store import Store
 from .tokenize import content_tokens
 
+GATES = ("coverage", "rerank_top")
 EXPLICIT_CLAUSE = re.compile(r"第\s*((?:[A-Z]|\d{1,2})(?:\.\d{1,3}){1,4})\s*条|((?:[A-Z]|\d{1,2})(?:\.\d{1,3}){1,4})\s*条")
 
 
@@ -39,6 +41,12 @@ class AskConfig:
     # compute evidence coverage on the query with document references removed (《title》, corpus titles,
     # standard codes, 第x条): otherwise neighbours match only the title words and get cited.
     coverage_strip_doc_refs: bool = True
+    # refusal gate.  "coverage" (default, unchanged behaviour): refuse if top coverage < min_coverage.
+    # "rerank_top" (Block 3 S1, frozen t=0.94 in 081a449): coverage gate AND per-citation coverage
+    # filter are off (min_coverage treated as 0); refuse if sigmoid(top reranker logit) < gate_threshold.
+    # Needs a rerank search mode.  Not the default.
+    gate: str = "coverage"
+    gate_threshold: float = 0.0
 
 
 @dataclass
@@ -70,10 +78,16 @@ def _coverage(query: str, text: str) -> float:
 def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
         context_hooks: list[ContextHook] | None = None) -> dict:
     cfg = cfg or AskConfig()
+    if cfg.gate not in GATES:
+        raise ValueError(f"unknown gate {cfg.gate}")
+    if cfg.gate == "rerank_top" and cfg.search.mode not in ("hybrid_rerank", "bm25_rerank"):
+        raise ValueError("gate rerank_top needs a rerank search mode")
+    min_cov = cfg.min_coverage if cfg.gate == "coverage" else 0.0
     t0 = time.perf_counter()
     trace: dict = {"config": {"search": asdict(cfg.search), "n_evidence": cfg.n_evidence,
                               "min_coverage": cfg.min_coverage, "cite_kinds": list(cfg.cite_kinds),
-                              "coverage_strip_doc_refs": cfg.coverage_strip_doc_refs},
+                              "coverage_strip_doc_refs": cfg.coverage_strip_doc_refs,
+                              "gate": cfg.gate, "gate_threshold": cfg.gate_threshold},
                    "stages": [], "context_log": [], "token_counter": "cjk_char+ascii_word estimate"}
 
     def stage(name, **kw):
@@ -115,14 +129,20 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
                          "text": h["text"]})
     top_cov = max(e["coverage"] for e in evidence)
     stage("evidence_gate", top_coverage=top_cov)
-    if top_cov < cfg.min_coverage:
+    if top_cov < min_cov:
         return refuse(f"证据不足（最高覆盖率 {top_cov:.2f} < 阈值 {cfg.min_coverage}）", evidence)
+    if cfg.gate == "rerank_top":
+        logits = [e["score"] for e in evidence if e.get("route") == "rerank"]
+        s1 = 1 / (1 + math.exp(-max(logits))) if logits else 0.0
+        stage("rerank_gate", s1=round(s1, 4), threshold=cfg.gate_threshold)
+        if s1 < cfg.gate_threshold:
+            return refuse(f"证据不足（rerank 最高分 {s1:.3f} < 阈值 {cfg.gate_threshold}）", evidence)
 
     # 4. citations, each verified verbatim against stored text
     citations = []
     texts = {}
     for e, h in zip(evidence, hits):
-        if e["coverage"] < cfg.min_coverage or h["kind"] not in cfg.cite_kinds:
+        if e["coverage"] < min_cov or h["kind"] not in cfg.cite_kinds:
             continue
         if h["doc_id"] not in texts:
             texts[h["doc_id"]] = store.doc_text(h["doc_id"])
