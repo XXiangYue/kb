@@ -1,0 +1,122 @@
+{
+ "time_local": "2026-10-27 08:35 CST",
+ "plan": "reports/plan_block2_pool_coverage_zh.md",
+ "question_file": "reports/questions_block2.jsonl",
+ "n_test_answerable": 214,
+ "K_rerank_head": 20,
+ "K_source": "tushen_kb/search.py:34 rerank_n=20; :141 head = rows[:n]",
+ "per_retriever_pool": 50,
+ "per_retriever_pool_source": "search.py:32,92,119 max(k*5, pool)",
+ "rrf_k": 60,
+ "routing_triggered": "0/214",
+ "std_filter_applied": "0/214",
+ "coverage": {
+  "bm25_pool": {
+   "@5(selfcheck=keyword Recall@5)": "192/214 = 0.897",
+   "@20(reranker input)": "212/214 = 0.991",
+   "@50(full pool)": "213/214 = 0.995"
+  },
+  "hybrid_pool": {
+   "@5(selfcheck=hybrid Recall@5)": "190/214 = 0.888",
+   "@20(reranker input)": "212/214 = 0.991",
+   "@full(union, up to 100)": "214/214 = 1.000"
+  }
+ },
+ "paired_coverage_at_K": {
+  "both": 210,
+  "only_bm25": 2,
+  "only_hybrid": 2,
+  "neither": 0
+ },
+ "rerank_top5_misses(committed, not re-run)": {
+  "bm25_rerank": [
+   {
+    "qid": "00a7d241c16f",
+    "type": "T3",
+    "committed_rank": 7,
+    "gold_rank_in_pool": 5,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "fc37d37bee7a",
+    "type": "T3",
+    "committed_rank": null,
+    "gold_rank_in_pool": 18,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "9a11144a2c61",
+    "type": "T3",
+    "committed_rank": null,
+    "gold_rank_in_pool": null,
+    "gold_in_reranked_head(K)": false
+   },
+   {
+    "qid": "736995ec8a2a",
+    "type": "T4",
+    "committed_rank": 7,
+    "gold_rank_in_pool": 4,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "83b4585b8f47",
+    "type": "T5",
+    "committed_rank": 7,
+    "gold_rank_in_pool": 5,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "5dc0d1b13f5b",
+    "type": "P",
+    "committed_rank": null,
+    "gold_rank_in_pool": 32,
+    "gold_in_reranked_head(K)": false
+   }
+  ],
+  "hybrid_rerank": [
+   {
+    "qid": "00a7d241c16f",
+    "type": "T3",
+    "committed_rank": 7,
+    "gold_rank_in_pool": 2,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "fc37d37bee7a",
+    "type": "T3",
+    "committed_rank": null,
+    "gold_rank_in_pool": 14,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "d5b61dc62c88",
+    "type": "T4",
+    "committed_rank": null,
+    "gold_rank_in_pool": 21,
+    "gold_in_reranked_head(K)": false
+   },
+   {
+    "qid": "736995ec8a2a",
+    "type": "T4",
+    "committed_rank": 7,
+    "gold_rank_in_pool": 6,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "83b4585b8f47",
+    "type": "T5",
+    "committed_rank": 6,
+    "gold_rank_in_pool": 17,
+    "gold_in_reranked_head(K)": true
+   },
+   {
+    "qid": "e06fe0b50ab6",
+    "type": "P",
+    "committed_rank": null,
+    "gold_rank_in_pool": 24,
+    "gold_in_reranked_head(K)": false
+   }
+  ]
+ },
+ "wall_s": 8.5
+}
