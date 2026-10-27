@@ -1,6 +1,6 @@
 PY ?= .venv/bin/python
 
-.PHONY: test eval eval-smoke eval-report
+.PHONY: test eval eval-smoke eval-report hooks secrets
 
 test:
 	$(PY) -m pytest -q
@@ -22,3 +22,10 @@ eval-report:
 residual:
 	$(PY) -m tushen_kb.stdref check
 	$(PY) -m tushen_kb.stdref scan --history
+
+# pre-commit hook shipped in-repo: secret checks + standards residual scan on staged content
+hooks:
+	git config core.hooksPath .githooks
+
+secrets:
+	$(PY) scripts/check_secrets.py

@@ -334,22 +334,33 @@ def scan_history(ref: Reference, repo: Path = ROOT, k: int = SCAN_K, all_refs: b
             "hits": sorted(per_blob, key=lambda x: -x["chars"])}
 
 
-def scan_worktree(ref: Reference, k: int = SCAN_K) -> dict:
-    files = _git("ls-files").decode().split("\n")
-    res, tot, totlen = [], 0, 0
-    for f in files:
-        if not f or not (ROOT / f).is_file():
-            continue
-        t = blob_text((ROOT / f).read_bytes())
+def scan_worktree(ref: Reference, k: int = SCAN_K, repo: Path | str = ROOT) -> dict:
+    """Scan tracked + untracked (non-ignored) files in the work tree, and the STAGED (index) content
+    of every path with staged changes, so a pre-commit hook sees exactly what would be committed."""
+    repo = Path(repo)
+    files = _git("ls-files", "--cached", "--others", "--exclude-standard", cwd=repo).decode().split("\n")
+    staged = [f for f in _git("diff", "--cached", "--name-only", "--diff-filter=ACMR", cwd=repo).decode().split("\n") if f]
+    res, tot, totlen, n = [], 0, 0, 0
+
+    def one(label, data):
+        nonlocal tot, totlen, n
+        t = blob_text(data)
         if t is None:
-            continue
+            return
+        n += 1
         r = ref.scan_text(t, k)
         tot += r["chars"]
         totlen += r["folded_len"]
         if r["windows"]:
-            res.append({"path": f, **r})
-    return {"k": k, "files_with_hits": len(res), "total_chars": tot, "total_folded_chars": totlen,
-            "hits": sorted(res, key=lambda x: -x["chars"])}
+            res.append({"path": label, **r})
+
+    for f in sorted({f for f in files if f}):
+        if (repo / f).is_file():
+            one(f, (repo / f).read_bytes())
+    for f in staged:
+        one(f"{f} (staged)", _git("show", f":{f}", cwd=repo))
+    return {"k": k, "files_scanned": n, "files_with_hits": len(res), "total_windows": sum(x["windows"] for x in res),
+            "total_chars": tot, "total_folded_chars": totlen, "hits": sorted(res, key=lambda x: -x["chars"])}
 
 
 def main(argv=None):
@@ -363,8 +374,9 @@ def main(argv=None):
     s.add_argument("--json", action="store_true")
     r = sub.add_parser("resolve")
     r.add_argument("file")
+    ap.add_argument("--db", default=str(DB), help="local standards index (default data/tushen.sqlite)")
     a = ap.parse_args(argv)
-    ref = default_reference()
+    ref = Reference.from_db(a.db)
     if a.cmd == "check":
         man = json.loads((ROOT / "corpus" / "manifest.json").read_text(encoding="utf-8"))["docs"]
         ok = True
@@ -387,7 +399,7 @@ def main(argv=None):
             print(json.dumps({k: v for k, v in out.items() if k != "hits"}, ensure_ascii=False))
             for h in out["hits"][:50]:
                 print(h)
-        bad = out.get("total_windows", out.get("total_chars", 0)) or out.get("commit_msgs_with_hits")
+        bad = out["total_windows"] or out.get("commit_msgs_with_hits")
         sys.exit(1 if bad else 0)
     if a.cmd == "resolve":
         p = Path(a.file)

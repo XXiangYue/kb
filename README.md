@@ -45,6 +45,14 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 
 所有评测脚本读取 `reports/*.jsonl` 时自动还原（`stdref.loads`），本地文本缺失或 sha256 不符时直接报错，不会静默用错文本。还原后的文本只应留在本地，不要提交。
 
+重新跑评测会把还原后的原文写进 `reports/`。提交前必须拦下：每个 clone 执行一次
+
+```bash
+make hooks        # 即 git config core.hooksPath .githooks
+```
+
+`.githooks/pre-commit` 运行 `scripts/check_secrets.py`：密钥检查 + 标准原文残留扫描（已跟踪、未跟踪、**暂存区**内容，≥20 字窗口命中即拒绝提交，只报路径与计数、不打印原文）。本地没有 `data/tushen.sqlite` 时残留扫描标记为 SKIPPED；设 `STDREF_REQUIRED=1` 则改为失败。
+
 ## 设计要点
 
 - **解析**（`pdfparse.py`）：按字符基线聚类成行（修复 GB46034 标点/数字字体纵向偏移导致的断行）；表格单独抽取（≥2 行 ≥2 列 ≥40% 非空）；页眉页脚/水印按跨页重复率剔除；`assemble()` 生成归一化全文，**`doc_text[start:end] == chunk.text` 在入库时断言**。

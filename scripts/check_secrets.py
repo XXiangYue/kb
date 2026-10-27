@@ -7,12 +7,22 @@
    Bearer <token>).
 3. Check that no forbidden file types are tracked/staged (pdf, sqlite, db,
    .env, weights).
+4. Standards residual scan (`tushen_kb.stdref`): fail if any tracked, untracked
+   (non-ignored) or STAGED file contains a 20-char window of standards text.
+   Needs the local standards index (data/tushen.sqlite, or --stdref-db / $STDREF_DB);
+   without it the step is SKIPPED (reported), or fails with --require-residual /
+   STDREF_REQUIRED=1.  Matched text is never printed, only paths and counts.
 Exit code 0 = clean.
 """
+import argparse
 import os
 import re
 import subprocess
 import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
 KEY_ENVS = ["DEEPSEEK_API_KEY", "MIMO_API_KEY", "OPENROUTER_API_KEY", "OPENAI_API_KEY", "HF_TOKEN"]
 # plus ANY env var that looks like a credential (…_API_KEY, …_API_KEY_<n>, …_TOKEN, …_SECRET) with a long value,
@@ -34,7 +44,24 @@ def files() -> list[str]:
     return sorted({f for f in out if f and os.path.isfile(f)})
 
 
-def main() -> int:
+def residual(db: Path, required: bool) -> list[str]:
+    """Standards residual scan of tracked/untracked/staged content in the current repo."""
+    if not db.exists():
+        msg = f"standards residual scan SKIPPED: {db} not found (download_corpus.sh + ingest to enable)"
+        print(msg)
+        return [msg] if required else []
+    from tushen_kb import stdref
+    out = stdref.scan_worktree(stdref.Reference.from_db(db), repo=Path.cwd())
+    print(f"standards residual scan (k={out['k']}): {out['files_scanned']} files, "
+          f"{out['files_with_hits']} with hits, {out['total_windows']} windows")
+    return [f"standards text ({h['windows']} windows, {h['chars']} chars) in {h['path']}" for h in out["hits"]]
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--stdref-db", default=os.environ.get("STDREF_DB", str(ROOT / "data" / "tushen.sqlite")))
+    ap.add_argument("--require-residual", action="store_true", default=os.environ.get("STDREF_REQUIRED") == "1")
+    a = ap.parse_args(argv)
     fs = files()
     names = set(KEY_ENVS) | {n for n, v in os.environ.items() if KEY_ENV_RE.search(n) and len(v) >= 16}
     keys = {name: os.environ[name] for name in sorted(names) if os.environ.get(name)}
@@ -54,6 +81,7 @@ def main() -> int:
                 problems.append(f"pattern {pname} in {f}")
     print(f"checked {len(fs)} files; env key values compared: {sorted(keys)} (values not shown); "
           f"patterns: {sorted(PATTERNS)}")
+    problems += residual(Path(a.stdref_db), a.require_residual)
     for p in problems:
         print("PROBLEM:", p)
     print("CLEAN" if not problems else f"NOT CLEAN ({len(problems)})")

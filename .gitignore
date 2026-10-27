@@ -23,6 +23,7 @@ data/
 *.sqlite-shm
 # --- model weights / caches ---
 models/
+models
 .cache/
 *.onnx
 *.bin

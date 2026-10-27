@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# Pre-commit: secret checks + standards residual scan (tracked, untracked and STAGED content).
+# Enable once per clone:  make hooks   (= git config core.hooksPath .githooks)
+# Set STDREF_REQUIRED=1 to fail when the local standards index (data/tushen.sqlite) is missing.
+set -e
+ROOT="$(git rev-parse --show-toplevel)"
+PY="${PY:-$ROOT/.venv/bin/python}"
+[ -x "$PY" ] || PY=python3
+exec "$PY" "$ROOT/scripts/check_secrets.py"
