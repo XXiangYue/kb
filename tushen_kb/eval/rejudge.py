@@ -14,6 +14,8 @@ here (same questions, same corruption rule, same two-choice items).
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import json
 import time
@@ -35,7 +37,7 @@ def build(store, n=6, n_choice=4):
     if gen.status() != "ready":
         raise SystemExit(f"generator {gen.status()}")
     gm = ChatModel(gen)
-    qs = [json.loads(l) for l in open(REPORTS / "questions_block1.jsonl", encoding="utf-8")]
+    qs = [stdref.loads(l) for l in open(REPORTS / "questions_block1.jsonl", encoding="utf-8")]
     test = [q for q in qs if q["type"] != "U" and q["split"] == "test"]
     items, gen_calls = [], []
     for q in test[:n]:
@@ -75,7 +77,7 @@ def _judge_item(j: J.Judge, it: dict) -> list[J.Judgment]:
 
 
 def judge(roles: list[str], workers: int, tag: str):
-    lines = [json.loads(l) for l in open(ITEMS, encoding="utf-8")]
+    lines = [stdref.loads(l) for l in open(ITEMS, encoding="utf-8")]
     meta, items = lines[0]["_meta"], lines[1:]
     assert meta["faith_prompt"] == J.FAITH_PROMPT and meta["choice_prompt"] == J.CHOICE_PROMPT, "prompts changed"
     judges = [j for j in J.load_judges() if j.spec.role in roles]
@@ -144,7 +146,7 @@ def _load_recs(tag: str) -> dict:
     fields = set(J.Judgment.__dataclass_fields__)
     recs: dict[str, list] = {}
     for l in open(REPORTS / f"judgments_{tag}_records.jsonl", encoding="utf-8"):
-        d = json.loads(l)
+        d = stdref.loads(l)
         recs.setdefault(d["judge_role"], []).append(J.Judgment(**{k: v for k, v in d.items() if k in fields}))
     return recs
 
@@ -152,13 +154,13 @@ def _load_recs(tag: str) -> dict:
 def retry(role: str, tag: str, rounds: int, wait_s: float):
     """Re-run ONLY failed judgments of one role with the same model + prompt.
     Never switches model (there is no backup judge; failures are reported as coverage x/N)."""
-    lines = [json.loads(l) for l in open(ITEMS, encoding="utf-8")]
+    lines = [stdref.loads(l) for l in open(ITEMS, encoding="utf-8")]
     meta, items = lines[0]["_meta"], lines[1:]
     assert meta["faith_prompt"] == J.FAITH_PROMPT and meta["choice_prompt"] == J.CHOICE_PROMPT, "prompts changed"
     by_id = {it["item_id"]: it for it in items}
     recs = _load_recs(tag)
     sup_path = REPORTS / f"judgments_{tag}_superseded_failures.jsonl"
-    retry_log = [json.loads(l) for l in open(sup_path, encoding="utf-8")] if sup_path.exists() else []
+    retry_log = [stdref.loads(l) for l in open(sup_path, encoding="utf-8")] if sup_path.exists() else []
     j = next(x for x in J.load_judges() if x.spec.role == role)
     for rnd in range(rounds):
         bad = sorted({x.item_id for x in recs[role] if x.status != "ok"})

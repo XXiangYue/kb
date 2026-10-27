@@ -40,6 +40,8 @@ Usage:
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import json
 import math
@@ -85,7 +87,7 @@ def build_ooc():
     store = Store(str(ROOT / "data" / "tushen.sqlite"))
     g = b2.Gold(store)
     assert not set(OOC_TOPICS["dev"]) & set(OOC_TOPICS["test"]) and not set(sum(OOC_TOPICS.values(), [])) & set(b2.U_TOPICS)
-    u2 = [q for q in [json.loads(l) for l in open(b2.QFILE, encoding="utf-8")][1:] if q["type"] == "U2"]
+    u2 = [q for q in [stdref.loads(l) for l in open(b2.QFILE, encoding="utf-8")][1:] if q["type"] == "U2"]
     norm = lambda s: re.sub(r"\s", "", s)
     cnt = {s: {"proposed": 0, "removed_unparsable": 0, "removed_ref": 0, "removed_term_in_corpus": 0,
                "removed_overlap_U2": 0, "removed_overlap_dev_test": 0, "removed_dup": 0} for s in OOC_TOPICS}
@@ -160,7 +162,7 @@ def _frozen(path):
 
 def load_sets(split):
     def rd(p):
-        return [json.loads(l) for l in open(p, encoding="utf-8")][1:]
+        return [stdref.loads(l) for l in open(p, encoding="utf-8")][1:]
     b2q, low, ooc = rd(b2.QFILE), rd(REPORTS / "questions_lowoverlap.jsonl"), rd(OOC)
     s = lambda L: [q for q in L if q["split"] == split]
     return {"block2_answerable": [q for q in s(b2q) if q["answerable"]],

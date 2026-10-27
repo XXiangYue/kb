@@ -18,6 +18,8 @@ Description only, for category 2: how many of the rejected answers contain an el
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import json
 import re
 import time
@@ -52,11 +54,11 @@ def spliced(ans: str) -> bool:
 
 
 def main():
-    R = [json.loads(l) for l in open(SRC, encoding="utf-8")]
+    R = [stdref.loads(l) for l in open(SRC, encoding="utf-8")]
     qtext = {}
     for f in SETS.values():
         for l in list(open(REPORTS / f, encoding="utf-8"))[1:]:
-            q = json.loads(l)
+            q = stdref.loads(l)
             qtext[q["qid"]] = q["question"]
     res = {}
     for name, f in SETS.items():

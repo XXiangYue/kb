@@ -10,7 +10,9 @@
       "sha256": "69d2c2c4d33787e83c02d006e376d1c0977fda5da465bb5bacca84a6820565d3",
       "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目（含条文说明的文字版；页眉带第三方汇编水印「消防规范网 gf.1190119.com」）",
       "license": "强制性工程建设规范，住建部发布公告称本规范在住房和城乡建设部门户网站公开，供公众免费阅读；再分发权利未明示，且此文字版为第三方汇编 → 不入库，仅脚本下载。官方 gov.cn 镜像为扫描件无文字层（见 README）。",
-      "mandatory_rule": "doc:statement 全部条文必须严格执行"
+      "mandatory_rule": "doc:statement 全部条文必须严格执行",
+      "text_sha256": "4ccfc3e45bfaef9d55214a7388990c572d334ecee3cd668e0359895cd76df30c",
+      "text_chars": 86168
     },
     {
       "doc_id": "GB46034-2025",
@@ -21,7 +23,9 @@
       "sha256": "c11804fa2e741da6a5767f496fe483602d4e5dd82ac26789368ff1e7629bc41e",
       "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目",
       "license": "强制性国家标准，国家标准全文公开系统（openstd.samr.gov.cn）对强制性国标提供免费在线阅读；版权归标准出版方，再分发权利未明示 → 不入库。",
-      "mandatory_rule": "doc:code 强制性国家标准（代号无 /T），全文强制"
+      "mandatory_rule": "doc:code 强制性国家标准（代号无 /T），全文强制",
+      "text_sha256": "5743f605f89389cce87266b82152ac6101e91e729982d237322a397722680f1d",
+      "text_chars": 16468
     },
     {
       "doc_id": "DB32T4696-2024",
@@ -32,7 +36,9 @@
       "sha256": "8ddc8a5dcef04c495d5d133b641337f85d3e7b06b5b45900b7b50e9f12bdc559",
       "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目",
       "license": "江苏省推荐性地方标准，政府网站公开发布供阅读；再分发权利未明示 → 不入库。",
-      "mandatory_rule": "clause:font 推荐性标准，逐条按黑体/加粗字体启发式判定"
+      "mandatory_rule": "clause:font 推荐性标准，逐条按黑体/加粗字体启发式判定",
+      "text_sha256": "2007aa5f9453a4585f5bbea35b090a6265e56a395db34db779c6956a48952942",
+      "text_chars": 47747
     },
     {
       "doc_id": "DB32T5053-2025",
@@ -43,7 +49,10 @@
       "sha256": "bd675678ac0059da68a2798a04e8210be16d1b40aa137ad3d65d531b214409ff",
       "source": "江苏省消防救援总队官网 js.119.gov.cn「标准规范」栏目",
       "license": "江苏省推荐性地方标准，政府网站公开发布供阅读；再分发权利未明示 → 不入库。",
-      "mandatory_rule": "clause:font 推荐性标准，逐条按黑体/加粗字体启发式判定"
+      "mandatory_rule": "clause:font 推荐性标准，逐条按黑体/加粗字体启发式判定",
+      "text_sha256": "891d13690b473b37301ff75dea016232f1ebd18aca4be41c1d232c9906e9a552",
+      "text_chars": 16458
     }
-  ]
+  ],
+  "note_text_sha256": "text_sha256 / text_chars: the document text produced by `python -m tushen_kb.cli ingest` (pdfparse-1) from the PDF above (table doc_text). Committed artifacts reference standards text only as ⟦std:doc|clause|start+len|sha256-16⟧ offsets into this text; check with `python -m tushen_kb.stdref check`."
 }

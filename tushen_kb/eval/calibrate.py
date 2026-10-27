@@ -10,6 +10,8 @@ Test is not read here except for the overlap check.
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import json
 import re
 import time
@@ -30,7 +32,7 @@ MODE = "hybrid_rerank"
 def load_all():
     qs = []
     for f in QFILES:
-        qs += [json.loads(l) for l in open(f, encoding="utf-8")][1:]
+        qs += [stdref.loads(l) for l in open(f, encoding="utf-8")][1:]
     return qs
 
 
@@ -74,7 +76,7 @@ def main():
     best = sorted(grid, key=lambda g: (g["errors"], -g["_p"], -g["min_coverage"]))[0]
     rep = {"time_local": time.strftime("%Y-%m-%d %H:%M %Z"), "mode": MODE, "rule": __doc__,
            "dev_test_overlap": ov, "n_dev_answerable": len(ans), "n_dev_U2": len(u2),
-           "n_dev_by_file": {f.name: sum(1 for q in [json.loads(l) for l in open(f, encoding='utf-8')][1:]
+           "n_dev_by_file": {f.name: sum(1 for q in [stdref.loads(l) for l in open(f, encoding='utf-8')][1:]
                                          if q["split"] == "dev") for f in QFILES},
            "grid": [{k: v for k, v in g.items() if k != "_p"} for g in grid],
            "chosen_min_coverage": best["min_coverage"]}

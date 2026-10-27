@@ -10,6 +10,7 @@ if command -v uv >/dev/null; then uv pip install --python .venv/bin/python -q -r
 else .venv/bin/pip install -q -r requirements.txt; fi
 PY=.venv/bin/python bash scripts/download_corpus.sh
 .venv/bin/python -m tushen_kb.cli ingest
+.venv/bin/python -m tushen_kb.stdref check
 echo "== smoke =="
 .venv/bin/python -m tushen_kb.cli ask "GB 55037 第4.1.2条" | head -c 600; echo
 .venv/bin/python -m tushen_kb.cli ask "GB 50016 第5.5.17条" | head -c 300; echo

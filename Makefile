@@ -16,3 +16,9 @@ eval-smoke:
 # rebuild report.md / report.json from existing checkpoints + traces (no API calls)
 eval-report:
 	$(PY) -m tushen_kb.eval.agent_eval --suite agent --phase report
+
+# standards-text residual scan over all history (0 = pass; needs local ingest)
+.PHONY: residual
+residual:
+	$(PY) -m tushen_kb.stdref check
+	$(PY) -m tushen_kb.stdref scan --history

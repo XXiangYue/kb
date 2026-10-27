@@ -18,6 +18,8 @@
 """
 from __future__ import annotations
 
+from . import stdref  # resolves standards-text references in committed artifacts
+
 import json
 import os
 import threading
@@ -260,7 +262,7 @@ def cost_usd(provider: str, model: str, usage: dict | None, ts_utc: datetime | N
 # ---------------------------------------------------------------- reading traces back
 def load_spans(path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(l) for l in f if l.strip()]
+        return [stdref.loads(l) for l in f if l.strip()]
 
 
 def trace_tree(spans: list[dict], trace_id: str) -> dict:

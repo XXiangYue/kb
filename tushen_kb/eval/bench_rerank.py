@@ -8,6 +8,8 @@ The first WARMUP queries are excluded.  No memoisation.  No other heavy job runs
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import json
 import os
 import platform
@@ -39,7 +41,7 @@ def main():
     store = Store(str(ROOT / "data" / "tushen.sqlite"))
     qs = []
     for f in ("questions_block2.jsonl", "questions_lowoverlap.jsonl"):
-        qs += [q for q in [json.loads(l) for l in open(REPORTS / f, encoding="utf-8")][1:]
+        qs += [q for q in [stdref.loads(l) for l in open(REPORTS / f, encoding="utf-8")][1:]
                if q["split"] == "test" and q["answerable"]]
     k = SearchConfig().rerank_n
     rr, s_h, s_hr = [], [], []

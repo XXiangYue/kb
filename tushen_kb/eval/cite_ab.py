@@ -11,6 +11,8 @@ Usage: python -m tushen_kb.eval.cite_ab --variable cite_kinds
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import collections
 import json
@@ -63,7 +65,7 @@ def main():
     ap.add_argument("--base", default="{}", help="JSON AskConfig overrides shared by A and B (earlier fixes)")
     a = ap.parse_args()
     store = Store(a.db)
-    qs = [json.loads(l) for l in open(QFILE, encoding="utf-8")]
+    qs = [stdref.loads(l) for l in open(QFILE, encoding="utf-8")]
     test = [q for q in qs if q["type"] != "U" and q["split"] == "test"]
     u_test = [q for q in qs if q["type"] == "U" and q["split"] == "test"]
     base = AskConfig(**{k: tuple(v) if isinstance(v, list) else v for k, v in json.loads(a.base).items()})

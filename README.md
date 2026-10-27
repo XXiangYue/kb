@@ -25,6 +25,26 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 精确 URL 与 sha256 见 `corpus/manifest.json`。由于再分发权利不明确，PDF **不提交到 git**（`.gitignore` 排除 `*.pdf`、`data/`），用 `scripts/download_corpus.sh` 下载并校验 sha256。
 住建部官网（gov.cn）上的 GB 55037 / GB 55034 / GB 50016 官方版本为**扫描件、无文字层**，本原型不做 OCR，故未采用。
 
+### 标准原文需自行获取（仓库不含标准原文）
+
+本仓库**不包含标准正文**：PDF 与解析出的文本（`data/`）都不入库；`reports/` 下的评测题集、逐题结果、trace 中原本逐字出现的标准文字（问句、引用、证据、模型回答里的长段引文）已全部替换为**偏移引用**：
+
+```
+⟦std:<doc_id>|<条号>|<起始偏移>+<长度>|<该片段 sha256 前 16 位>⟧[|<还原编辑>]
+```
+
+偏移指向本地 ingest 生成的文本（`data/tushen.sqlite` 表 `doc_text`，`pdfparse-1`），该文本的 sha256 记录在 `corpus/manifest.json` 的 `text_sha256`。还原编辑（可选）只记录原文中空白和标点的差异，保证还原后与原始评测输入逐字节一致。
+
+使用者须**自行从合法来源获取标准文本**（`scripts/download_corpus.sh` 从来源站点下载并校验 PDF sha256，然后 `ingest`），再：
+
+```bash
+.venv/bin/python -m tushen_kb.stdref check                 # 本地文本 sha256 与 manifest 一致？
+.venv/bin/python -m tushen_kb.stdref resolve reports/questions_block2.jsonl | head   # 用本地文本还原（仅输出到终端）
+.venv/bin/python -m tushen_kb.stdref scan --history        # 残留扫描：工作区 / 全部历史 blob（含 .gz）与提交说明中 ≥20 字的标准原文窗口，0 才通过
+```
+
+所有评测脚本读取 `reports/*.jsonl` 时自动还原（`stdref.loads`），本地文本缺失或 sha256 不符时直接报错，不会静默用错文本。还原后的文本只应留在本地，不要提交。
+
 ## 设计要点
 
 - **解析**（`pdfparse.py`）：按字符基线聚类成行（修复 GB46034 标点/数字字体纵向偏移导致的断行）；表格单独抽取（≥2 行 ≥2 列 ≥40% 非空）；页眉页脚/水印按跨页重复率剔除；`assemble()` 生成归一化全文，**`doc_text[start:end] == chunk.text` 在入库时断言**。

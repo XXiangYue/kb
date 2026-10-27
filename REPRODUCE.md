@@ -30,6 +30,8 @@ PY=.venv/bin/python bash scripts/download_corpus.sh
 
 # 3. 建索引：解析 → 条文级切块 → SQLite FTS5（data/tushen.sqlite）
 .venv/bin/python -m tushen_kb.cli ingest
+# 3b. 校验本地标准文本与 manifest 的 text_sha256 一致（reports/ 中的题集只存偏移引用，评测时用本地文本还原）
+.venv/bin/python -m tushen_kb.stdref check
 
 # 4. 下载两个模型到 models/（经 hf-mirror.com；可用 HF_ENDPOINT 改源）
 bash scripts/download_models.sh

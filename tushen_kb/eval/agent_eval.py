@@ -21,6 +21,8 @@ Design (all fixed BEFORE the run, nothing tuned on the test split):
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import contextvars
 import gzip
@@ -84,7 +86,7 @@ def load_questions(smoke: bool = False, split: str = "test") -> list[dict]:
     qs = []
     for key, f in QFILES.items():
         for line in list(open(REPORTS / f, encoding="utf-8"))[1:]:
-            q = json.loads(line)
+            q = stdref.loads(line)
             if q.get("split") == split:
                 q["set"] = key if key != "block2" else ("block2_U2" if q["type"] == "U2" else "block2_answerable")
                 qs.append(q)
@@ -345,7 +347,7 @@ def run_phase(suite: str, out: Path, no_judge2=False):
     for name, k, Q in plan:
         cfg = make_cfg(name)
         ck = out / f"items_{name}_run{k}.jsonl"
-        done = {json.loads(l)["qid"] for l in open(ck, encoding="utf-8")} if ck.exists() else set()
+        done = {stdref.loads(l)["qid"] for l in open(ck, encoding="utf-8")} if ck.exists() else set()
         t0 = time.time()
         for i, q in enumerate([q for q in Q if q["qid"] not in done]):
             rec = run_item(store, q, name, cfg, llm, judges, k, False, trace_file)
@@ -391,7 +393,7 @@ def judge2_phase(suite: str, out: Path):
         last = {}
         if ck.exists():
             for l in open(ck, encoding="utf-8"):
-                x = json.loads(l)
+                x = stdref.loads(l)
                 last[x["qid"]] = x["j2_correct"]["status"]
         todo = [r for r in items if last.get(r["qid"]) not in ("ok", "unparsable")]
         if not todo:
@@ -439,7 +441,7 @@ def overhead_phase(out: Path, reps: int = 2):
 
 # ------------------------------------------------------------------ report
 def _load(p):
-    return [json.loads(l) for l in open(p, encoding="utf-8")] if p.exists() else []
+    return [stdref.loads(l) for l in open(p, encoding="utf-8")] if p.exists() else []
 
 
 def _rate_ci(xs):
@@ -461,7 +463,7 @@ def _open_traces(out):
     if p.exists():
         return obs.load_spans(p)
     with gzip.open(out / "traces.jsonl.gz", "rt", encoding="utf-8") as f:
-        return [json.loads(l) for l in f if l.strip()]
+        return [stdref.loads(l) for l in f if l.strip()]
 
 
 def config_metrics(R, spans_by_trace):
@@ -669,7 +671,7 @@ def stability(runs, k):
 def prev_version_agreement(R):
     if not PREV_VERSION_RUN.exists():
         return None
-    prev = {json.loads(l)["qid"]: json.loads(l) for l in open(PREV_VERSION_RUN, encoding="utf-8")}
+    prev = {stdref.loads(l)["qid"]: stdref.loads(l) for l in open(PREV_VERSION_RUN, encoding="utf-8")}
     both = [(r, prev[r["qid"]]) for r in R if r["qid"] in prev]
     ans = [(a, b) for a, b in both if a["answerable"]]
     return {"source": "reports/e2e_s1_deepseek_per_question.jsonl (commit 7fdc378, same config, DeepSeek)",

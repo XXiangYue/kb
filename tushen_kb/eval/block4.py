@@ -11,6 +11,8 @@ No model judges anything here; all numbers are program checks against the frozen
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import json
 import sys
 import time
@@ -42,7 +44,7 @@ def a2():
     sets = load_sets("test")
     old = {}
     for l in open(TEST_PQ, encoding="utf-8"):
-        r = json.loads(l)
+        r = stdref.loads(l)
         old[(r["set"], r["qid"])] = r
     # S1 refusal = base refusal (min_cov 0) OR S1 < t, as in 7818948
     cA = AskConfig(search=SearchConfig(mode=MODE), min_coverage=0.0, coverage_strip_doc_refs=False)
@@ -85,7 +87,7 @@ def a2():
 
 
 def _rd(name):
-    return {r["qid"]: r for r in (json.loads(l) for l in open(REPORTS / name, encoding="utf-8"))}
+    return {r["qid"]: r for r in (stdref.loads(l) for l in open(REPORTS / name, encoding="utf-8"))}
 
 
 def _cmp(qids, A, B, refused_a, refused_b, prec):
@@ -123,7 +125,7 @@ def pair(only_a1=False):
             g: _cmp([q for q in s5 if f(s5[q]) and q in B], s5, B, fr, fr, g != "U2_已见过") for g, f in groups.items()}
         ev = {}
         for l in open(TEST_PQ, encoding="utf-8"):
-            r = json.loads(l)
+            r = stdref.loads(l)
             ev.setdefault(r["set"], {})[r["qid"]] = r
         out["b vs 7818948: a=S1 evidence-only b=S1+DeepSeek (effect of adding the LLM stage)"] = {
             k: _cmp([q for q in E if q in B], E, B, lambda r: r["new_refused"], fr, k in ("block2_answerable", "lowoverlap"))

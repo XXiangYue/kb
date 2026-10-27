@@ -7,6 +7,8 @@ No reranker / LLM calls.  Usage: python -m tushen_kb.eval.pool_coverage
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import json
 import time
 from pathlib import Path
@@ -33,13 +35,13 @@ def cov(ranks, k):
 def main():
     t0 = time.time()
     store = Store(str(ROOT / "data" / "tushen.sqlite"))
-    lines = [json.loads(l) for l in open(REPORTS / "questions_block2.jsonl", encoding="utf-8")]
+    lines = [stdref.loads(l) for l in open(REPORTS / "questions_block2.jsonl", encoding="utf-8")]
     ans = [q for q in lines[1:] if q["split"] == "test" and q["answerable"]]
     cfg = SearchConfig(mode="hybrid_rerank", k=10)  # same cfg run_block2 builds; pool/rerank_n/rrf_k default
     K = cfg.rerank_n
     rr = {}
     for l in open(REPORTS / "eval_block2_bm25_rerank_per_question.jsonl", encoding="utf-8"):
-        d = json.loads(l)
+        d = stdref.loads(l)
         rr[d["qid"]] = d
     per, rb, rh = [], [], []
     for q in ans:

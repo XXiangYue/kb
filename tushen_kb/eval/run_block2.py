@@ -29,6 +29,8 @@ Usage: python -m tushen_kb.eval.run_block2
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import json
 import resource
@@ -172,7 +174,7 @@ def main():
     from .. import dense
     _memo(dense)
     qfile = Path(a.qfile)
-    lines = [json.loads(l) for l in open(qfile, encoding="utf-8")]
+    lines = [stdref.loads(l) for l in open(qfile, encoding="utf-8")]
     meta, qs = lines[0], lines[1:]
     test = [q for q in qs if q["split"] == a.split]
     ans = [q for q in test if q["answerable"]]

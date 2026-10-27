@@ -15,6 +15,8 @@ status, tokens, latency, error class - never prompt secrets or keys.
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import json
 import re
@@ -106,10 +108,10 @@ def main():
                      "gate": cfg.gate, "gate_threshold": cfg.gate_threshold}, time.strftime("%H:%M %Z"), flush=True)
     qs = []
     for f in ("questions_block2.jsonl", "questions_lowoverlap.jsonl") + (("questions_ooc_b3.jsonl",) if a.with_ooc else ()):
-        qs += [dict(json.loads(l), _file=f) for l in open(REPORTS / f, encoding="utf-8")][1:]
+        qs += [dict(stdref.loads(l), _file=f) for l in open(REPORTS / f, encoding="utf-8")][1:]
     qs = [q for q in qs if q.get("split") == "test"]
     ck = REPORTS / f"{a.out}_per_question.jsonl"
-    done = {json.loads(l)["qid"] for l in open(ck, encoding="utf-8")} if ck.exists() else set()
+    done = {stdref.loads(l)["qid"] for l in open(ck, encoding="utf-8")} if ck.exists() else set()
     todo = [q for q in qs if q["qid"] not in done]
     for i in range(0, len(todo), a.batch):
         b = todo[i:i + a.batch]
@@ -124,7 +126,7 @@ def main():
 
 
 def summarize(ck: Path, out: str, cfg):
-    R = [json.loads(l) for l in open(ck, encoding="utf-8")]
+    R = [stdref.loads(l) for l in open(ck, encoding="utf-8")]
     res = {}
     kou = "口径B" if cfg.coverage_strip_doc_refs else "口径A"
     for name, sel in (("block2_test", lambda r: r["file"] == "questions_block2.jsonl"),

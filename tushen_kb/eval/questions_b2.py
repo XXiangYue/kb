@@ -20,6 +20,8 @@ Usage: python -m tushen_kb.eval.questions_b2 build   -> reports/questions_block2
 """
 from __future__ import annotations
 
+from .. import stdref  # resolves standards-text references in committed artifacts
+
 import argparse
 import json
 import random
@@ -381,7 +383,7 @@ def build(store: Store, sizes: dict, seed: int = 2026):
 
 
 def load() -> tuple[dict, list]:
-    lines = [json.loads(l) for l in open(QFILE, encoding="utf-8")]
+    lines = [stdref.loads(l) for l in open(QFILE, encoding="utf-8")]
     return lines[0]["_meta"], lines[1:]
 
 
