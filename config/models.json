@@ -25,19 +25,19 @@
     },
     {
       "role": "judge2",
-      "provider": "openrouter",
-      "family": "google",
-      "base_url": "https://openrouter.ai/api/v1",
-      "model": "google/gemini-3.8-flash",
-      "api_key_env": "OPENROUTER_API_KEY",
+      "provider": "xiaomi-mimo",
+      "family": "xiaomi-mimo",
+      "base_url": "https://token-plan-cn.xiaomimimo.com/v1",
+      "model": "mimo-v2.6-pro",
+      "api_key_env": "MIMO_API_KEY",
       "auth_header": "Authorization",
       "max_retries": 3,
       "backoff_base_s": 10.0,
-      "timeout_s": 180.0,
+      "timeout_s": 120.0,
       "min_max_tokens": 0,
-      "_history": "block-1 run2 used OpenRouter google/gemma-4-31b-it:free with fallback nvidia/nemotron-3-ultra-550b-a55b:free (records kept in reports/historical/). The earlier relay judge2 endpoint is retired and removed (2026-10-27).",
-      "_removed": "backup judge gpt-5.6-luna removed 2026-10-27: its relay answered as a different model (gpt-5.6-terra), suspected hidden prompt injection; banned for any use. judge2 = one model only, never switched; failures are reported as coverage x/N.",
-      "_agent_eval": "tushen_kb.eval.agent_eval overrides judge2 with Xiaomi MiMo mimo-v2.6-pro (amendment A1): this OpenRouter key had a $0 limit (HTTP 403) on 2026-10-27."
+      "shared_family_ok": true,
+      "_history": "judge2 = Xiaomi MiMo mimo-v2.6-pro, the model actually used by the agent eval (amendment A1, commit 734ae6b; reports/agent_eval/judge_calls.jsonl). Same family as judge1 (weaker independence, reported), different model; still a different family/provider from the DeepSeek generator. Block-1 rejudge used OpenRouter google/gemini-3.8-flash (records in reports/judgments_block1_v2_records.jsonl); the OpenRouter key later had a $0 limit (HTTP 403), so it is no longer the configured judge2. Block-1 run2 OpenRouter gemma/nemotron records are kept in reports/historical/. The earlier relay judge2 endpoint is retired and removed.",
+      "_removed": "backup judge gpt-5.6-luna removed 2026-10-27: its relay answered as a different model (gpt-5.6-terra), suspected hidden prompt injection; banned for any use. judge2 = one model only, never switched; failures are reported as coverage x/N."
     }
   ]
 }

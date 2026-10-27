@@ -44,6 +44,7 @@ class ModelSpec:
     backoff_base_s: float = 1.0
     min_max_tokens: int = 0
     timeout_s: float = 60.0
+    shared_family_ok: bool = False  # explicit opt-in: judge may share family with another judge (different model)
 
     def families(self) -> list[str]:
         fs = [self.family] + [f.get("family") for f in (self.fallback_models or [])]
@@ -106,7 +107,7 @@ def validate(gen: ModelSpec, judges: list[ModelSpec]) -> None:
         for fam in j.families():
             if gfam and fam == gfam:
                 raise ConfigError(f"{j.role}: judge family '{fam}' equals generator family — not allowed")
-            if fam in seen and seen[fam] != j.role:
+            if fam in seen and seen[fam] != j.role and not j.shared_family_ok:
                 raise ConfigError(f"{j.role}: family '{fam}' already used by {seen[fam]} — judges must differ")
             seen[fam] = j.role
         if gen.provider and j.provider and j.provider.lower() == gen.provider.lower() and gen.provider != "openrouter":

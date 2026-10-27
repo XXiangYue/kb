@@ -31,6 +31,21 @@
   - 不可答 82 题：block2_U2 31、ooc_b3 51。
 - **“工具调用”的含义**：`ask` 是固定流水线，没有由 LLM 自主选择工具的环节，所以“工具调用成功率”在这里是固定步骤的成功率。步骤依次为 existence_check → retrieve{bm25, vector, rrf, rerank, clause_route} → evidence_gate → rerank_gate → cite → generate → verify_quotes。
 
+## 2.1 本评测 414 题与 Block 2 检索评测 214 题的关系
+
+由数据文件核对（`load_questions()`，`tushen_kb/eval/agent_eval.py`）：
+
+| 子集 | 文件（test 划分） | 题数 | 可答 | 怎么来的 |
+|---|---|---|---|---|
+| block2_answerable | `reports/questions_block2.jsonl`（type T2 88 / P 36 / T4 34 / T3 31 / T5 25） | 214 | 是 | DeepSeek 按条文出题/改写，程序过滤（seed 2026，见文件 `_meta`） |
+| block2_U2 | 同上（type U2） | 31 | 否 | 同文件中的不可答题 |
+| lowoverlap | `reports/questions_lowoverlap.jsonl`（type L） | 118 | 是 | 口语化、低词面重叠出题（seed 2027） |
+| ooc_b3 | `reports/questions_ooc_b3.jsonl`（type OOC） | 51 | 否 | 库外主题问题 |
+
+- **214 是 414 的真子集**：Block 2 检索评测的 Recall@5 192→208/214、MRR 0.761→0.876 来自 `reports/block2_report_zh.md`，逐题结果 `reports/eval_block2_bm25_rerank_per_question.jsonl` 的 214 个 qid 与本评测 `block2_answerable` 的 214 个 qid 完全相同（交集 214/214），也都出现在 `reports/agent_eval/items_system_run1.jsonl` 中。
+- **度量不同**：214 题那组是**只测检索**（gold 条文是否进前 5、MRR，不调 LLM）；本评测是**端到端**（检索 + 拒答门控 + LLM 回答 + 引文校验，再由 judge 判正确），另加 200 题（U2 31 + 低重叠 118 + 库外 51）。
+- 本评测 system 在这 214 题上的任务成功为 151/214，在 lowoverlap 118 题上为 52/118，U2 31/31、ooc_b3 51/51（来自 `items_system_run1.jsonl`）。检索命中（208/214）与端到端成功（151/214）不是同一个指标，不可互换引用。
+
 ## 3. 任务成功率（bootstrap 95% CI，2000 次，seed 0）
 
 | 指标（分母） | system | baseline_bm25 |

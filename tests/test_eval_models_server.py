@@ -122,8 +122,9 @@ def test_server_roundtrip(store, tmp_path):
 def test_repo_judge2_is_third_family():
     gen, judges = load_models()
     fams = [f for j in judges if j.configured for f in j.families()]
-    assert "deepseek" not in fams and len(fams) == len(set(fams))
-    assert judges[1].model == "google/gemini-3.8-flash"
+    assert "deepseek" not in fams
+    assert judges[1].model == "mimo-v2.6-pro" and judges[1].shared_family_ok
+    assert judges[0].model != judges[1].model
 
 
 def test_fallback_family_equal_to_generator_rejected():
@@ -207,9 +208,20 @@ def test_banned_and_backup_judges_rejected():
         _spec({"role": "judge2", "model": "gemini-3.8-flash", "backup_models": [{"model": "m", "family": "f"}]})
 
 
-def test_config_judge2_is_openrouter_gemini():
+def test_config_judge2_is_mimo_pro():
     _, js = load_models()
     j2 = [j for j in js if j.role == "judge2"][0]
-    assert j2.model == "google/gemini-3.8-flash" and j2.family == "google" and not j2.fallback_models
-    assert j2.provider == "openrouter" and j2.base_url == "https://openrouter.ai/api/v1"
-    assert j2.timeout_s >= 180 and j2.api_key_env == "OPENROUTER_API_KEY"
+    assert j2.model == "mimo-v2.6-pro" and j2.family == "xiaomi-mimo" and not j2.fallback_models
+    assert j2.provider == "xiaomi-mimo" and j2.base_url == "https://token-plan-cn.xiaomimimo.com/v1"
+    assert j2.api_key_env == "MIMO_API_KEY"
+    from tushen_kb.eval.agent_eval import JUDGE2_SPEC
+    assert JUDGE2_SPEC["model"] == j2.model and JUDGE2_SPEC["base_url"] == j2.base_url
+
+
+def test_shared_family_requires_opt_in():
+    gen = spec("generator", "deepseek", "deepseek")
+    j1, j2 = spec("judge1", "xiaomi-mimo", "xiaomi-mimo"), spec("judge2", "xiaomi-mimo", "xiaomi-mimo")
+    with pytest.raises(ConfigError):
+        validate(gen, [j1, j2])
+    j2.shared_family_ok = True
+    validate(gen, [j1, j2])

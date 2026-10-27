@@ -38,7 +38,7 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 |---|---|---|---|---|
 | 生成 | DeepSeek | deepseek | deepseek-flash | `DEEPSEEK_API_KEY` |
 | 裁判 1 | 小米 MiMo | xiaomi-mimo | mimo-v2.6-flash | `MIMO_API_KEY` |
-| 裁判 2 | OpenRouter（`https://openrouter.ai/api/v1`） | google | `google/gemini-3.8-flash`（timeout 180s，指数退避，只用这一个模型，从不切换；持续失败时报告覆盖率 x/N）。Agent 端到端评测（`tushen_kb.eval.agent_eval`）因该 key 额度为 0（HTTP 403），按修订 A1 改用 Xiaomi MiMo `mimo-v2.6-pro` 作 judge2。已禁用模型 gpt-5.6-luna / gpt-5.6-terra 会被配置校验拒绝（含任何 backup_models） | `OPENROUTER_API_KEY` |
+| 裁判 2 | Xiaomi MiMo（`https://token-plan-cn.xiaomimimo.com/v1`） | xiaomi-mimo | `mimo-v2.6-pro`（Agent 端到端评测实际使用的 judge2，修订 A1；与裁判 1 同族不同模型，`shared_family_ok` 显式声明，独立性偏弱，报告中已注明；只用这一个模型，从不切换，持续失败时报告覆盖率 x/N）。Block 1 双裁判重判当时用的是 OpenRouter `google/gemini-3.8-flash`，该 key 之后额度为 0（HTTP 403），已不再作为配置项；其历史记录保留在 `reports/`。已禁用模型 gpt-5.6-luna / gpt-5.6-terra 会被配置校验拒绝（含任何 backup_models） | `MIMO_API_KEY` |
 
 - 配置校验：任何裁判（含回退模型）的 family ≠ 生成模型 family，两位裁判 family 互不相同 → **DeepSeek 永远不能当裁判**。
 - key 只在调用时从环境读取，不写入日志/仓库/产物；无 key → 状态 `skipped`，绝不伪造结果。
@@ -58,7 +58,9 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 
 产物：`reports/eval_block1.json`（结果）、`reports/questions_block1.jsonl`（冻结题集）、`reports/historical/`（已弃用的 judge2 首跑记录）。
 
-### 双裁判重判（judge2 = gemini-3.8-flash）
+### 双裁判重判（历史记录：当时 judge2 = gemini-3.8-flash）
+
+> 注：`config/models.json` 的 judge2 现为 MiMo `mimo-v2.6-pro`。下列数字是当时用 OpenRouter gemini-3.8-flash 跑出的已提交记录；现在重跑该命令会用 mimo-v2.6-pro，结果不保证相同。
 
 冻结题项 `reports/judge_items_block1.jsonl`（含 prompt；Block 1 run2 的生成答案未持久化，故用同样 6 道 T1 题重新生成 6 个 DeepSeek 答案 + 6 个程序篡改版 + 4 道二选一×2 顺序 = 每裁判 20 条判定）。命令：`python -m tushen_kb.eval.rejudge judge` 后 `... rejudge retry --role judge2`（仅对失败项同模型同 prompt 重试，被替换的失败记录保留在 `reports/judgments_block1_v2_superseded_failures.jsonl` 并计入调用数）。
 

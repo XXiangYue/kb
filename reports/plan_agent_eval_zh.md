@@ -29,6 +29,7 @@
 | ooc_b3 | questions_ooc_b3.jsonl (test) | 51 | 不可答（库外） | — |
 
 - 合计可答 332 题，不可答 82 题。
+- Block 2 检索评测的指标（Recall@5 192→208/214、MRR 0.761→0.876）用的正是 block2_answerable 这 214 题（qid 完全相同），但只测检索；本评测是同一 214 题加另外 200 题的端到端评测，两组数字不可互换。详见报告 §2.1。
 - dev 划分只用于调试评测脚本是否跑通（`--suite dev_smoke`），其结果不报告。**不在任何划分上调提示词、阈值或参数**：system 与 baseline 的参数全部沿用已提交的版本。
 - 冒烟子集：4 个子集各取 qid 排序后的前 5 题，共 20 题；稳定性部分取其中前 5 题，k=3；不跑 judge2。
 
@@ -167,7 +168,7 @@ trace_example.json 的选取规则：优先选一个“生成幻觉”题；没�
 
 ## 10. 修订 A1（2026-10-27 21:55 NZDT，于 judge2 阶段运行前提交）
 
-- 背景：主运行进行到 system run1 第 174/414 题时，按负责人的指示，judge2 应使用“OpenRouter Gemini flash（若有额度），否则用 MiMo”，不得使用 uuapi。
+- 背景：主运行进行到 system run1 第 174/414 题时，按负责人的指示，judge2 应使用“OpenRouter Gemini flash（若有额度），否则用 MiMo”，不得使用已停用的中转站。
 - 复查结果：同日 21:51 NZDT 复查 OpenRouter 密钥，`limit=0`、`is_free_tier=true`，`google/gemini-3.8-flash` 仍返回 HTTP 403 “Key limit exceeded”。因此 judge2 由 §6 的 `google/gemma-4-26b-a4b-it:free` 改为 **Xiaomi MiMo `mimo-v2.6-pro`**，与 judge1 使用相同的 token-plan 端点，关闭 thinking，max_tokens 16，提示词与 judge1 的 correctness 相同。
 - 独立性：judge2 与 judge1 同属 xiaomi-mimo 家族，但不是同一模型（pro 与 flash，有断言保证）。两者都与被测的 DeepSeek 生成模型不同 provider、不同 family（对两个裁判分别调用 `llm.validate` 检查）。同家族两裁判的一致率可能偏高，结果中将作为限制说明。
 - 不变项：抽样（seed 20261027，60 题，上限 45 题）、调用与重试策略、分歧裁决规则（主结果只用 judge1，judge2 只用于一致率、κ 和 AND 规则敏感性分析）、其余所有指标与阈值。
