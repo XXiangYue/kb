@@ -20,6 +20,8 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import obs
+
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_CONFIG = ROOT / "config" / "models.json"
 
@@ -142,20 +144,41 @@ class ChatModel:
         rec = {"role": sp.role, "provider": sp.provider, "family": sp.family, "model_name": sp.model,
                "model_version": None, "status": sp.status(), "text": None, "usage": None, "ms": None,
                "error": None, "attempts": [], "fallback_used": False}
-        if rec["status"] != "ready":
+        with obs.span(f"chat {sp.model}", kind="CLIENT", **{
+                "gen_ai.operation.name": "chat", "gen_ai.provider.name": sp.provider, "gen_ai.request.model": sp.model,
+                "gen_ai.request.max_tokens": max_tokens, "gen_ai.request.temperature": temperature,
+                "tushen.role": sp.role, "tushen.family": sp.family,
+                "tushen.prompt_chars": sum(len(m.get("content") or "") for m in messages)}) as sp_:
+            if rec["status"] != "ready":
+                obs.set_attrs(sp_, **{"tushen.status": rec["status"]})
+                return rec
+            ts = obs.now_utc()
+            t0 = time.perf_counter()
+            chain = [(sp.model, sp.family, sp.min_max_tokens or 0)] + [
+                (f["model"], f["family"], f.get("min_max_tokens", 0)) for f in (sp.fallback_models or [])]
+            for i, (model, fam, mmt) in enumerate(chain):
+                ok, out = self._try_model(model, messages, max(max_tokens, mmt), temperature, rec)
+                rec.update(model_name=model, family=fam, fallback_used=i > 0)
+                if ok:
+                    rec.update(status="ok", error=None, **out)
+                    break
+                rec.update(status="error", error=out.get("error"))
+            rec["ms"] = round((time.perf_counter() - t0) * 1000)
+            u = rec.get("usage") or {}
+            rec["cost_usd"] = obs.cost_usd(sp.provider, rec["model_name"], u, ts)
+            for a in rec["attempts"]:
+                if a["status"] != "ok":
+                    sp_.add_event("gen_ai.attempt.failed", {"attempt": a["attempt"], "http.status": a.get("http") or 0})
+            obs.set_attrs(sp_, **{
+                "gen_ai.response.model": rec.get("model_version"), "gen_ai.usage.input_tokens": u.get("prompt_tokens"),
+                "gen_ai.usage.output_tokens": u.get("completion_tokens"),
+                "tushen.usage.cache_hit_tokens": obs.cache_hit_tokens(u) if u else None,
+                "tushen.cost_usd": rec["cost_usd"], "tushen.provider_cost_usd": u.get("cost"),
+                "tushen.attempts": len(rec["attempts"]), "tushen.fallback_used": rec["fallback_used"],
+                "tushen.status": rec["status"], "tushen.completion_chars": len(rec.get("text") or "")})
+            if rec["status"] != "ok":
+                obs.set_error(sp_, "http_or_network", rec.get("error") or "")
             return rec
-        t0 = time.perf_counter()
-        chain = [(sp.model, sp.family, sp.min_max_tokens or 0)] + [
-            (f["model"], f["family"], f.get("min_max_tokens", 0)) for f in (sp.fallback_models or [])]
-        for i, (model, fam, mmt) in enumerate(chain):
-            ok, out = self._try_model(model, messages, max(max_tokens, mmt), temperature, rec)
-            rec.update(model_name=model, family=fam, fallback_used=i > 0)
-            if ok:
-                rec.update(status="ok", error=None, **out)
-                break
-            rec.update(status="error", error=out.get("error"))
-        rec["ms"] = round((time.perf_counter() - t0) * 1000)
-        return rec
 
     def _try_model(self, model, messages, max_tokens, temperature, rec) -> tuple[bool, dict]:
         sp = self.spec

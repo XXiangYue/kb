@@ -1,0 +1,2 @@
+# Optional tracing (tushen_kb/obs.py).  Without it every span is a no-op.
+opentelemetry-sdk==1.45.1

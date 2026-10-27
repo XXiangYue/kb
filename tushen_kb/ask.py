@@ -16,6 +16,7 @@ import time
 from dataclasses import asdict, dataclass, field
 from typing import Callable
 
+from . import obs
 from .cite import format_ref, locate, pick_quote, verify_citation, verify_quote
 from .llm import count_tokens
 from .search import STD_IN_QUERY, SearchConfig, resolve_docs, search
@@ -77,7 +78,27 @@ def _coverage(query: str, text: str) -> float:
 
 def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
         context_hooks: list[ContextHook] | None = None) -> dict:
+    """Run the pipeline.  With tracing on (tushen_kb.obs) every step is a span under ``kb.ask``;
+    a refusing step carries kb.step.outcome="refuse" + kb.refusal_reason, the root carries the
+    final outcome, and ``trace["otel"]`` holds the trace/span ids for linking."""
     cfg = cfg or AskConfig()
+    with obs.span("kb.ask", kind="SERVER", **{"gen_ai.operation.name": "invoke_agent",
+                                              "gen_ai.agent.name": "tushen-kb.ask", "kb.query": query,
+                                              "kb.search.mode": cfg.search.mode, "kb.gate": cfg.gate,
+                                              "kb.gate_threshold": cfg.gate_threshold,
+                                              "kb.min_coverage": cfg.min_coverage,
+                                              "kb.n_evidence": cfg.n_evidence}) as root:
+        r = _ask(store, query, cfg, llm, context_hooks, root)
+        obs.set_attrs(root, **{"kb.refused": r["refused"], "kb.refusal_reason": r["refusal_reason"],
+                               "kb.refusal_step": r["trace"].get("refusal_step"), "kb.mode": r.get("mode"),
+                               "kb.citation_chunk_ids": [c["chunk_id"] for c in r["citations"]]})
+        if root.is_recording():
+            ctx = root.get_span_context()
+            r["trace"]["otel"] = {"trace_id": format(ctx.trace_id, "032x"), "span_id": format(ctx.span_id, "016x")}
+        return r
+
+
+def _ask(store, query, cfg, llm, context_hooks, root) -> dict:
     if cfg.gate not in GATES:
         raise ValueError(f"unknown gate {cfg.gate}")
     if cfg.gate == "rerank_top" and cfg.search.mode not in ("hybrid_rerank", "bm25_rerank"):
@@ -93,69 +114,95 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
     def stage(name, **kw):
         trace["stages"].append({"stage": name, "ms": round((time.perf_counter() - t0) * 1000, 1), **kw})
 
-    def refuse(reason: str, evidence=None):
+    def refuse(reason: str, sp, step: str, evidence=None):
         stage("refuse", reason=reason)
+        trace["refusal_step"] = step
+        obs.set_attrs(sp, **{"kb.step.outcome": "refuse", "kb.refusal_reason": reason})
         return {"query": query, "refused": True, "refusal_reason": reason, "answer": None,
                 "evidence": evidence or [], "citations": [], "trace": trace}
 
+    def step(name, **attrs):
+        return obs.span(f"kb.{name}", **{"gen_ai.operation.name": "execute_tool", "gen_ai.tool.name": name, **attrs})
+
     # 1. existence checks: standard code / clause number that the corpus does not contain
-    matched_docs, missing_codes = resolve_docs(store, query)
-    if missing_codes:
-        return refuse(f"语料库中不存在标准 {', '.join(missing_codes)}")
-    for m in EXPLICIT_CLAUSE.finditer(query):
-        no = m.group(1) or m.group(2)
-        exists = any(store.clause_exists(no, d) for d in matched_docs) if matched_docs else store.clause_exists(no)
-        if not exists:
-            return refuse(f"语料库中不存在第 {no} 条" + (f"（限定 {', '.join(matched_docs)}）" if matched_docs else ""))
+    with step("existence_check") as sp:
+        matched_docs, missing_codes = resolve_docs(store, query)
+        obs.set_attrs(sp, **{"kb.matched_docs": matched_docs, "kb.missing_codes": missing_codes})
+        if missing_codes:
+            return refuse(f"语料库中不存在标准 {', '.join(missing_codes)}", sp, "existence_check")
+        for m in EXPLICIT_CLAUSE.finditer(query):
+            no = m.group(1) or m.group(2)
+            exists = any(store.clause_exists(no, d) for d in matched_docs) if matched_docs else store.clause_exists(no)
+            if not exists:
+                return refuse(f"语料库中不存在第 {no} 条" + (f"（限定 {', '.join(matched_docs)}）" if matched_docs else ""),
+                              sp, "existence_check")
+        sp.set_attribute("kb.step.outcome", "pass")
     stage("existence_check", matched_docs=matched_docs)
 
     # 2. retrieve
-    hits = search(store, query, cfg.search)
-    stage("retrieve", n_hits=len(hits))
-    if not hits:
-        return refuse("未检索到相关条文")
+    with step("retrieve", **{"kb.search.mode": cfg.search.mode, "kb.search.k": cfg.search.k}) as sp:
+        hits = search(store, query, cfg.search)
+        obs.set_attrs(sp, **{"kb.n_hits": len(hits), "kb.hit_chunk_ids": [h["chunk_id"] for h in hits],
+                             "kb.hit_routes": [h.get("route") or "" for h in hits]})
+        stage("retrieve", n_hits=len(hits))
+        if not hits:
+            return refuse("未检索到相关条文", sp, "retrieve")
+        sp.set_attribute("kb.step.outcome", "pass")
 
     # 3. evidence gate
-    docs = {d["doc_id"]: d for d in store.docs()}
-    evidence = []
-    cov_query = strip_doc_refs(query, [d["title"] for d in docs.values()]) if cfg.coverage_strip_doc_refs else query
-    trace["coverage_query"] = cov_query
-    for h in hits[:cfg.n_evidence]:
-        cov = _coverage(cov_query, h["text"]) if h.get("route") != "clause_route" else 1.0
-        evidence.append({"chunk_id": h["chunk_id"], "doc_id": h["doc_id"], "kind": h["kind"],
-                         "clause_no": h["clause_no"], "page_start": h["page_start"], "page_end": h["page_end"],
-                         "char_start": h["char_start"], "char_end": h["char_end"], "score": h["score"],
-                         "route": h.get("route"), "coverage": round(cov, 3), "is_mandatory": bool(h["is_mandatory"]),
-                         "text": h["text"]})
-    top_cov = max(e["coverage"] for e in evidence)
-    stage("evidence_gate", top_coverage=top_cov)
-    if top_cov < min_cov:
-        return refuse(f"证据不足（最高覆盖率 {top_cov:.2f} < 阈值 {cfg.min_coverage}）", evidence)
+    with step("evidence_gate", **{"kb.min_coverage": min_cov}) as sp:
+        docs = {d["doc_id"]: d for d in store.docs()}
+        evidence = []
+        cov_query = strip_doc_refs(query, [d["title"] for d in docs.values()]) if cfg.coverage_strip_doc_refs else query
+        trace["coverage_query"] = cov_query
+        for h in hits[:cfg.n_evidence]:
+            cov = _coverage(cov_query, h["text"]) if h.get("route") != "clause_route" else 1.0
+            evidence.append({"chunk_id": h["chunk_id"], "doc_id": h["doc_id"], "kind": h["kind"],
+                             "clause_no": h["clause_no"], "page_start": h["page_start"], "page_end": h["page_end"],
+                             "char_start": h["char_start"], "char_end": h["char_end"], "score": h["score"],
+                             "route": h.get("route"), "coverage": round(cov, 3), "is_mandatory": bool(h["is_mandatory"]),
+                             "text": h["text"]})
+        top_cov = max(e["coverage"] for e in evidence)
+        obs.set_attrs(sp, **{"kb.evidence_chunk_ids": [e["chunk_id"] for e in evidence], "kb.top_coverage": top_cov,
+                             "kb.evidence_tokens_est": sum(count_tokens(e["text"]) for e in evidence)})
+        stage("evidence_gate", top_coverage=top_cov)
+        if top_cov < min_cov:
+            return refuse(f"证据不足（最高覆盖率 {top_cov:.2f} < 阈值 {cfg.min_coverage}）", sp, "evidence_gate", evidence)
+        sp.set_attribute("kb.step.outcome", "pass")
     if cfg.gate == "rerank_top":
-        logits = [e["score"] for e in evidence if e.get("route") == "rerank"]
-        s1 = 1 / (1 + math.exp(-max(logits))) if logits else 0.0
-        stage("rerank_gate", s1=round(s1, 4), threshold=cfg.gate_threshold)
-        if s1 < cfg.gate_threshold:
-            return refuse(f"证据不足（rerank 最高分 {s1:.3f} < 阈值 {cfg.gate_threshold}）", evidence)
+        with step("rerank_gate", **{"kb.gate_threshold": cfg.gate_threshold}) as sp:
+            logits = [e["score"] for e in evidence if e.get("route") == "rerank"]
+            s1 = 1 / (1 + math.exp(-max(logits))) if logits else 0.0
+            sp.set_attribute("kb.s1", round(s1, 4))
+            stage("rerank_gate", s1=round(s1, 4), threshold=cfg.gate_threshold)
+            if s1 < cfg.gate_threshold:
+                return refuse(f"证据不足（rerank 最高分 {s1:.3f} < 阈值 {cfg.gate_threshold}）", sp, "rerank_gate", evidence)
+            sp.set_attribute("kb.step.outcome", "pass")
 
     # 4. citations, each verified verbatim against stored text
-    citations = []
-    texts = {}
-    for e, h in zip(evidence, hits):
-        if e["coverage"] < min_cov or h["kind"] not in cfg.cite_kinds:
-            continue
-        if h["doc_id"] not in texts:
-            texts[h["doc_id"]] = store.doc_text(h["doc_id"])
-        quote = pick_quote(query, h["text"])
-        cit = {"chunk_id": h["chunk_id"], "quote": quote, "ref": format_ref(docs[h["doc_id"]], h),
-               "doc_id": h["doc_id"], "clause_no": h["clause_no"], "page_start": h["page_start"]}
-        cit["char_start"], cit["char_end"] = locate(cit, h)
-        cit["verified"] = verify_citation(cit, h, texts[h["doc_id"]])
-        if cit["verified"]:
-            citations.append(cit)
-    stage("cite", n_verified=len(citations))
-    if not citations:
-        return refuse("没有通过原文校验的引用", evidence)
+    with step("cite") as sp:
+        citations = []
+        texts = {}
+        n_tried = 0
+        for e, h in zip(evidence, hits):
+            if e["coverage"] < min_cov or h["kind"] not in cfg.cite_kinds:
+                continue
+            n_tried += 1
+            if h["doc_id"] not in texts:
+                texts[h["doc_id"]] = store.doc_text(h["doc_id"])
+            quote = pick_quote(query, h["text"])
+            cit = {"chunk_id": h["chunk_id"], "quote": quote, "ref": format_ref(docs[h["doc_id"]], h),
+                   "doc_id": h["doc_id"], "clause_no": h["clause_no"], "page_start": h["page_start"]}
+            cit["char_start"], cit["char_end"] = locate(cit, h)
+            cit["verified"] = verify_citation(cit, h, texts[h["doc_id"]])
+            if cit["verified"]:
+                citations.append(cit)
+        obs.set_attrs(sp, **{"kb.n_citation_candidates": n_tried, "kb.n_verified": len(citations),
+                             "kb.citation_chunk_ids": [c["chunk_id"] for c in citations]})
+        stage("cite", n_verified=len(citations))
+        if not citations:
+            return refuse("没有通过原文校验的引用", sp, "cite", evidence)
+        sp.set_attribute("kb.step.outcome", "pass")
 
     # 5. context hooks (future: Skills) + optional LLM
     state = {"evidence": evidence, "citations": citations}
@@ -168,22 +215,35 @@ def ask(store: Store, query: str, cfg: AskConfig | None = None, llm=None,
     trace["context_log"].append({"source": "evidence", "tokens": ev_tokens})
     answer, llm_call = None, None
     if llm is not None:
-        prompt = build_prompt(query, evidence, state.get("context", []))
-        trace["context_log"].append({"source": "prompt_total", "tokens": count_tokens(prompt)})
-        llm_call = llm.complete([{"role": "user", "content": prompt}], max_tokens=400)
-        trace["llm_call"] = {k: llm_call.get(k) for k in ("role", "provider", "family", "model_name",
-                                                          "model_version", "status", "usage", "ms", "error")}
-        if llm_call["status"] != "ok":
-            stage("llm", status=llm_call["status"])  # skipped/error: fall back to evidence-only
-        else:
-            answer = llm_call["text"] or ""
-            if "无法回答" in answer[:20]:
-                return refuse("生成模型判定证据不足", evidence)
-            quotes = re.findall(r"「([^」]{4,})」", answer)
-            bad = [q for q in quotes if not any(verify_quote(q, e["text"])[0] for e in evidence)]
-            stage("llm", status="ok", n_quotes=len(quotes), n_bad_quotes=len(bad))
-            if not quotes or bad:
-                return refuse("生成答案中的引文未通过原文校验" if bad else "生成答案未给出原文引文", evidence)
+        with step("generate") as sp:
+            prompt = build_prompt(query, evidence, state.get("context", []))
+            trace["context_log"].append({"source": "prompt_total", "tokens": count_tokens(prompt)})
+            llm_call = llm.complete([{"role": "user", "content": prompt}], max_tokens=400)
+            trace["llm_call"] = {k: llm_call.get(k) for k in ("role", "provider", "family", "model_name",
+                                                              "model_version", "status", "usage", "ms", "error")}
+            sp.set_attribute("kb.llm_status", llm_call["status"])
+            if llm_call["status"] != "ok":
+                stage("llm", status=llm_call["status"])  # skipped/error: fall back to evidence-only
+                sp.set_attribute("kb.step.outcome", "fallback_evidence_only")
+                if llm_call["status"] == "error":
+                    obs.set_error(sp, "llm_call_failed", llm_call.get("error") or "")
+            else:
+                answer = llm_call["text"] or ""
+                if "无法回答" in answer[:20]:
+                    return refuse("生成模型判定证据不足", sp, "generate", evidence)
+                sp.set_attribute("kb.step.outcome", "pass")
+        if answer is not None:
+            with step("verify_quotes") as sp:
+                quotes = re.findall(r"「([^」]{4,})」", answer)
+                src = [[e["chunk_id"] for e in evidence if verify_quote(q, e["text"])[0]] for q in quotes]
+                bad = [q for q, s_ in zip(quotes, src) if not s_]
+                obs.set_attrs(sp, **{"kb.n_quotes": len(quotes), "kb.n_bad_quotes": len(bad),
+                                     "kb.quote_source_chunk_ids": sorted({c for s_ in src for c in s_})})
+                stage("llm", status="ok", n_quotes=len(quotes), n_bad_quotes=len(bad))
+                if not quotes or bad:
+                    return refuse("生成答案中的引文未通过原文校验" if bad else "生成答案未给出原文引文", sp,
+                                  "verify_quotes", evidence)
+                sp.set_attribute("kb.step.outcome", "pass")
     mode = "llm_answer" if answer is not None else "evidence_only"
     stage("done", llm=(llm_call or {}).get("model_name") or "none")
     return {"query": query, "refused": False, "refusal_reason": None, "answer": answer,

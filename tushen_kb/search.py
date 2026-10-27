@@ -14,6 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from . import obs
 from .store import Store
 from .tokenize import fts_query
 
@@ -63,20 +64,43 @@ def search(store: Store, q: str, cfg: SearchConfig | None = None) -> list[dict]:
         raise ValueError(f"unknown mode {cfg.mode}")
     doc_ids: list[str] = resolve_docs(store, q)[0] if cfg.std_filter else []
     if cfg.mode == "keyword":
-        rows = _bm25_pool(store, q, cfg, doc_ids)
+        rows = _traced("bm25", _bm25_pool, store, q, cfg, doc_ids)
     elif cfg.mode == "bm25_rerank":
-        rows = _rerank(q, _bm25_pool(store, q, cfg, doc_ids), cfg.rerank_n)
+        rows = _traced_rerank(q, _traced("bm25", _bm25_pool, store, q, cfg, doc_ids), cfg.rerank_n)
     elif cfg.mode == "vector":
-        rows = _vector_pool(store, q, cfg, doc_ids)
+        rows = _traced("vector", _vector_pool, store, q, cfg, doc_ids)
     else:
-        rows = _rrf(_bm25_pool(store, q, cfg, doc_ids), _vector_pool(store, q, cfg, doc_ids), cfg.rrf_k)
+        a = _traced("bm25", _bm25_pool, store, q, cfg, doc_ids)
+        b = _traced("vector", _vector_pool, store, q, cfg, doc_ids)
+        with obs.span("kb.search.rrf", **{"kb.rrf_k": cfg.rrf_k}) as sp:
+            rows = _rrf(a, b, cfg.rrf_k)
+            sp.set_attribute("kb.n_out", len(rows))
         if cfg.mode == "hybrid_rerank":
-            rows = _rerank(q, rows, cfg.rerank_n)
+            rows = _traced_rerank(q, rows, cfg.rerank_n)
     if cfg.clause_route:
-        rows = _route(store, q, rows, doc_ids)
+        with obs.span("kb.search.clause_route") as sp:
+            n0 = sum(r.get("route") == "clause_route" for r in rows)
+            rows = _route(store, q, rows, doc_ids)
+            sp.set_attribute("kb.n_routed", sum(r.get("route") == "clause_route" for r in rows) - n0)
     for i, r in enumerate(rows[:cfg.k]):
         r["rank"] = i + 1
     return rows[:cfg.k]
+
+
+def _traced(name, fn, store, q, cfg, doc_ids):
+    with obs.span(f"kb.search.{name}", **{"kb.pool": max(cfg.k * 5, cfg.pool), "kb.doc_filter": doc_ids}) as sp:
+        rows = fn(store, q, cfg, doc_ids)
+        obs.set_attrs(sp, **{"kb.n_out": len(rows), "kb.top_chunk_ids": [r["chunk_id"] for r in rows[:10]]})
+        return rows
+
+
+def _traced_rerank(q, rows, n):
+    with obs.span("kb.search.rerank", **{"kb.rerank_n": min(n, len(rows)), "kb.rerank_model": "BAAI/bge-reranker-base",
+                                         "kb.input_chunk_ids": [r["chunk_id"] for r in rows[:n]]}) as sp:
+        out = _rerank(q, rows, n)
+        obs.set_attrs(sp, **{"kb.top_chunk_ids": [r["chunk_id"] for r in out[:10]],
+                             "kb.top_score": out[0]["score"] if out else None})
+        return out
 
 
 def _bm25_pool(store: Store, q: str, cfg: SearchConfig, doc_ids: list[str]) -> list[dict]:
