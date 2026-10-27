@@ -3,23 +3,50 @@
   "models": {
     "deepseek/deepseek-flash": {
       "source": "https://api-docs.deepseek.com/quick_start/pricing/ (English page; model version DeepSeek-V4.1-Flash-1017)",
-      "input_cache_hit": 0.003, "input_cache_miss": 0.15, "output": 0.60,
-      "peak_multiplier": 2.0, "peak_utc_hours": [[1, 4], [6, 10]], "peak_weekdays_only": true,
+      "input_cache_hit": 0.003,
+      "input_cache_miss": 0.15,
+      "output": 0.6,
+      "peak_multiplier": 2.0,
+      "peak_utc_hours": [
+        [
+          1,
+          4
+        ],
+        [
+          6,
+          10
+        ]
+      ],
+      "peak_weekdays_only": true,
       "note": "listed values are OFF-PEAK; peak = 2x (01:00-04:00 and 06:00-10:00 UTC Mon-Fri). Chinese public holidays (all off-peak) are not modelled. Cache hit tokens = usage.prompt_cache_hit_tokens."
     },
     "xiaomi-mimo/mimo-v2.6-flash": {
       "source": "https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go (海外 USD 实时推理; 国内 ¥0.02 / ¥1.00 / ¥2.00)",
-      "input_cache_hit": 0.0028, "input_cache_miss": 0.14, "output": 0.28,
+      "input_cache_hit": 0.0028,
+      "input_cache_miss": 0.14,
+      "output": 0.28,
       "note": "our calls use a Token Plan key (subscription quota, base_url token-plan-cn); this is the pay-as-you-go LIST-PRICE EQUIVALENT, not the amount actually billed. Cache hit tokens = usage.prompt_tokens_details.cached_tokens when present."
     },
     "openrouter/google/gemma-4-26b-a4b-it:free": {
       "source": "https://openrouter.ai/api/v1/models (free variant, pricing 0); OpenRouter also returns usage.cost, recorded as tushen.provider_cost_usd",
-      "input_cache_hit": 0.0, "input_cache_miss": 0.0, "output": 0.0
+      "input_cache_hit": 0.0,
+      "input_cache_miss": 0.0,
+      "output": 0.0,
+      "note": "NOT used in the reported run (replaced by amendment A1 before the judge2 phase)."
     },
     "openrouter/google/gemini-3.8-flash": {
       "source": "https://openrouter.ai/api/v1/models (prompt 0.000000825 / completion 0.000004125 USD per token)",
-      "input_cache_hit": 0.825, "input_cache_miss": 0.825, "output": 4.125,
+      "input_cache_hit": 0.825,
+      "input_cache_miss": 0.825,
+      "output": 4.125,
       "note": "listed for completeness; NOT used in the 2026-10-27 run (key total limit $0 -> HTTP 403)."
+    },
+    "xiaomi-mimo/mimo-v2.6-pro": {
+      "source": "https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go (海外 USD 实时推理; 国内 ¥0.025 / ¥3.00 / ¥6.00; page updated 2026-10-21)",
+      "input_cache_hit": 0.0036,
+      "input_cache_miss": 0.435,
+      "output": 0.87,
+      "note": "Token Plan key (subscription quota); pay-as-you-go LIST-PRICE EQUIVALENT, not the amount billed."
     }
   }
 }

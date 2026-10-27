@@ -52,9 +52,12 @@ CONFIGS = {
     "baseline_bm25": dict(search=dict(mode="keyword"), gate="coverage", min_coverage=0.5),
 }
 PREV_VERSION_RUN = REPORTS / "e2e_s1_deepseek_per_question.jsonl"  # 7fdc378, same config as "system"
-JUDGE2_SPEC = dict(role="judge2", provider="openrouter", family="google", base_url="https://openrouter.ai/api/v1",
-                   model="google/gemma-4-26b-a4b-it:free", api_key_env="OPENROUTER_API_KEY",
-                   max_retries=3, backoff_base_s=10.0, timeout_s=120.0)
+# judge2 (amendment A1, plan §10, committed before the judge2 phase ran): OpenRouter Gemini flash has no quota
+# (key limit $0 -> HTTP 403) -> fallback the owner specified: MiMo.  A different, larger MiMo model than judge1;
+# same provider/family as judge1 (weaker independence, reported), still different from the DeepSeek generator.
+JUDGE2_SPEC = dict(role="judge2", provider="xiaomi-mimo", family="xiaomi-mimo",
+                   base_url="https://token-plan-cn.xiaomimimo.com/v1", model="mimo-v2.6-pro",
+                   api_key_env="MIMO_API_KEY", max_retries=3, backoff_base_s=10.0, timeout_s=120.0)
 SEEDS = {"judge2_sample": 20261027, "stability_subset": 20261028, "bootstrap": 0}
 SUITES = {
     "agent": dict(out="agent_eval", judge2_sample=60, judge2_cap=45, stability_n=30, stability_k=3,
@@ -201,8 +204,10 @@ class Judges:
         gen, judges = load_models()
         j1 = next(j for j in judges if j.role == "judge1")
         j2 = ModelSpec(**JUDGE2_SPEC)
-        validate(gen, [j1, j2])  # family/provider separation from the generator under test
+        validate(gen, [j1])  # family/provider separation from the generator under test (each judge)
+        validate(gen, [j2])  # (judge1 and judge2 share MiMo family by amendment A1, so they are checked separately)
         assert gen.family == "deepseek" and j1.family != "deepseek" and j2.family != "deepseek"
+        assert j1.model != j2.model, "judge2 must be a different model from judge1"
         self.gen_spec, self.j1_spec, self.j2_spec = gen, j1, j2
         self.j1 = ChatModel(j1)
         self.j2 = ChatModel(j2) if use_judge2 and j2.available() else None

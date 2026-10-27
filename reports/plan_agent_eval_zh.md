@@ -160,7 +160,16 @@ trace_example.json 的选取规则：优先选一个“生成幻觉”题；没�
 ## 9. 已知限制（运行前即已知）
 
 - `ask` 没有 LLM 自主选工具的环节，“工具调用准确率”以固定步骤的正确率代替。
-- judge2 是免费模型的抽样子集，可用性受上游限流影响；Gemini 因额度原因不可用。
+- judge2 是抽样子集；Gemini 因额度原因不可用（见修订 A1）。
 - 裁判均为 LLM，没有人工标注或复核。
 - 稳定性只覆盖 30 题 × 3 次。
 - MiMo 成本是列表价等值，不是实际扣费；DeepSeek 峰谷价没有考虑中国法定节假日。
+
+## 10. 修订 A1（2026-10-27 21:55 NZDT，于 judge2 阶段运行前提交）
+
+- 背景：主运行进行到 system run1 第 174/414 题时，按负责人的指示，judge2 应使用“OpenRouter Gemini flash（若有额度），否则用 MiMo”，不得使用 uuapi。
+- 复查结果：同日 21:51 NZDT 复查 OpenRouter 密钥，`limit=0`、`is_free_tier=true`，`google/gemini-3.8-flash` 仍返回 HTTP 403 “Key limit exceeded”。因此 judge2 由 §6 的 `google/gemma-4-26b-a4b-it:free` 改为 **Xiaomi MiMo `mimo-v2.6-pro`**，与 judge1 使用相同的 token-plan 端点，关闭 thinking，max_tokens 16，提示词与 judge1 的 correctness 相同。
+- 独立性：judge2 与 judge1 同属 xiaomi-mimo 家族，但不是同一模型（pro 与 flash，有断言保证）。两者都与被测的 DeepSeek 生成模型不同 provider、不同 family（对两个裁判分别调用 `llm.validate` 检查）。同家族两裁判的一致率可能偏高，结果中将作为限制说明。
+- 不变项：抽样（seed 20261027，60 题，上限 45 题）、调用与重试策略、分歧裁决规则（主结果只用 judge1，judge2 只用于一致率、κ 和 AND 规则敏感性分析）、其余所有指标与阈值。
+- 未受影响：judge2 只在主运行结束后单独运行，此前从未在 test 划分上调用过 judge2，因此本修订不涉及已产生的任何结果。已完成的 174 条 checkpoint 保留，续跑时不重复调用 API。
+- 成本：`config/prices.json` 新增 `xiaomi-mimo/mimo-v2.6-pro` 的海外实时推理列表价 $0.0036 / $0.435 / $0.87 每百万 token（Token Plan 列表价等值）。
