@@ -1,0 +1,39 @@
+{
+ "suite": "smoke",
+ "kb_version": "0.1.0",
+ "configs": {
+  "system": {
+   "search": {
+    "mode": "hybrid_rerank"
+   },
+   "gate": "rerank_top",
+   "gate_threshold": 0.94
+  },
+  "baseline_bm25": {
+   "search": {
+    "mode": "keyword"
+   },
+   "gate": "coverage",
+   "min_coverage": 0.5
+  }
+ },
+ "n_questions": 20,
+ "judge2_sample_qids": [],
+ "judge2_cap": 0,
+ "stability_qids": [
+  "00a7d241c16f",
+  "00cb9755bc31",
+  "014d451906a7",
+  "05fb9ea54fcf",
+  "061be9161e2e"
+ ],
+ "stability_k": 3,
+ "seeds": {
+  "judge2_sample": 20261027,
+  "stability_subset": 20261028,
+  "bootstrap": 0
+ },
+ "generator": "deepseek-flash",
+ "judge1": "mimo-v2.6-flash",
+ "judge2": null
+}

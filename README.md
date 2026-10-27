@@ -38,7 +38,7 @@ curl -s 127.0.0.1:8765/ask -d '{"q":"GB 55037 第4.1.2条"}'
 |---|---|---|---|---|
 | 生成 | DeepSeek | deepseek | deepseek-flash | `DEEPSEEK_API_KEY` |
 | 裁判 1 | 小米 MiMo | xiaomi-mimo | mimo-v2.6-flash | `MIMO_API_KEY` |
-| 裁判 2 | uuapi（OpenAI 兼容，`https://uuapi.io/v1`） | google | gemini-3.8-flash（timeout 180s，并发 ≤2，指数退避）。**只用这一个模型，从不切换**；持续失败时报告覆盖率 x/N。原备用裁判 gpt-5.6-luna 已删除并禁用：该中转返回的模型名是 gpt-5.6-terra，疑似隐藏提示注入（配置校验会拒绝该模型及任何 backup_models） | `NEW_API_KEY_2` |
+| 裁判 2 | OpenRouter（`https://openrouter.ai/api/v1`） | google | `google/gemini-3.8-flash`（timeout 180s，指数退避，只用这一个模型，从不切换；持续失败时报告覆盖率 x/N）。Agent 端到端评测（`tushen_kb.eval.agent_eval`）因该 key 额度为 0（HTTP 403），按修订 A1 改用 Xiaomi MiMo `mimo-v2.6-pro` 作 judge2。已禁用模型 gpt-5.6-luna / gpt-5.6-terra 会被配置校验拒绝（含任何 backup_models） | `OPENROUTER_API_KEY` |
 
 - 配置校验：任何裁判（含回退模型）的 family ≠ 生成模型 family，两位裁判 family 互不相同 → **DeepSeek 永远不能当裁判**。
 - key 只在调用时从环境读取，不写入日志/仓库/产物；无 key → 状态 `skipped`，绝不伪造结果。
@@ -132,6 +132,16 @@ python -m tushen_kb.cli search "消防电梯前室面积" --mode hybrid_rerank
 Block 2 报告里的引用精度一律按口径 B 计算。
 
 注意 37 题变差：去掉文档引用后只剩「规定/内容」等泛词，邻居块覆盖率反而变高。剩余不精确引用：其他条文 101、正文块 27。
+
+## Agent 端到端评测与可观测性（`tushen_kb.eval.agent_eval`，结果见 `reports/agent_eval_report_zh.md`）
+
+- 一条命令：`.venv/bin/python -m tushen_kb.eval.agent_eval --suite agent`（或 `make eval`；冒烟用 `--suite smoke`；只重算报告、不调 API 用 `--phase report`）。输出 `reports/agent_eval/report.md` 与 `report.json`。
+- 预注册方案：`reports/plan_agent_eval_zh.md`，于运行前提交，含修订 A1、A2。
+- test 划分共 414 题。被测系统 hybrid_rerank + DeepSeek 的任务成功率为 285/414 = 0.688 [95% CI 0.640, 0.734]，预声明基线 BM25 为 213/414 = 0.514；配对差 +0.174 [0.123, 0.222]。
+- 失败按 8 类做代码归因，并定位到步骤。从 trace 复算归因，888 条中不一致 0 条。
+- 稳定性：30 题 × 3 次，pass^3 = 17/30。
+- OpenTelemetry span 树（GenAI semconv 属性名），含每个 span 的 tokens、成本与延迟，可选开启，开销约 0.5 ms/题。trace 示例：`reports/agent_eval/trace_example.json`。
+- 裁判调用台账 `judge_calls.jsonl` 记录接口返回的模型 id、时间戳和失败原因；返回的模型版本若在运行中变化，按批次分开统计。
 
 ## 已知限制
 

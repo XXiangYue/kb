@@ -1,0 +1,837 @@
+{
+ "suite": "smoke",
+ "manifest": {
+  "suite": "smoke",
+  "kb_version": "0.1.0",
+  "configs": {
+   "system": {
+    "search": {
+     "mode": "hybrid_rerank"
+    },
+    "gate": "rerank_top",
+    "gate_threshold": 0.94
+   },
+   "baseline_bm25": {
+    "search": {
+     "mode": "keyword"
+    },
+    "gate": "coverage",
+    "min_coverage": 0.5
+   }
+  },
+  "n_questions": 20,
+  "judge2_sample_qids": [],
+  "judge2_cap": 0,
+  "stability_qids": [
+   "00a7d241c16f",
+   "00cb9755bc31",
+   "014d451906a7",
+   "05fb9ea54fcf",
+   "061be9161e2e"
+  ],
+  "stability_k": 3,
+  "seeds": {
+   "judge2_sample": 20261027,
+   "stability_subset": 20261028,
+   "bootstrap": 0
+  },
+  "generator": "deepseek-flash",
+  "judge1": "mimo-v2.6-flash",
+  "judge2": null
+ },
+ "generated_local": "2026-10-27 23:00 NZDT",
+ "attribution_rederived_from_trace_file": {
+  "items": 50,
+  "mismatches": []
+ },
+ "configs": {
+  "system": {
+   "n": 20,
+   "n_answerable": 10,
+   "n_unanswerable": 10,
+   "task_success": {
+    "value": 0.65,
+    "num": 13,
+    "den": 20,
+    "str": "13/20 = 0.650 [95% CI 0.450, 0.850]",
+    "ci95": [
+     0.45,
+     0.85
+    ]
+   },
+   "task_success_answerable": {
+    "value": 0.3,
+    "num": 3,
+    "den": 10,
+    "str": "3/10 = 0.300 [95% CI 0.100, 0.600]",
+    "ci95": [
+     0.1,
+     0.6
+    ]
+   },
+   "task_success_unanswerable(correct_refusal)": {
+    "value": 1.0,
+    "num": 10,
+    "den": 10,
+    "str": "10/10 = 1.000 [95% CI 1.000, 1.000]",
+    "ci95": [
+     1.0,
+     1.0
+    ]
+   },
+   "task_success_by_set": {
+    "block2_U2": {
+     "value": 1.0,
+     "num": 5,
+     "den": 5,
+     "str": "5/5 = 1.000"
+    },
+    "block2_answerable": {
+     "value": 0.4,
+     "num": 2,
+     "den": 5,
+     "str": "2/5 = 0.400"
+    },
+    "lowoverlap": {
+     "value": 0.2,
+     "num": 1,
+     "den": 5,
+     "str": "1/5 = 0.200"
+    },
+    "ooc_b3": {
+     "value": 1.0,
+     "num": 5,
+     "den": 5,
+     "str": "5/5 = 1.000"
+    }
+   },
+   "answered_rate_answerable": {
+    "value": 0.4,
+    "num": 4,
+    "den": 10,
+    "str": "4/10 = 0.400"
+   },
+   "false_refusal_answerable": {
+    "value": 0.6,
+    "num": 6,
+    "den": 10,
+    "str": "6/10 = 0.600"
+   },
+   "answer_correct_among_answered(judge1)": {
+    "value": 0.75,
+    "num": 3,
+    "den": 4,
+    "str": "3/4 = 0.750"
+   },
+   "answer_supported_among_answered(judge1)": {
+    "value": 1.0,
+    "num": 4,
+    "den": 4,
+    "str": "4/4 = 1.000"
+   },
+   "step_success": {
+    "existence_check_pass(answerable)": {
+     "value": 1.0,
+     "num": 10,
+     "den": 10,
+     "str": "10/10 = 1.000"
+    },
+    "retrieve_gold_in_pool": {
+     "value": 0.9,
+     "num": 9,
+     "den": 10,
+     "str": "9/10 = 0.900"
+    },
+    "context_gold_in_top3": {
+     "value": 0.7,
+     "num": 7,
+     "den": 10,
+     "str": "7/10 = 0.700"
+    },
+    "gate_pass_answerable(kb.rerank_gate)": {
+     "value": 0.9,
+     "num": 9,
+     "den": 10,
+     "str": "9/10 = 0.900"
+    },
+    "gate_pass_answerable_gold_in_context": {
+     "value": 0.8571428571428571,
+     "num": 6,
+     "den": 7,
+     "str": "6/7 = 0.857"
+    },
+    "refused_before_llm(unanswerable)": {
+     "value": 1.0,
+     "num": 10,
+     "den": 10,
+     "str": "10/10 = 1.000"
+    },
+    "cite_verified_any(answerable reaching cite)": {
+     "value": 1.0,
+     "num": 9,
+     "den": 9,
+     "str": "9/9 = 1.000"
+    },
+    "citation_precision(non-refused answerable)": {
+     "value": 0.3333333333333333,
+     "num": 4,
+     "den": 12,
+     "str": "4/12 = 0.333"
+    },
+    "llm_call_ok(generate reached)": {
+     "value": 1.0,
+     "num": 9,
+     "den": 9,
+     "str": "9/9 = 1.000"
+    },
+    "quote_verify_pass(answers reaching verify)": {
+     "value": 1.0,
+     "num": 4,
+     "den": 4,
+     "str": "4/4 = 1.000"
+    },
+    "quote_from_gold(answerable answers with quotes)": {
+     "value": 1.0,
+     "num": 4,
+     "den": 4,
+     "str": "4/4 = 1.000"
+    },
+    "step_spans_without_error(all steps)": {
+     "value": 1.0,
+     "num": 202,
+     "den": 202,
+     "str": "202/202 = 1.000"
+    }
+   },
+   "failure_table": {
+    "检索未召回": 1,
+    "召回但排序靠后未进上下文": 2,
+    "生成幻觉": 0,
+    "引用错误": 0,
+    "拒答误判": 3,
+    "该拒未拒": 0,
+    "工具或步骤错误": 0,
+    "其他": 1
+   },
+   "failure_table_by_step": {
+    "召回但排序靠后未进上下文 @ kb.search.rerank": 2,
+    "其他 @ kb.generate": 1,
+    "拒答误判 @ kb.generate": 2,
+    "检索未召回 @ kb.retrieve": 1,
+    "拒答误判 @ kb.rerank_gate": 1
+   },
+   "generator": {
+    "calls": 9,
+    "calls_ok": 9,
+    "prompt_tokens": 4992,
+    "completion_tokens": 197,
+    "tokens_per_question": 259.4,
+    "cost_usd_total": 0.000831,
+    "cost_usd_per_question": 4.154e-05,
+    "cost_usd_per_1k_questions": 0.0415,
+    "models": [
+     "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501"
+    ]
+   },
+   "latency_ms": {
+    "chat (generator)": {
+     "n": 9,
+     "p50": 1019.141,
+     "p95": 1432.671,
+     "mean": 1068.0
+    },
+    "kb.ask": {
+     "n": 20,
+     "p50": 1674.792,
+     "p95": 4289.751,
+     "mean": 2384.2
+    },
+    "kb.cite": {
+     "n": 9,
+     "p50": 3.383,
+     "p95": 6.872,
+     "mean": 3.8
+    },
+    "kb.evidence_gate": {
+     "n": 20,
+     "p50": 0.596,
+     "p95": 1.134,
+     "mean": 0.7
+    },
+    "kb.existence_check": {
+     "n": 20,
+     "p50": 0.084,
+     "p95": 0.166,
+     "mean": 0.1
+    },
+    "kb.generate": {
+     "n": 9,
+     "p50": 1019.666,
+     "p95": 1433.107,
+     "mean": 1068.5
+    },
+    "kb.rerank_gate": {
+     "n": 20,
+     "p50": 0.024,
+     "p95": 0.031,
+     "mean": 0.0
+    },
+    "kb.retrieve": {
+     "n": 20,
+     "p50": 1623.309,
+     "p95": 3261.614,
+     "mean": 1900.0
+    },
+    "kb.search.bm25": {
+     "n": 20,
+     "p50": 3.019,
+     "p95": 7.755,
+     "mean": 3.7
+    },
+    "kb.search.clause_route": {
+     "n": 20,
+     "p50": 0.049,
+     "p95": 0.076,
+     "mean": 0.1
+    },
+    "kb.search.rerank": {
+     "n": 20,
+     "p50": 1611.032,
+     "p95": 3240.992,
+     "mean": 1883.0
+    },
+    "kb.search.rrf": {
+     "n": 20,
+     "p50": 0.124,
+     "p95": 0.175,
+     "mean": 0.1
+    },
+    "kb.search.vector": {
+     "n": 20,
+     "p50": 9.903,
+     "p95": 20.947,
+     "mean": 11.8
+    },
+    "kb.verify_quotes": {
+     "n": 4,
+     "p50": 0.22,
+     "p95": 0.42,
+     "mean": 0.3
+    }
+   }
+  },
+  "baseline_bm25": {
+   "n": 20,
+   "n_answerable": 10,
+   "n_unanswerable": 10,
+   "task_success": {
+    "value": 0.6,
+    "num": 12,
+    "den": 20,
+    "str": "12/20 = 0.600 [95% CI 0.400, 0.800]",
+    "ci95": [
+     0.4,
+     0.8
+    ]
+   },
+   "task_success_answerable": {
+    "value": 0.2,
+    "num": 2,
+    "den": 10,
+    "str": "2/10 = 0.200 [95% CI 0.000, 0.500]",
+    "ci95": [
+     0.0,
+     0.5
+    ]
+   },
+   "task_success_unanswerable(correct_refusal)": {
+    "value": 1.0,
+    "num": 10,
+    "den": 10,
+    "str": "10/10 = 1.000 [95% CI 1.000, 1.000]",
+    "ci95": [
+     1.0,
+     1.0
+    ]
+   },
+   "task_success_by_set": {
+    "block2_U2": {
+     "value": 1.0,
+     "num": 5,
+     "den": 5,
+     "str": "5/5 = 1.000"
+    },
+    "block2_answerable": {
+     "value": 0.4,
+     "num": 2,
+     "den": 5,
+     "str": "2/5 = 0.400"
+    },
+    "lowoverlap": {
+     "value": 0.0,
+     "num": 0,
+     "den": 5,
+     "str": "0/5 = 0.000"
+    },
+    "ooc_b3": {
+     "value": 1.0,
+     "num": 5,
+     "den": 5,
+     "str": "5/5 = 1.000"
+    }
+   },
+   "answered_rate_answerable": {
+    "value": 0.4,
+    "num": 4,
+    "den": 10,
+    "str": "4/10 = 0.400"
+   },
+   "false_refusal_answerable": {
+    "value": 0.6,
+    "num": 6,
+    "den": 10,
+    "str": "6/10 = 0.600"
+   },
+   "answer_correct_among_answered(judge1)": {
+    "value": 0.5,
+    "num": 2,
+    "den": 4,
+    "str": "2/4 = 0.500"
+   },
+   "answer_supported_among_answered(judge1)": {
+    "value": 1.0,
+    "num": 4,
+    "den": 4,
+    "str": "4/4 = 1.000"
+   },
+   "step_success": {
+    "existence_check_pass(answerable)": {
+     "value": 1.0,
+     "num": 10,
+     "den": 10,
+     "str": "10/10 = 1.000"
+    },
+    "retrieve_gold_in_pool": {
+     "value": 0.9,
+     "num": 9,
+     "den": 10,
+     "str": "9/10 = 0.900"
+    },
+    "context_gold_in_top3": {
+     "value": 0.7,
+     "num": 7,
+     "den": 10,
+     "str": "7/10 = 0.700"
+    },
+    "gate_pass_answerable(kb.evidence_gate)": {
+     "value": 0.5,
+     "num": 5,
+     "den": 10,
+     "str": "5/10 = 0.500"
+    },
+    "gate_pass_answerable_gold_in_context": {
+     "value": 0.5714285714285714,
+     "num": 4,
+     "den": 7,
+     "str": "4/7 = 0.571"
+    },
+    "refused_before_llm(unanswerable)": {
+     "value": 0.9,
+     "num": 9,
+     "den": 10,
+     "str": "9/10 = 0.900"
+    },
+    "cite_verified_any(answerable reaching cite)": {
+     "value": 1.0,
+     "num": 5,
+     "den": 5,
+     "str": "5/5 = 1.000"
+    },
+    "citation_precision(non-refused answerable)": {
+     "value": 0.375,
+     "num": 3,
+     "den": 8,
+     "str": "3/8 = 0.375"
+    },
+    "llm_call_ok(generate reached)": {
+     "value": 1.0,
+     "num": 6,
+     "den": 6,
+     "str": "6/6 = 1.000"
+    },
+    "quote_verify_pass(answers reaching verify)": {
+     "value": 1.0,
+     "num": 4,
+     "den": 4,
+     "str": "4/4 = 1.000"
+    },
+    "quote_from_gold(answerable answers with quotes)": {
+     "value": 0.75,
+     "num": 3,
+     "den": 4,
+     "str": "3/4 = 0.750"
+    },
+    "step_spans_without_error(all steps)": {
+     "value": 1.0,
+     "num": 116,
+     "den": 116,
+     "str": "116/116 = 1.000"
+    }
+   },
+   "failure_table": {
+    "检索未召回": 1,
+    "召回但排序靠后未进上下文": 2,
+    "生成幻觉": 0,
+    "引用错误": 0,
+    "拒答误判": 4,
+    "该拒未拒": 0,
+    "工具或步骤错误": 0,
+    "其他": 1
+   },
+   "failure_table_by_step": {
+    "召回但排序靠后未进上下文 @ kb.retrieve": 2,
+    "拒答误判 @ kb.generate": 1,
+    "其他 @ kb.generate": 1,
+    "拒答误判 @ kb.evidence_gate": 3,
+    "检索未召回 @ kb.retrieve": 1
+   },
+   "generator": {
+    "calls": 6,
+    "calls_ok": 6,
+    "prompt_tokens": 3745,
+    "completion_tokens": 164,
+    "tokens_per_question": 195.4,
+    "cost_usd_total": 0.001283,
+    "cost_usd_per_question": 6.413e-05,
+    "cost_usd_per_1k_questions": 0.0641,
+    "models": [
+     "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501"
+    ]
+   },
+   "latency_ms": {
+    "chat (generator)": {
+     "n": 6,
+     "p50": 1121.681,
+     "p95": 1677.654,
+     "mean": 1201.0
+    },
+    "kb.ask": {
+     "n": 20,
+     "p50": 4.529,
+     "p95": 1388.418,
+     "mean": 366.3
+    },
+    "kb.cite": {
+     "n": 6,
+     "p50": 1.898,
+     "p95": 8.747,
+     "mean": 3.4
+    },
+    "kb.evidence_gate": {
+     "n": 20,
+     "p50": 0.444,
+     "p95": 0.805,
+     "mean": 0.5
+    },
+    "kb.existence_check": {
+     "n": 20,
+     "p50": 0.057,
+     "p95": 0.214,
+     "mean": 0.1
+    },
+    "kb.generate": {
+     "n": 6,
+     "p50": 1122.074,
+     "p95": 1678.443,
+     "mean": 1201.6
+    },
+    "kb.retrieve": {
+     "n": 20,
+     "p50": 3.123,
+     "p95": 5.831,
+     "mean": 3.6
+    },
+    "kb.search.bm25": {
+     "n": 20,
+     "p50": 2.787,
+     "p95": 5.429,
+     "mean": 3.3
+    },
+    "kb.search.clause_route": {
+     "n": 20,
+     "p50": 0.019,
+     "p95": 0.027,
+     "mean": 0.0
+    },
+    "kb.verify_quotes": {
+     "n": 4,
+     "p50": 0.24,
+     "p95": 0.396,
+     "mean": 0.3
+    }
+   }
+  }
+ },
+ "system_vs_baseline": {
+  "n_paired": 20,
+  "task_success_diff(system-baseline)": {
+   "diff": 0.050000000000000044,
+   "ci": [
+    -0.1,
+    0.25
+   ],
+   "iters": 2000,
+   "seed": 0
+  },
+  "mcnemar": {
+   "b01": 2,
+   "b10": 1,
+   "n_discordant": 3,
+   "p_value": 1.0
+  }
+ },
+ "judges": {
+  "j1": {
+   "calls": 20,
+   "ok": 20,
+   "prompt_tokens": 14158,
+   "completion_tokens": 40,
+   "cost_usd": 0.001993,
+   "models": [
+    "mimo-v2.6-flash"
+   ]
+  }
+ },
+ "judge_agreement": {
+  "j2_attempted": 0,
+  "both_valid": 0,
+  "raw_agreement": {
+   "value": null,
+   "num": 0,
+   "den": 0,
+   "str": "0/0 = 待测"
+  },
+  "cohen_kappa": null,
+  "j1_yes": 0,
+  "j2_yes": 0,
+  "disagreements": [],
+  "and_rule_correct": {
+   "value": null,
+   "num": 0,
+   "den": 0,
+   "str": "0/0 = 待测"
+  },
+  "judge1_only_correct": {
+   "value": null,
+   "num": 0,
+   "den": 0,
+   "str": "0/0 = 待测"
+  },
+  "scope": "system run1, judge2 seeded sample (answered answerable items only)",
+  "j2_http_calls_incl_retry_passes": 0,
+  "j2_status_counts_all_calls": {}
+ },
+ "judge_version_batches": {
+  "batches": [
+   {
+    "batch_id": "judge1#1",
+    "role": "judge1",
+    "returned_model": "mimo-v2.6-flash",
+    "first_utc": "2026-10-27T08:23:23Z",
+    "n_calls": 20,
+    "n_failed": 0,
+    "last_utc": "2026-10-27T08:27:01Z"
+   }
+  ],
+  "version_changed_roles": [],
+  "n_calls_in_trace": 20,
+  "n_calls_without_returned_model": 0,
+  "failure_reasons": {},
+  "ledger_path": "reports/agent_eval_smoke/judge_calls.jsonl"
+ },
+ "stability": {
+  "n_questions": 5,
+  "k": 3,
+  "pass^k(all k runs succeed)": {
+   "value": 0.6,
+   "num": 3,
+   "den": 5,
+   "str": "3/5 = 0.600"
+  },
+  "pass@k(any run succeeds)": {
+   "value": 0.8,
+   "num": 4,
+   "den": 5,
+   "str": "4/5 = 0.800"
+  },
+  "mean_single_run_success": {
+   "value": 0.7333333333333333,
+   "num": 11,
+   "den": 15,
+   "str": "11/15 = 0.733"
+  },
+  "success_consistency(same outcome in all k)": {
+   "value": 0.8,
+   "num": 4,
+   "den": 5,
+   "str": "4/5 = 0.800"
+  },
+  "decision_consistency(refuse/answer same in all k)": {
+   "value": 1.0,
+   "num": 5,
+   "den": 5,
+   "str": "5/5 = 1.000"
+  },
+  "answer_agreement(identical text, answered in all k)": {
+   "value": 1.0,
+   "num": 1,
+   "den": 1,
+   "str": "1/1 = 1.000"
+  },
+  "per_question": [
+   {
+    "qid": "00a7d241c16f",
+    "set": "block2_answerable",
+    "success": [
+     false,
+     false,
+     false
+    ],
+    "refused": [
+     true,
+     true,
+     true
+    ],
+    "category": [
+     "召回但排序靠后未进上下文",
+     "召回但排序靠后未进上下文",
+     "召回但排序靠后未进上下文"
+    ],
+    "trace_ids": [
+     "f22176a2cd88eb6441b179ff97379dc2",
+     "e8e3b10f605fefde86535a784c63ce87",
+     "fedbc25065bbbb895e2d09fc21aa15c6"
+    ],
+    "decision_consistent": true,
+    "success_consistent": true,
+    "answers_identical": true
+   },
+   {
+    "qid": "00cb9755bc31",
+    "set": "block2_U2",
+    "success": [
+     true,
+     true,
+     true
+    ],
+    "refused": [
+     true,
+     true,
+     true
+    ],
+    "category": [
+     null,
+     null,
+     null
+    ],
+    "trace_ids": [
+     "9a915c6c6ce9b866dd8e13a2c8e2168c",
+     "0214fb827c844d68a4c89951341ecb06",
+     "9fe984c88998421fa8f0a5e03a32390a"
+    ],
+    "decision_consistent": true,
+    "success_consistent": true,
+    "answers_identical": true
+   },
+   {
+    "qid": "014d451906a7",
+    "set": "ooc_b3",
+    "success": [
+     true,
+     true,
+     true
+    ],
+    "refused": [
+     true,
+     true,
+     true
+    ],
+    "category": [
+     null,
+     null,
+     null
+    ],
+    "trace_ids": [
+     "3db49040ec7463cf7922c8cc6b693289",
+     "d6d42886da9343f24f28eb4a5c1e3078",
+     "f3510cfadc2e895f1005e826f7cf1487"
+    ],
+    "decision_consistent": true,
+    "success_consistent": true,
+    "answers_identical": true
+   },
+   {
+    "qid": "05fb9ea54fcf",
+    "set": "block2_answerable",
+    "success": [
+     false,
+     true,
+     true
+    ],
+    "refused": [
+     false,
+     false,
+     false
+    ],
+    "category": [
+     "其他",
+     null,
+     null
+    ],
+    "trace_ids": [
+     "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "091e86edb0ba0e876345ba729f6262c7",
+     "d15a95140fbfa7e2bed1e2bd8c970907"
+    ],
+    "decision_consistent": true,
+    "success_consistent": false,
+    "answers_identical": true
+   },
+   {
+    "qid": "061be9161e2e",
+    "set": "block2_U2",
+    "success": [
+     true,
+     true,
+     true
+    ],
+    "refused": [
+     true,
+     true,
+     true
+    ],
+    "category": [
+     null,
+     null,
+     null
+    ],
+    "trace_ids": [
+     "acce5b9bba6aaf143889e72b4f6bb181",
+     "fa09e8315429023f9ee8484f12e5a04b",
+     "ce2c16e2e50fd52ecbefdf961906b5a3"
+    ],
+    "decision_consistent": true,
+    "success_consistent": true,
+    "answers_identical": true
+   }
+  ]
+ },
+ "prev_version": null,
+ "split": "test",
+ "trace_example": {
+  "qid": "05fb9ea54fcf",
+  "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+  "category": "其他",
+  "path": "reports/agent_eval_smoke/trace_example.json"
+ }
+}

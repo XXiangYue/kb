@@ -1,0 +1,12 @@
+{
+ "path": "keyword BM25 + coverage gate, no LLM (cheapest path; overhead is the largest relative share here)",
+ "n_questions": 414,
+ "reps_per_mode": 2,
+ "spans_written_on_passes": 5394,
+ "median_ms_off": 3.56,
+ "median_ms_on": 4.163,
+ "mean_ms_off": 3.773,
+ "mean_ms_on": 4.271,
+ "median_delta_ms": 0.603,
+ "mean_delta_ms_per_question": 0.499
+}

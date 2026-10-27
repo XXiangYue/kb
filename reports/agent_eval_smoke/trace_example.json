@@ -1,0 +1,760 @@
+{
+ "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+ "span_id": "c52d951c0447872d",
+ "parent_span_id": null,
+ "name": "eval.item",
+ "kind": "INTERNAL",
+ "start_time_unix_nano": 1793089399718026090,
+ "end_time_unix_nano": 1793089472926705421,
+ "duration_ms": 73208.679,
+ "status": {
+  "code": "ERROR",
+  "description": "答案判错但证据支持（答非所问/不完整）"
+ },
+ "attributes": {
+  "eval.qid": "05fb9ea54fcf",
+  "eval.set": "block2_answerable",
+  "eval.type": "T4",
+  "eval.config": "system",
+  "eval.run": 1,
+  "eval.answerable": true,
+  "eval.gold_chunk_ids": [
+   "DB32T4696-2024:table:5.1.1:1",
+   "DB32T4696-2024:table:5.2.2:1"
+  ],
+  "eval.success": false,
+  "eval.failure_category": "其他",
+  "eval.failed_step": "kb.generate",
+  "eval.failure_reason": "答案判错但证据支持（答非所问/不完整）",
+  "eval.gold_in_pool": true,
+  "eval.gold_in_context": true,
+  "eval.gold_rank_hits": 1,
+  "eval.judge.correct": false,
+  "eval.judge.support": true,
+  "error.type": "eval_failure:其他"
+ },
+ "events": [],
+ "resource": {
+  "telemetry.sdk.language": "python",
+  "telemetry.sdk.name": "opentelemetry",
+  "telemetry.sdk.version": "1.45.1",
+  "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+  "service.name": "tushen-kb-eval",
+  "service.version": "0.1.0"
+ },
+ "scope": "tushen_kb",
+ "children": [
+  {
+   "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+   "span_id": "76be2fd6b418aeb9",
+   "parent_span_id": "c52d951c0447872d",
+   "name": "kb.ask",
+   "kind": "SERVER",
+   "start_time_unix_nano": 1793089399718072549,
+   "end_time_unix_nano": 1793089403520983550,
+   "duration_ms": 3802.911,
+   "status": {
+    "code": "UNSET",
+    "description": null
+   },
+   "attributes": {
+    "gen_ai.operation.name": "invoke_agent",
+    "gen_ai.agent.name": "tushen-kb.ask",
+    "kb.query": "⟦std:DB32T4696-2024|5.1.1|8212+31|ffb855c6541eeb5a⟧中，“C类”对应的“⟦std:DB32T4696-2024|5.1.1|8253+15|27fad0211655f789⟧”是什么？",
+    "kb.search.mode": "hybrid_rerank",
+    "kb.gate": "rerank_top",
+    "kb.gate_threshold": 0.94,
+    "kb.min_coverage": 0.5,
+    "kb.n_evidence": 3,
+    "kb.refused": false,
+    "kb.mode": "llm_answer",
+    "kb.citation_chunk_ids": [
+     "DB32T4696-2024:table:5.1.1:1",
+     "DB32T4696-2024:table:5.1.1:0",
+     "DB32T4696-2024:clause:5.1.1:0"
+    ]
+   },
+   "events": [],
+   "resource": {
+    "telemetry.sdk.language": "python",
+    "telemetry.sdk.name": "opentelemetry",
+    "telemetry.sdk.version": "1.45.1",
+    "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+    "service.name": "tushen-kb-eval",
+    "service.version": "0.1.0"
+   },
+   "scope": "tushen_kb",
+   "children": [
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "70b17f2e7f07b472",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.existence_check",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089399718118273,
+     "end_time_unix_nano": 1793089399718212937,
+     "duration_ms": 0.095,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "existence_check",
+      "kb.matched_docs": [],
+      "kb.missing_codes": [],
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    },
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "e2fa7c05288d3680",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.retrieve",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089399718322144,
+     "end_time_unix_nano": 1793089402563432653,
+     "duration_ms": 2845.111,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "retrieve",
+      "kb.search.mode": "hybrid_rerank",
+      "kb.search.k": 10,
+      "kb.n_hits": 10,
+      "kb.hit_chunk_ids": [
+       "DB32T4696-2024:table:5.1.1:1",
+       "DB32T4696-2024:table:5.1.1:0",
+       "DB32T4696-2024:clause:5.1.1:0",
+       "DB32T4696-2024:clause:4.8:0",
+       "DB32T4696-2024:clause:4.4:0",
+       "DB32T4696-2024:table:5.2.2:1",
+       "DB32T4696-2024:clause:5.1.2:0",
+       "DB32T4696-2024:clause:5.2.3:0",
+       "DB32T4696-2024:clause:5.3.1:0",
+       "DB32T4696-2024:clause:4.3:0"
+      ],
+      "kb.hit_routes": [
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank",
+       "rerank"
+      ],
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": [
+      {
+       "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+       "span_id": "178aa9aa6e150c5e",
+       "parent_span_id": "e2fa7c05288d3680",
+       "name": "kb.search.bm25",
+       "kind": "INTERNAL",
+       "start_time_unix_nano": 1793089399718405539,
+       "end_time_unix_nano": 1793089399723233331,
+       "duration_ms": 4.828,
+       "status": {
+        "code": "UNSET",
+        "description": null
+       },
+       "attributes": {
+        "kb.pool": 50,
+        "kb.doc_filter": [],
+        "kb.n_out": 50,
+        "kb.top_chunk_ids": [
+         "DB32T4696-2024:table:5.1.1:0",
+         "DB32T4696-2024:clause:5.1.1:0",
+         "DB32T4696-2024:table:5.1.1:1",
+         "DB32T4696-2024:clause:5.1.2:0",
+         "DB32T4696-2024:clause:5.3.1:0",
+         "DB32T4696-2024:clause:5.2.3:0",
+         "DB32T4696-2024:clause:4.8:0",
+         "DB32T4696-2024:clause:4.3:0",
+         "DB32T4696-2024:table:5.2.2:0",
+         "DB32T4696-2024:table:5.2.2:1"
+        ]
+       },
+       "events": [],
+       "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.45.1",
+        "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+        "service.name": "tushen-kb-eval",
+        "service.version": "0.1.0"
+       },
+       "scope": "tushen_kb",
+       "children": []
+      },
+      {
+       "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+       "span_id": "29f1ba00c08d584b",
+       "parent_span_id": "e2fa7c05288d3680",
+       "name": "kb.search.vector",
+       "kind": "INTERNAL",
+       "start_time_unix_nano": 1793089399723465539,
+       "end_time_unix_nano": 1793089399734084835,
+       "duration_ms": 10.619,
+       "status": {
+        "code": "UNSET",
+        "description": null
+       },
+       "attributes": {
+        "kb.pool": 50,
+        "kb.doc_filter": [],
+        "kb.n_out": 50,
+        "kb.top_chunk_ids": [
+         "DB32T4696-2024:clause:5.1.1:0",
+         "DB32T4696-2024:table:5.1.1:0",
+         "DB32T4696-2024:table:5.1.1:1",
+         "DB32T4696-2024:clause:5.2.3:0",
+         "DB32T4696-2024:clause:4.8:0",
+         "DB32T4696-2024:clause:6.2.1:0",
+         "DB32T4696-2024:clause:4.3:0",
+         "DB32T4696-2024:clause:6.2.3:0",
+         "DB32T4696-2024:clause:4.4:0",
+         "DB32T4696-2024:clause:4.9:0"
+        ]
+       },
+       "events": [],
+       "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.45.1",
+        "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+        "service.name": "tushen-kb-eval",
+        "service.version": "0.1.0"
+       },
+       "scope": "tushen_kb",
+       "children": []
+      },
+      {
+       "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+       "span_id": "df25a0773967f0b1",
+       "parent_span_id": "e2fa7c05288d3680",
+       "name": "kb.search.rrf",
+       "kind": "INTERNAL",
+       "start_time_unix_nano": 1793089399734289291,
+       "end_time_unix_nano": 1793089399734394974,
+       "duration_ms": 0.106,
+       "status": {
+        "code": "UNSET",
+        "description": null
+       },
+       "attributes": {
+        "kb.rrf_k": 60,
+        "kb.n_out": 62
+       },
+       "events": [],
+       "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.45.1",
+        "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+        "service.name": "tushen-kb-eval",
+        "service.version": "0.1.0"
+       },
+       "scope": "tushen_kb",
+       "children": []
+      },
+      {
+       "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+       "span_id": "44bfc024831f6b55",
+       "parent_span_id": "e2fa7c05288d3680",
+       "name": "kb.search.rerank",
+       "kind": "INTERNAL",
+       "start_time_unix_nano": 1793089399734484917,
+       "end_time_unix_nano": 1793089402562267227,
+       "duration_ms": 2827.782,
+       "status": {
+        "code": "UNSET",
+        "description": null
+       },
+       "attributes": {
+        "kb.rerank_n": 20,
+        "kb.rerank_model": "BAAI/bge-reranker-base",
+        "kb.input_chunk_ids": [
+         "DB32T4696-2024:table:5.1.1:0",
+         "DB32T4696-2024:clause:5.1.1:0",
+         "DB32T4696-2024:table:5.1.1:1",
+         "DB32T4696-2024:clause:5.2.3:0",
+         "DB32T4696-2024:clause:4.8:0",
+         "DB32T4696-2024:clause:4.3:0",
+         "DB32T4696-2024:clause:5.1.2:0",
+         "DB32T4696-2024:clause:6.2.1:0",
+         "DB32T4696-2024:table:5.2.2:1",
+         "DB32T4696-2024:clause:6.2.3:0",
+         "DB32T4696-2024:clause:6.1.3:0",
+         "DB32T4696-2024:clause:5.3.1:0",
+         "DB32T4696-2024:clause:4.2:0",
+         "DB32T4696-2024:clause:4.4:0",
+         "DB32T4696-2024:text:3术语和定义:0",
+         "DB32T4696-2024:clause:5.4.6:0",
+         "DB32T4696-2024:table:5.2.2:0",
+         "DB32T4696-2024:clause:4.13:0",
+         "DB32T4696-2024:clause:4.6:0",
+         "DB32T4696-2024:clause:6.1.1:0"
+        ],
+        "kb.top_chunk_ids": [
+         "DB32T4696-2024:table:5.1.1:1",
+         "DB32T4696-2024:table:5.1.1:0",
+         "DB32T4696-2024:clause:5.1.1:0",
+         "DB32T4696-2024:clause:4.8:0",
+         "DB32T4696-2024:clause:4.4:0",
+         "DB32T4696-2024:table:5.2.2:1",
+         "DB32T4696-2024:clause:5.1.2:0",
+         "DB32T4696-2024:clause:5.2.3:0",
+         "DB32T4696-2024:clause:5.3.1:0",
+         "DB32T4696-2024:clause:4.3:0"
+        ],
+        "kb.top_score": 7.993837356567383
+       },
+       "events": [],
+       "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.45.1",
+        "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+        "service.name": "tushen-kb-eval",
+        "service.version": "0.1.0"
+       },
+       "scope": "tushen_kb",
+       "children": []
+      },
+      {
+       "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+       "span_id": "3c3fc70fae733a48",
+       "parent_span_id": "e2fa7c05288d3680",
+       "name": "kb.search.clause_route",
+       "kind": "INTERNAL",
+       "start_time_unix_nano": 1793089402563022672,
+       "end_time_unix_nano": 1793089402563091713,
+       "duration_ms": 0.069,
+       "status": {
+        "code": "UNSET",
+        "description": null
+       },
+       "attributes": {
+        "kb.n_routed": 0
+       },
+       "events": [],
+       "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.45.1",
+        "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+        "service.name": "tushen-kb-eval",
+        "service.version": "0.1.0"
+       },
+       "scope": "tushen_kb",
+       "children": []
+      }
+     ]
+    },
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "a582e78f9e42f81f",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.evidence_gate",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089402563609534,
+     "end_time_unix_nano": 1793089402564730630,
+     "duration_ms": 1.121,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "evidence_gate",
+      "kb.min_coverage": 0.0,
+      "kb.evidence_chunk_ids": [
+       "DB32T4696-2024:table:5.1.1:1",
+       "DB32T4696-2024:table:5.1.1:0",
+       "DB32T4696-2024:clause:5.1.1:0"
+      ],
+      "kb.top_coverage": 0.875,
+      "kb.evidence_tokens_est": 544,
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    },
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "76ad174129c361b0",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.rerank_gate",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089402564972210,
+     "end_time_unix_nano": 1793089402564994330,
+     "duration_ms": 0.022,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "rerank_gate",
+      "kb.gate_threshold": 0.94,
+      "kb.s1": 0.9997,
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    },
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "2567be0bcbc98ecb",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.cite",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089402565093893,
+     "end_time_unix_nano": 1793089402568296431,
+     "duration_ms": 3.203,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "cite",
+      "kb.n_citation_candidates": 3,
+      "kb.n_verified": 3,
+      "kb.citation_chunk_ids": [
+       "DB32T4696-2024:table:5.1.1:1",
+       "DB32T4696-2024:table:5.1.1:0",
+       "DB32T4696-2024:clause:5.1.1:0"
+      ],
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    },
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "230e7e66ae5e381d",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.generate",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089402568514174,
+     "end_time_unix_nano": 1793089403520312569,
+     "duration_ms": 951.798,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "generate",
+      "kb.llm_status": "ok",
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": [
+      {
+       "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+       "span_id": "a29bb2297a7955a0",
+       "parent_span_id": "230e7e66ae5e381d",
+       "name": "chat deepseek-flash",
+       "kind": "CLIENT",
+       "start_time_unix_nano": 1793089402568702832,
+       "end_time_unix_nano": 1793089403520016745,
+       "duration_ms": 951.314,
+       "status": {
+        "code": "UNSET",
+        "description": null
+       },
+       "attributes": {
+        "gen_ai.operation.name": "chat",
+        "gen_ai.provider.name": "deepseek",
+        "gen_ai.request.model": "deepseek-flash",
+        "gen_ai.request.max_tokens": 400,
+        "gen_ai.request.temperature": 0.0,
+        "tushen.role": "generator",
+        "tushen.family": "deepseek",
+        "tushen.prompt_chars": 1085,
+        "gen_ai.response.model": "deepseek-flash/e72d3c7f663d3e1383b00b3884cb4501",
+        "gen_ai.usage.input_tokens": 624,
+        "gen_ai.usage.output_tokens": 10,
+        "tushen.usage.cache_hit_tokens": 384,
+        "tushen.cost_usd": 8.6304e-05,
+        "tushen.attempts": 1,
+        "tushen.fallback_used": false,
+        "tushen.status": "ok",
+        "tushen.completion_chars": 20
+       },
+       "events": [],
+       "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.45.1",
+        "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+        "service.name": "tushen-kb-eval",
+        "service.version": "0.1.0"
+       },
+       "scope": "tushen_kb",
+       "children": []
+      }
+     ]
+    },
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "2f6a25297a2e1fe5",
+     "parent_span_id": "76be2fd6b418aeb9",
+     "name": "kb.verify_quotes",
+     "kind": "INTERNAL",
+     "start_time_unix_nano": 1793089403520449583,
+     "end_time_unix_nano": 1793089403520848486,
+     "duration_ms": 0.399,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "verify_quotes",
+      "kb.n_quotes": 3,
+      "kb.n_bad_quotes": 0,
+      "kb.quote_source_chunk_ids": [
+       "DB32T4696-2024:clause:5.1.1:0",
+       "DB32T4696-2024:table:5.1.1:0",
+       "DB32T4696-2024:table:5.1.1:1"
+      ],
+      "kb.step.outcome": "pass"
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    }
+   ]
+  },
+  {
+   "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+   "span_id": "2a09d9056861a969",
+   "parent_span_id": "c52d951c0447872d",
+   "name": "eval.judge.correctness",
+   "kind": "INTERNAL",
+   "start_time_unix_nano": 1793089403521771368,
+   "end_time_unix_nano": 1793089405190815489,
+   "duration_ms": 1669.044,
+   "status": {
+    "code": "UNSET",
+    "description": null
+   },
+   "attributes": {
+    "eval.qid": "05fb9ea54fcf",
+    "eval.judge.role": "judge1",
+    "eval.judge.model": "mimo-v2.6-flash",
+    "eval.judge.verdict": false,
+    "eval.judge.status": "ok"
+   },
+   "events": [],
+   "resource": {
+    "telemetry.sdk.language": "python",
+    "telemetry.sdk.name": "opentelemetry",
+    "telemetry.sdk.version": "1.45.1",
+    "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+    "service.name": "tushen-kb-eval",
+    "service.version": "0.1.0"
+   },
+   "scope": "tushen_kb",
+   "children": [
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "0f3920853617acda",
+     "parent_span_id": "2a09d9056861a969",
+     "name": "chat mimo-v2.6-flash",
+     "kind": "CLIENT",
+     "start_time_unix_nano": 1793089403521828736,
+     "end_time_unix_nano": 1793089405189430813,
+     "duration_ms": 1667.602,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.provider.name": "xiaomi-mimo",
+      "gen_ai.request.model": "mimo-v2.6-flash",
+      "gen_ai.request.max_tokens": 16,
+      "gen_ai.request.temperature": 0.0,
+      "tushen.role": "judge1",
+      "tushen.family": "xiaomi-mimo",
+      "tushen.prompt_chars": 1231,
+      "gen_ai.response.model": "mimo-v2.6-flash",
+      "gen_ai.usage.input_tokens": 773,
+      "gen_ai.usage.output_tokens": 2,
+      "tushen.usage.cache_hit_tokens": 0,
+      "tushen.cost_usd": 0.00010878,
+      "tushen.attempts": 1,
+      "tushen.fallback_used": false,
+      "tushen.status": "ok",
+      "tushen.completion_chars": 1
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    }
+   ]
+  },
+  {
+   "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+   "span_id": "f3dbb027e497af32",
+   "parent_span_id": "c52d951c0447872d",
+   "name": "eval.judge.support",
+   "kind": "INTERNAL",
+   "start_time_unix_nano": 1793089403522642991,
+   "end_time_unix_nano": 1793089472925509065,
+   "duration_ms": 69402.866,
+   "status": {
+    "code": "UNSET",
+    "description": null
+   },
+   "attributes": {
+    "eval.qid": "05fb9ea54fcf",
+    "eval.judge.role": "judge1",
+    "eval.judge.model": "mimo-v2.6-flash",
+    "eval.judge.verdict": true,
+    "eval.judge.status": "ok"
+   },
+   "events": [],
+   "resource": {
+    "telemetry.sdk.language": "python",
+    "telemetry.sdk.name": "opentelemetry",
+    "telemetry.sdk.version": "1.45.1",
+    "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+    "service.name": "tushen-kb-eval",
+    "service.version": "0.1.0"
+   },
+   "scope": "tushen_kb",
+   "children": [
+    {
+     "trace_id": "1d44eea63d3a457da6a8b9b0c22bdce3",
+     "span_id": "505e8c9a602c7920",
+     "parent_span_id": "f3dbb027e497af32",
+     "name": "chat mimo-v2.6-flash",
+     "kind": "CLIENT",
+     "start_time_unix_nano": 1793089403522702787,
+     "end_time_unix_nano": 1793089472924946423,
+     "duration_ms": 69402.244,
+     "status": {
+      "code": "UNSET",
+      "description": null
+     },
+     "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.provider.name": "xiaomi-mimo",
+      "gen_ai.request.model": "mimo-v2.6-flash",
+      "gen_ai.request.max_tokens": 16,
+      "gen_ai.request.temperature": 0.0,
+      "tushen.role": "judge1",
+      "tushen.family": "xiaomi-mimo",
+      "tushen.prompt_chars": 945,
+      "gen_ai.response.model": "mimo-v2.6-flash",
+      "gen_ai.usage.input_tokens": 578,
+      "gen_ai.usage.output_tokens": 2,
+      "tushen.usage.cache_hit_tokens": 0,
+      "tushen.cost_usd": 8.148e-05,
+      "tushen.attempts": 1,
+      "tushen.fallback_used": false,
+      "tushen.status": "ok",
+      "tushen.completion_chars": 1
+     },
+     "events": [],
+     "resource": {
+      "telemetry.sdk.language": "python",
+      "telemetry.sdk.name": "opentelemetry",
+      "telemetry.sdk.version": "1.45.1",
+      "service.instance.id": "11796d98-248e-4853-852a-880a230ca144",
+      "service.name": "tushen-kb-eval",
+      "service.version": "0.1.0"
+     },
+     "scope": "tushen_kb",
+     "children": []
+    }
+   ]
+  }
+ ]
+}

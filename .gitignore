@@ -32,3 +32,6 @@ models/
 # --- generated eval artifacts (reports/*.md and reports/*.json summaries ARE committed) ---
 reports/runs/
 *.log
+# raw trace files (committed gzipped as traces.jsonl.gz)
+reports/agent_eval*/traces.jsonl
+reports/agent_eval*/_overhead_traces.jsonl

@@ -123,7 +123,7 @@ def test_repo_judge2_is_third_family():
     gen, judges = load_models()
     fams = [f for j in judges if j.configured for f in j.families()]
     assert "deepseek" not in fams and len(fams) == len(set(fams))
-    assert judges[1].model == "gemini-3.8-flash"
+    assert judges[1].model == "google/gemini-3.8-flash"
 
 
 def test_fallback_family_equal_to_generator_rejected():
@@ -195,11 +195,11 @@ def test_verdict_parsing():
 
 def test_banned_and_backup_judges_rejected():
     from tushen_kb.llm import _spec
-    j2 = spec("judge2", "uuapi", "google")
+    j2 = spec("judge2", "openrouter", "google")
     j2.model = "gpt-5.6-luna"
     with pytest.raises(ConfigError):
         validate(spec("generator", "deepseek", "deepseek"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
-    j2 = spec("judge2", "uuapi", "google")
+    j2 = spec("judge2", "openrouter", "google")
     j2.fallback_models = [{"model": "gpt-x", "family": "openai"}]
     with pytest.raises(ConfigError):
         validate(spec("generator", "deepseek", "deepseek"), [spec("judge1", "mimo", "xiaomi-mimo"), j2])
@@ -207,8 +207,9 @@ def test_banned_and_backup_judges_rejected():
         _spec({"role": "judge2", "model": "gemini-3.8-flash", "backup_models": [{"model": "m", "family": "f"}]})
 
 
-def test_config_judge2_is_uuapi_gemini():
+def test_config_judge2_is_openrouter_gemini():
     _, js = load_models()
     j2 = [j for j in js if j.role == "judge2"][0]
-    assert j2.model == "gemini-3.8-flash" and j2.family == "google" and not j2.fallback_models
-    assert j2.timeout_s >= 180 and j2.api_key_env == "NEW_API_KEY_2"
+    assert j2.model == "google/gemini-3.8-flash" and j2.family == "google" and not j2.fallback_models
+    assert j2.provider == "openrouter" and j2.base_url == "https://openrouter.ai/api/v1"
+    assert j2.timeout_s >= 180 and j2.api_key_env == "OPENROUTER_API_KEY"
