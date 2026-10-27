@@ -238,13 +238,21 @@ class Judges:
     def _call(self, model, name, task, prompt, qid):
         with obs.span(f"eval.judge.{task}", **{"eval.qid": qid, "eval.judge.role": name,
                                                "eval.judge.model": model.spec.model}) as sp:
+            called_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
             rec = model.complete([{"role": "user", "content": prompt}], max_tokens=16)
             v = _parse_binary(rec.get("text")) if rec["status"] == "ok" else None
             st = rec["status"] if rec["status"] != "ok" or v is not None else "unparsable"
-            obs.set_attrs(sp, **{"eval.judge.verdict": v, "eval.judge.status": st})
+            reason = None if st == "ok" else (rec.get("error") or ("unparsable: " + (rec.get("text") or "")[:40]
+                                                                  if st == "unparsable" else st))
+            # every judge call records the model id the API RETURNED, the call time and the failure reason
+            obs.set_attrs(sp, **{"eval.judge.verdict": v, "eval.judge.status": st,
+                                 "eval.judge.returned_model": rec.get("model_version"),
+                                 "eval.judge.called_at_utc": called_at, "eval.judge.failure_reason": reason,
+                                 "eval.judge.attempts": len(rec.get("attempts") or [])})
             return {"verdict": v, "status": st, "model": rec.get("model_name"), "model_version": rec.get("model_version"),
                     "usage": rec.get("usage"), "cost_usd": rec.get("cost_usd"), "ms": rec.get("ms"),
-                    "raw": (rec.get("text") or "")[:40], "error": rec.get("error")}
+                    "raw": (rec.get("text") or "")[:40], "error": rec.get("error"), "called_at_utc": called_at,
+                    "failure_reason": reason}
 
     def judge(self, q, answer, evidence_text, with_j2):
         cp = CORRECT_PROMPT.format(question=q["question"], reference=self.reference(q), answer=answer)
@@ -567,6 +575,69 @@ def judge_stats(R):
     return dict(j), agree
 
 
+def judge_ledger(spans):
+    """One row per judge call, read from the trace file: role, qid, requested model, the model id the API
+    returned (``gen_ai.response.model`` on the child chat span, or ``eval.judge.returned_model``), call time
+    (span start, UTC) and failure reason.  Calls are then cut into *version batches*: per role, in time order,
+    a new batch starts whenever the returned model id changes.  Batches are never pooled (plan §10 A2)."""
+    by_parent = defaultdict(list)
+    for s in spans:
+        by_parent[s["parent_span_id"]].append(s)
+    rows = []
+    for s in spans:
+        if not s["name"].startswith("eval.judge."):
+            continue
+        a = s["attributes"]
+        chat = next((c for c in by_parent.get(s["span_id"], []) if c["name"].startswith("chat ")), None)
+        ca = chat["attributes"] if chat else {}
+        st = a.get("eval.judge.status")
+        reason = a.get("eval.judge.failure_reason")
+        if reason is None and st != "ok":
+            reason = (chat and chat["status"].get("description")) or (
+                "unparsable (verdict not 是/否)" if st == "unparsable" else st)
+        t = s["start_time_unix_nano"] / 1e9
+        rows.append({"role": a.get("eval.judge.role"), "task": s["name"].split(".")[-1], "qid": a.get("eval.qid"),
+                     "trace_id": s["trace_id"], "span_id": s["span_id"], "request_model": a.get("eval.judge.model"),
+                     "returned_model": a.get("eval.judge.returned_model") or ca.get("gen_ai.response.model"),
+                     "called_at_utc": a.get("eval.judge.called_at_utc") or
+                     time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t)), "_t": t,
+                     "status": st, "verdict": a.get("eval.judge.verdict"), "failure_reason": reason,
+                     "attempts": ca.get("tushen.attempts")})
+    rows.sort(key=lambda r: (r["role"] or "", r["_t"]))
+    batches, cur = [], {}
+    for r in rows:
+        if r["returned_model"] is None:  # failed call: no returned id, belongs to the running batch of its role
+            r["batch"] = cur[r["role"]]["batch_id"] if r["role"] in cur else None
+            if r["role"] in cur:
+                cur[r["role"]]["n_failed"] += 1
+            continue
+        b = cur.get(r["role"])
+        if b is None or b["returned_model"] != r["returned_model"]:
+            b = {"batch_id": f"{r['role']}#{sum(x['role'] == r['role'] for x in batches) + 1}", "role": r["role"],
+                 "returned_model": r["returned_model"], "first_utc": r["called_at_utc"], "n_calls": 0, "n_failed": 0}
+            batches.append(b)
+            cur[r["role"]] = b
+        b["n_calls"] += 1
+        b["last_utc"] = r["called_at_utc"]
+        r["batch"] = b["batch_id"]
+    for r in rows:
+        r.pop("_t")
+    roles = Counter(b["role"] for b in batches)
+    return rows, {"batches": batches, "version_changed_roles": sorted(k for k, v in roles.items() if v > 1)}
+
+
+def per_batch_judge_metrics(rows, sysR):
+    """Only computed when some judge's returned model id changed mid-run: answer correctness and judge1/judge2
+    agreement inside each batch (or batch pair) separately, never pooled."""
+    item_trace = {r["trace_id"]: r for r in sysR}
+    j1b = {(x["trace_id"]): x["batch"] for x in rows if x["role"] == "judge1" and x["task"] == "correctness"}
+    out = {}
+    for b in sorted({v for v in j1b.values() if v}):
+        R = [item_trace[t] for t, bb in j1b.items() if bb == b and t in item_trace]
+        out[b] = {"answer_correct_among_judged(system run1)": rate(sum(r["verdicts"].get("correct") is True for r in R), len(R))}
+    return out
+
+
 def stability(runs, k):
     by = defaultdict(dict)
     for i, R in enumerate(runs, 1):
@@ -653,6 +724,23 @@ def report_phase(suite: str, out: Path):
     j2_all = _load(out / "judge2.jsonl")
     res["judge_agreement"]["j2_http_calls_incl_retry_passes"] = len(j2_all)
     res["judge_agreement"]["j2_status_counts_all_calls"] = dict(Counter(x["j2_correct"]["status"] for x in j2_all))
+    # judge-call ledger with returned model ids / timestamps / failure reasons; version batches (A2)
+    ledger, vb = judge_ledger(spans)
+    j2_by_qid = {x["qid"]: x for x in j2_all}
+    for x in ledger:  # judge2 calls live in their own traces; link them to the item via judge2.jsonl
+        if x["role"] == "judge2" and x["qid"] in j2_by_qid:
+            x["item_trace_id"] = j2_by_qid[x["qid"]]["item_trace_id"]
+    with open(out / "judge_calls.jsonl", "w", encoding="utf-8") as f:
+        for x in ledger:
+            f.write(json.dumps(x, ensure_ascii=False) + "\n")
+    vb["n_calls_in_trace"] = len(ledger)
+    vb["n_calls_without_returned_model"] = sum(x["returned_model"] is None for x in ledger)
+    vb["failure_reasons"] = dict(Counter(x["failure_reason"] for x in ledger if x["failure_reason"]))
+    vb["ledger_path"] = str((out / "judge_calls.jsonl").relative_to(ROOT))
+    if vb["version_changed_roles"]:
+        vb["per_batch"] = per_batch_judge_metrics(ledger, sysR)
+        vb["note"] = "returned model id changed mid-run: batches reported separately, pooled judge metrics invalid"
+    res["judge_version_batches"] = vb
     stab_runs = [[r for r in runs[("system", k)] if r["qid"] in set(man["stability_qids"])] for k in range(1, S["stability_k"] + 1)]
     res["stability"] = stability(stab_runs, S["stability_k"]) if all(stab_runs) else None
     res["prev_version"] = prev_version_agreement(sysR) if not S["smoke"] else None
@@ -738,6 +826,21 @@ def render_md(res, bad):
     L.append(f"- 一致性（{ja['scope']}）：尝试 {ja['j2_attempted']}，双方有效 {ja['both_valid']}，原始一致率 "
              f"{ja['raw_agreement']['str']}，Cohen's κ = {ja['cohen_kappa'] if ja['cohen_kappa'] is None else round(ja['cohen_kappa'], 3)}；"
              f"AND 规则正确率 {ja['and_rule_correct']['str']} vs judge1 单独 {ja['judge1_only_correct']['str']}")
+    vb = res.get("judge_version_batches")
+    if vb:
+        L += ["", f"裁判调用台账（`{vb['ledger_path']}`，每次调用记录返回的模型 id、UTC 时间戳、失败原因）："
+                  f"trace 中共 {vb['n_calls_in_trace']} 次调用，无返回模型 id（失败）{vb['n_calls_without_returned_model']} 次。", "",
+              "| batch | 角色 | 返回模型 id | 调用数 | 失败数 | 首次 (UTC) | 末次 (UTC) |", "|---|---|---|---|---|---|---|"]
+        for b in vb["batches"]:
+            L.append(f"| {b['batch_id']} | {b['role']} | `{b['returned_model']}` | {b['n_calls']} | {b['n_failed']} | "
+                     f"{b['first_utc']} | {b.get('last_utc')} |")
+        L.append("")
+        L.append("返回模型 id 运行中途变化的角色：" + (", ".join(vb["version_changed_roles"]) +
+                 "（已分批单列，不合并）" if vb["version_changed_roles"] else "无（每个裁判在整个运行中只返回一个模型 id）"))
+        if vb["failure_reasons"]:
+            L.append(f"失败原因计数：{json.dumps(vb['failure_reasons'], ensure_ascii=False)}")
+        for b, m in (vb.get("per_batch") or {}).items():
+            L.append(f"- {b}: {_fmt(m)}")
     L += ["", "## 6. Token / 成本 / 延迟（生成模型，来自 span）", ""]
     for n in names:
         g = C[n]["generator"]

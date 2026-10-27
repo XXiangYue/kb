@@ -173,3 +173,10 @@ trace_example.json 的选取规则：优先选一个“生成幻觉”题；没�
 - 不变项：抽样（seed 20261027，60 题，上限 45 题）、调用与重试策略、分歧裁决规则（主结果只用 judge1，judge2 只用于一致率、κ 和 AND 规则敏感性分析）、其余所有指标与阈值。
 - 未受影响：judge2 只在主运行结束后单独运行，此前从未在 test 划分上调用过 judge2，因此本修订不涉及已产生的任何结果。已完成的 174 条 checkpoint 保留，续跑时不重复调用 API。
 - 成本：`config/prices.json` 新增 `xiaomi-mimo/mimo-v2.6-pro` 的海外实时推理列表价 $0.0036 / $0.435 / $0.87 每百万 token（Token Plan 列表价等值）。
+
+## 11. 修订 A2（2026-10-27 22:45 NZDT，在报告阶段生成前提交；不改变任何指标、阈值或提示词）
+
+- 背景：负责人新增要求：每次裁判调用都必须在 trace 中记录**接口返回的模型 id、时间戳和失败原因**；若运行中途返回的模型版本发生变化，该批次须单独标注，不得与之前的批次合并统计。
+- 本次运行中已经发生的裁判调用：judge1 的调用在主运行中完成，当时代码已在 `eval.judge.*` span 的子 span `chat <model>` 上记录了 `gen_ai.response.model`（接口返回的模型 id；DeepSeek 会附加 `system_fingerprint`）、span 起止时间（unix ns）以及失败时的 status description（已脱敏的 HTTP/网络错误）。报告阶段的 `judge_ledger()` 从 trace 文件读取这些字段，生成 `judge_calls.jsonl`（每行对应一次调用）。这些字段不是事后补写的，trace 文件不做修改。
+- 之后的运行：`Judges._call` 会直接在 `eval.judge.*` span 上写入 `eval.judge.returned_model`、`eval.judge.called_at_utc`、`eval.judge.failure_reason` 和 `eval.judge.attempts`。
+- 分批规则（预先声明）：按裁判角色把调用按时间排序，返回的模型 id 一旦变化即开始新批次（例如 `judge1#2`）。失败调用没有返回 id，计入它所在时间点的当前批次的失败数。若任一角色出现多个批次：报告中标注 `version_changed_roles`，裁判相关指标（judge1 判定的正确率、judge1/judge2 一致率）按批次分别给出，合并值标注为无效。若只有一个批次，则照常报告。

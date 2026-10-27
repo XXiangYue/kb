@@ -170,3 +170,27 @@ def test_ask_untraced_has_no_otel_ids(store):
     obs.shutdown()
     r = ask(store, "消防电梯底坑排水井有效容量")
     assert not (r["trace"].get("otel") or {}).get("trace_id")
+
+
+def test_judge_ledger_splits_batches_on_returned_model_change():
+    from tushen_kb.eval.agent_eval import judge_ledger
+
+    def pair(i, ret, status="ok", desc=None):
+        js = {"name": "eval.judge.correctness", "trace_id": f"t{i}", "span_id": f"j{i}", "parent_span_id": f"r{i}",
+              "start_time_unix_nano": int((1_800_000_000 + i) * 1e9), "status": {"code": "UNSET"},
+              "attributes": {"eval.judge.role": "judge1", "eval.qid": f"q{i}", "eval.judge.model": "m",
+                             "eval.judge.status": status, "eval.judge.verdict": True if status == "ok" else None}}
+        ch = {"name": "chat m", "trace_id": f"t{i}", "span_id": f"c{i}", "parent_span_id": f"j{i}",
+              "start_time_unix_nano": js["start_time_unix_nano"], "status": {"code": "ERROR" if desc else "UNSET",
+                                                                             "description": desc},
+              "attributes": {"gen_ai.response.model": ret, "tushen.attempts": 1}}
+        return [js, ch]
+
+    spans = pair(1, "m-v1") + pair(2, "m-v1") + pair(3, None, "error", "HTTP 429: busy") + pair(4, "m-v2")
+    rows, vb = judge_ledger(spans)
+    assert [r["batch"] for r in rows] == ["judge1#1", "judge1#1", "judge1#1", "judge1#2"]
+    assert vb["version_changed_roles"] == ["judge1"]
+    assert [b["n_calls"] for b in vb["batches"]] == [2, 1] and vb["batches"][0]["n_failed"] == 1
+    assert rows[2]["failure_reason"] == "HTTP 429: busy" and rows[0]["called_at_utc"].endswith("Z")
+    rows, vb = judge_ledger(pair(1, "m-v1") + pair(2, "m-v1"))
+    assert vb["version_changed_roles"] == [] and len(vb["batches"]) == 1
